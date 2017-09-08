@@ -1,0 +1,91 @@
+RSpec.describe Jekyll::RemoteTheme::Munger do
+  let(:config) { {} }
+  let(:site) { make_site(config) }
+  let(:theme_dir) { File.expand_path "_theme/", source_dir }
+  let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
+  let(:sass_dir) { File.expand_path "_sass/", theme_dir }
+  let(:sass_path) { File.expand_path "style.scss", sass_dir }
+  let(:includes_dir) { File.expand_path "_includes/", theme_dir }
+  let(:theme) { subject.send(:theme) }
+
+  subject { described_class.new(site) }
+
+  before { Jekyll.logger.log_level = :error }
+  before { write_source_dir }
+
+  it "stores the site" do
+    expect(subject.site).to be_a(Jekyll::Site)
+  end
+
+  context "without a theme" do
+    before { site.config["theme"] = nil }
+    before { subject.munge! }
+
+    it "doesn't set a theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with theme as a hash" do
+    let(:config) { { "remote_theme" => { "foo" => "bar" } } }
+    before { subject.munge! }
+
+    it "doesn't set a theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with a local theme" do
+    let(:config) { { "remote_theme" => "jekyll-theme-primer" } }
+    before { subject.munge! }
+
+    it "doesn't override the theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with a remote theme" do
+    let(:config) { { "remote_theme" => "pages-themes/primer" } }
+    let(:git_url) { File.expand_path "git_repo", tmp_dir }
+    before(:each) { allow(theme).to receive(:git_url).and_return(git_url) }
+    before { write_git_repo }
+    before { subject.munge! }
+
+    it "sets the theme" do
+      expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
+      expect(site.theme.name).to eql("primer")
+      expect(site.config["theme"]).to eql("primer")
+    end
+
+    it "clones" do
+      expect(layout_path).to be_an_existing_file
+    end
+
+    it "sets sass paths" do
+      expect(sass_path).to be_an_existing_file
+      expect(Sass.load_paths).to include(sass_dir)
+    end
+
+    it "sets include paths" do
+      expect(site.includes_load_paths).to include(includes_dir)
+    end
+
+    it "sets layouts" do
+      site.read
+      expect(site.layouts["default"]).to be_truthy
+      expect(site.layouts["default"].path).to eql(layout_path)
+    end
+  end
+end
