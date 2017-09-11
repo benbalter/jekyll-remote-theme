@@ -20,6 +20,7 @@ module Jekyll
           return false
         end
 
+        Jekyll.logger.info "Remote theme: ", "Using theme #{theme.name_with_owner}"
         cloner.run
         configure_theme
         theme

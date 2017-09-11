@@ -33,7 +33,7 @@ module Jekyll
           return false
         end
 
-        Jekyll.logger.info "Remote theme: ", "Cloning into #{git_url}"
+        Jekyll.logger.info "Remote theme: ", "Cloning into #{path}"
         output, status = Open3.capture2e(*clone_command)
         raise CloneError, output if status.exitstatus != 0
         @cloned = true
