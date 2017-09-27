@@ -1,13 +1,13 @@
-require "open3"
-
 module Jekyll
   module RemoteTheme
     class Cloner
       class CloneError < StandardError; end
+      include RemoteTheme::Executor
 
       FLAGS = [
         "--recurse-submodules",
         "--depth", "1",
+        "--verbose",
       ].freeze
 
       attr_reader :git_url, :git_ref, :path
@@ -29,12 +29,12 @@ module Jekyll
         if clone_dir_exists?
           msg = "_theme directory already exists in site source. "
           msg << "Not cloning remote theme."
-          Jekyll.logger.warn "Remote theme: ", msg
+          Jekyll.logger.warn "Remote Theme: ", msg
           return false
         end
 
-        Jekyll.logger.info "Remote theme: ", "Cloning into #{path}"
-        output, status = Open3.capture2e(*clone_command)
+        Jekyll.logger.info "Remote Theme: ", "Cloning into #{path}"
+        output, status = run_command(*clone_command)
         raise CloneError, output if status.exitstatus != 0
         @cloned = true
       end
@@ -43,11 +43,11 @@ module Jekyll
 
       def clone_command
         [
+          *timeout_command,
           "git",
           "clone",
           *FLAGS,
           "--branch", git_ref,
-          "--verbose",
           git_url,
           path,
         ].compact

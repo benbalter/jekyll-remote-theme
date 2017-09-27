@@ -3,11 +3,12 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 module Jekyll
   module RemoteTheme
-    autoload :VERSION, "jekyll-remote-theme/version"
-    autoload :Theme,   "jekyll-remote-theme/theme"
-    autoload :Cloner,  "jekyll-remote-theme/cloner"
-    autoload :Munger,  "jekyll-remote-theme/munger"
+    autoload :Cloner,      "jekyll-remote-theme/cloner"
+    autoload :Executor,    "jekyll-remote-theme/executor"
     autoload :MockGemspec, "jekyll-remote-theme/mock_gemspec"
+    autoload :Munger,      "jekyll-remote-theme/munger"
+    autoload :Theme,       "jekyll-remote-theme/theme"
+    autoload :VERSION,     "jekyll-remote-theme/version"
 
     CONFIG_KEY = "remote_theme".freeze
 
