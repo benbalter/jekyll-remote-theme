@@ -46,6 +46,10 @@ module Jekyll
         ].compact
       end
 
+      def clone_dir_exists?
+        Dir.exist? path
+      end
+
       def cloned?
         @cloned ||= clone_dir_exists?
       end
