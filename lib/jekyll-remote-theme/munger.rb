@@ -30,22 +30,18 @@ module Jekyll
 
       def theme
         return unless raw_theme && raw_theme.is_a?(String)
-        @theme ||= Theme.new(raw_theme, theme_path)
+        @theme ||= Theme.new(raw_theme)
       end
 
       def raw_theme
         config[CONFIG_KEY]
       end
 
-      def theme_path
-        @theme_path ||= File.expand_path "_theme", config["source"]
-      end
-
       def cloner
         @cloner ||= Cloner.new(
           :git_url => theme.git_url,
           :git_ref => theme.git_ref,
-          :path    => theme_path
+          :path    => theme.root
         )
       end
 

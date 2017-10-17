@@ -1,7 +1,7 @@
 RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:config) { {} }
   let(:site) { make_site(config) }
-  let(:theme_dir) { File.expand_path "_theme/", source_dir }
+  let(:theme_dir) { theme.root if theme }
   let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
   let(:sass_dir) { File.expand_path "_sass/", theme_dir }
   let(:sass_path) { File.expand_path "style.scss", sass_dir }
@@ -68,7 +68,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     let(:git_url) { File.expand_path "git_repo", tmp_dir }
     before { subject.instance_variable_set("@cloner", nil) }
     before { allow(subject.send(:theme)).to receive(:git_url).and_return(git_url) }
-  
+
     before { write_git_repo }
     before { subject.munge! }
 

@@ -25,15 +25,8 @@ module Jekyll
 
       def run
         return false unless path
-
-        if clone_dir_exists?
-          msg = "_theme directory already exists in site source. "
-          msg << "Not cloning remote theme."
-          Jekyll.logger.warn "Remote Theme: ", msg
-          return false
-        end
-
-        Jekyll.logger.info "Remote Theme: ", "Cloning into #{path}"
+        msg = "Cloning #{git_url} into a temporary local directory"
+        Jekyll.logger.info "Remote Theme: ", msg
         output, status = run_command(*clone_command)
         raise CloneError, output if status.exitstatus != 0
         @cloned = true
@@ -55,10 +48,6 @@ module Jekyll
 
       def cloned?
         @cloned ||= clone_dir_exists?
-      end
-
-      def clone_dir_exists?
-        path && Dir.exist?(path)
       end
     end
   end

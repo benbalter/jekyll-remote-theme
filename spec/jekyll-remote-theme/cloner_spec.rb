@@ -31,14 +31,6 @@ RSpec.describe Jekyll::RemoteTheme::Cloner do
     end
   end
 
-  context "when the theme dir exists" do
-    before { FileUtils.mkdir_p path }
-
-    it "doesn't clone" do
-      expect(subject.run).to be_falsy
-    end
-  end
-
   context "a valid theme" do
     it "clones" do
       layout_path = File.expand_path "_layouts/default.html", path

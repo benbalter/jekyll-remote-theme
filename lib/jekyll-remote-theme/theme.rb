@@ -4,8 +4,6 @@ module Jekyll
       THEME_REGEX = %r!\A([a-z0-9\-_]+)(?:/([a-z0-9\-_]+)(?:@([a-z0-9]+))?)?\z!i
       GIT_HOST = "https://github.com".freeze
 
-      attr_reader :root
-
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
       # raw_theme can be in the form of:
@@ -13,9 +11,8 @@ module Jekyll
       # 1. theme-name - a gem-based theme
       # 2. owner/theme-name - a GitHub owner + theme-name string
       # 3. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
-      def initialize(raw_theme, root = nil)
+      def initialize(raw_theme)
         @raw_theme = raw_theme.downcase.strip
-        @root = root
         super(name)
       end
 
@@ -58,6 +55,11 @@ module Jekyll
 
       def inspect
         "#<Jekyll::RemoteTheme::Theme owner=\"#{owner}\" name=\"#{name}\">"
+      end
+
+      # Note: On OS X Dir.mktmpdir returns a symlink
+      def root
+        @root ||= File.realpath Dir.mktmpdir("jekyll-remote-theme-")
       end
 
       private
