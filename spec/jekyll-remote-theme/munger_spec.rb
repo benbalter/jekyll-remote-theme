@@ -13,6 +13,13 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   before { Jekyll.logger.log_level = :error }
   before { write_source_dir }
 
+  # Remove :after_reset hook to allow themes to be stubbed prior to munging
+  before(:each) do
+    hooks = Jekyll::Hooks.instance_variable_get("@registry")
+    hooks[:site][:after_reset] = []
+    Jekyll::Hooks.instance_variable_set("@registry", hooks)
+  end
+
   it "stores the site" do
     expect(subject.site).to be_a(Jekyll::Site)
   end
@@ -57,16 +64,18 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with a remote theme" do
-    let(:config) { { "remote_theme" => "pages-themes/primer" } }
+    let(:config) { { "remote_theme" => "foo/bar" } }
     let(:git_url) { File.expand_path "git_repo", tmp_dir }
-    before(:each) { allow(theme).to receive(:git_url).and_return(git_url) }
+    before { subject.instance_variable_set("@cloner", nil) }
+    before { allow(subject.send(:theme)).to receive(:git_url).and_return(git_url) }
+  
     before { write_git_repo }
     before { subject.munge! }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
-      expect(site.theme.name).to eql("primer")
-      expect(site.config["theme"]).to eql("primer")
+      expect(site.theme.name).to eql("bar")
+      expect(site.config["theme"]).to eql("bar")
     end
 
     it "clones" do
