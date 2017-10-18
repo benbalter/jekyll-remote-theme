@@ -25,11 +25,20 @@ module Jekyll
 
       def run
         return false unless path
-        msg = "Cloning #{git_url} into a temporary local directory"
-        Jekyll.logger.info "Remote Theme: ", msg
+
+        if cloned?
+          Jekyll.logger.info LOG_KEY, "Using existing clone of #{git_url}"
+          return
+        end
+
+        Jekyll.logger.info LOG_KEY, "Cloning #{git_url} into a temporary local directory"
         output, status = run_command(*clone_command)
         raise CloneError, output if status.exitstatus != 0
         @cloned = true
+      end
+
+      def cloned?
+        @cloned ||= clone_dir_exists? && !clone_dir_empty?
       end
 
       private
@@ -47,11 +56,11 @@ module Jekyll
       end
 
       def clone_dir_exists?
-        Dir.exist? path
+        Dir.exist?(path)
       end
 
-      def cloned?
-        @cloned ||= clone_dir_exists?
+      def clone_dir_empty?
+        Dir["#{path}/*"].empty?
       end
     end
   end

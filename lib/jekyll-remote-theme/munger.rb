@@ -16,17 +16,25 @@ module Jekyll
         unless theme.remote?
           msg = "The theme `#{theme.name}` was requested, but exists locally. "
           msg << "The Gem-based theme will be used instead."
-          Jekyll.logger.warn "Remote theme: ", msg
+          Jekyll.logger.warn LOG_KEY, msg
           return false
         end
 
-        Jekyll.logger.info "Remote theme: ", "Using theme #{theme.name_with_owner}"
+        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
+
+        return if munged?
+
         cloner.run
         configure_theme
+        enqueue_theme_cleanup
         theme
       end
 
       private
+
+      def munged?
+        site.theme && site.theme.is_a?(Jekyll::RemoteTheme::Theme)
+      end
 
       def theme
         return unless raw_theme && raw_theme.is_a?(String)
@@ -45,16 +53,20 @@ module Jekyll
         )
       end
 
-      def theme_dir_exists?
-        @theme_dir_exists ||= Dir.exist?(theme_path)
-      end
-
       def configure_theme
         return unless theme
         site.config["theme"] = theme.name
         site.theme = theme
         site.theme.configure_sass
         site.send(:configure_include_paths)
+      end
+
+      def enqueue_theme_cleanup
+        at_exit do
+          return unless munged? && cloner.cloned?
+          Jekyll.logger.info LOG_KEY, "Cleaning up #{theme.name_with_owner}"
+          FileUtils.rm_rf theme.root
+        end
       end
     end
   end

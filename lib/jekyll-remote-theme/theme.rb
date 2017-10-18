@@ -25,7 +25,7 @@ module Jekyll
       end
 
       def name_with_owner
-        [name, owner].join("/")
+        [owner, name].join("/")
       end
       alias_method :nwo, :name_with_owner
 
