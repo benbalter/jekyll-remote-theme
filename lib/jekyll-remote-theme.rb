@@ -1,5 +1,5 @@
 require "jekyll"
-require 'fileutils'
+require "fileutils"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
