@@ -33,8 +33,13 @@ module Jekyll
 
         Jekyll.logger.info LOG_KEY, "Cloning #{git_url} into a temporary local directory"
         output, status = run_command(*clone_command)
-        raise CloneError, output if status.exitstatus != 0
-        @cloned = true
+        
+        if status.exitstatus != 0
+          Jekyll.logger.error LOG_KEY, "Could not clone #{git_url}"
+          raise CloneError, output
+        else
+          @cloned = true
+        end
       end
 
       def cloned?

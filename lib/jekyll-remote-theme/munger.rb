@@ -11,17 +11,14 @@ module Jekyll
       end
 
       def munge!
-        return unless theme
+        return unless raw_theme
 
-        unless theme.remote?
-          msg = "The theme `#{theme.name}` was requested, but exists locally. "
-          msg << "The Gem-based theme will be used instead."
-          Jekyll.logger.warn LOG_KEY, msg
-          return false
+        if theme.invalid?
+          Jekyll.logger.error LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
+          return
         end
 
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
-
         return if munged?
 
         cloner.run
@@ -37,7 +34,6 @@ module Jekyll
       end
 
       def theme
-        return unless raw_theme && raw_theme.is_a?(String)
         @theme ||= Theme.new(raw_theme)
       end
 

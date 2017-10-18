@@ -1,27 +1,29 @@
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
-      THEME_REGEX = %r!\A([a-z0-9\-_]+)(?:/([a-z0-9\-_]+)(?:@([a-z0-9]+))?)?\z!i
-      GIT_HOST = "https://github.com".freeze
+      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i
+      NAME_REGEX  = %r!(?<name>[a-z0-9\-_]+)!i
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\.]+)!i
+      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i
+      GIT_HOST    = "https://github.com".freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
       # raw_theme can be in the form of:
       #
-      # 1. theme-name - a gem-based theme
-      # 2. owner/theme-name - a GitHub owner + theme-name string
-      # 3. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
+      # 1. owner/theme-name - a GitHub owner + theme-name string
+      # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
       def initialize(raw_theme)
-        @raw_theme = raw_theme.downcase.strip
-        super(name)
+        @raw_theme = raw_theme.to_s.downcase.strip
+        super(@raw_theme)
       end
 
       def name
-        theme_parts[2] || theme_parts[1]
+        theme_parts[:name]
       end
 
       def owner
-        theme_parts[1] if theme_parts[2]
+        theme_parts[:owner]
       end
 
       def name_with_owner
@@ -30,7 +32,7 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
-        local? || remote?
+        theme_parts && name && owner
       end
 
       def invalid?
@@ -38,19 +40,11 @@ module Jekyll
       end
 
       def git_url
-        "#{GIT_HOST}/#{owner}/#{name}" if remote?
+        "#{GIT_HOST}/#{owner}/#{name}"
       end
 
       def git_ref
-        theme_parts[3] || "master" if remote?
-      end
-
-      def remote?
-        !owner.nil? && !gem?
-      end
-
-      def local?
-        owner.nil? && gem?
+        theme_parts[:ref] || "master"
       end
 
       def inspect
@@ -66,13 +60,6 @@ module Jekyll
 
       def theme_parts
         @theme_parts ||= @raw_theme.match(THEME_REGEX)
-      end
-
-      def gem?
-        return @gem if defined? @gem
-        @gem = !Gem::Specification.find_by_name(name).nil?
-      rescue Gem::LoadError
-        @gem = false
       end
 
       def gemspec

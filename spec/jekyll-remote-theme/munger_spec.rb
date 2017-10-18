@@ -50,19 +50,6 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
   end
 
-  context "with a local theme" do
-    let(:config) { { "remote_theme" => "jekyll-theme-primer" } }
-    before { subject.munge! }
-
-    it "doesn't override the theme" do
-      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
-    end
-
-    it "doesn't clone" do
-      expect(layout_path).to_not be_an_existing_file
-    end
-  end
-
   context "with a remote theme" do
     let(:config) { { "remote_theme" => "foo/bar" } }
     let(:git_url) { File.expand_path "git_repo", tmp_dir }

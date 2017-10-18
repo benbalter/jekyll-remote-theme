@@ -13,7 +13,7 @@ module Jekyll
     autoload :VERSION,     "jekyll-remote-theme/version"
 
     CONFIG_KEY = "remote_theme".freeze
-    LOG_KEY    = "Remmote Theme: ".freeze
+    LOG_KEY    = "Remmote Theme:".freeze
 
     def self.init(site)
       Munger.new(site).munge!
