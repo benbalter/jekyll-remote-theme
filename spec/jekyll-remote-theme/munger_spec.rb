@@ -4,7 +4,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:theme_dir) { theme.root if theme }
   let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
   let(:sass_dir) { File.expand_path "_sass/", theme_dir }
-  let(:sass_path) { File.expand_path "style.scss", sass_dir }
+  let(:sass_path) { File.expand_path "jekyll-theme-primer.scss", sass_dir }
   let(:includes_dir) { File.expand_path "_includes/", theme_dir }
   let(:theme) { subject.send(:theme) }
 
@@ -51,18 +51,13 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with a remote theme" do
-    let(:config) { { "remote_theme" => "foo/bar" } }
-    let(:git_url) { File.expand_path "git_repo", tmp_dir }
-    before { subject.instance_variable_set("@cloner", nil) }
-    before { allow(subject.send(:theme)).to receive(:git_url).and_return(git_url) }
-
-    before { write_git_repo }
+    let(:config) { { "remote_theme" => "pages-themes/primer" } }
     before { subject.munge! }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
-      expect(site.theme.name).to eql("bar")
-      expect(site.config["theme"]).to eql("bar")
+      expect(site.theme.name).to eql("primer")
+      expect(site.config["theme"]).to eql("primer")
     end
 
     it "clones" do

@@ -1,7 +1,7 @@
 require_relative "../lib/jekyll-remote-theme"
 require "fileutils"
 require "open3"
-require 'pathname'
+require "pathname"
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = "spec/examples.txt"
@@ -12,6 +12,10 @@ RSpec.configure do |config|
   end
   config.order = :random
   Kernel.srand config.seed
+end
+
+RSpec::Matchers.define :be_an_existing_file do
+  match { |path| File.exist?(path) }
 end
 
 def tmp_dir
@@ -55,22 +59,4 @@ end
 def make_site(options = {})
   config = Jekyll.configuration config_defaults.merge(options)
   Jekyll::Site.new(config)
-end
-
-def git_command(*command)
-  output, status = Open3.capture2e("git", *command)
-  raise StandardError, output if status.exitstatus != 0
-end
-
-def start_server
-  @pid = Process.spawn("bundle exec jekyll serve --source #{tmp_dir} --dest #{tmp_dir}/_site --quiet")
-  sleep 5
-end
-
-def stop_server
-  Process.kill "INT", @pid
-end
-
-RSpec::Matchers.define :be_an_existing_file do
-  match { |path| File.exist?(path) }
 end

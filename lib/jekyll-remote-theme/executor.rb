@@ -12,7 +12,7 @@ module Jekyll
         stdout, stderr, status = Open3.capture3(*cmds)
 
         if status.exitstatus != 0
-          Jekyll.logger.error LOG_KEY, "Error running command #{cmds.join(' ')}"
+          Jekyll.logger.error LOG_KEY, "Error running command #{cmds.join(" ")}"
           Jekyll.logger.debug LOG_KEY, stdout
           raise ExecutionError, stderr
         end

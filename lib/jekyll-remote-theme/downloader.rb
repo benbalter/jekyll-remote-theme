@@ -4,9 +4,9 @@ module Jekyll
       include RemoteTheme::Executor
 
       HOST = "https://codeload.github.com".freeze
-      PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme"
-      USER_AGENT  = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})"
-      TEMP_PREFIX = "jekyll-remote-theme-"
+      PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
+      USER_AGENT  = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})".freeze
+      TEMP_PREFIX = "jekyll-remote-theme-".freeze
 
       attr_reader :theme
       private :theme
@@ -17,7 +17,7 @@ module Jekyll
 
       def run
         if downloaded?
-          Jekyll.logger.debug LOG_KEY, "Using existing download of #{theme.name_with_owner}"
+          Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
           return
         end
 
@@ -33,7 +33,7 @@ module Jekyll
       end
 
       def temp_dir
-        @temp_dir ||= Dir.mktmpdir(TEMP_PREFIX)
+        @temp_dir ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
 
       private
@@ -46,7 +46,7 @@ module Jekyll
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         cmd = [
           *timeout_command, "curl", "--url", zip_url, "--output", zip_file.path,
-          "--user-agent", USER_AGENT, "--fail", "--silent", "--show-error"
+          "--user-agent", USER_AGENT, "--fail", "--silent", "--show-error",
         ]
         run_command(*cmd)
       end

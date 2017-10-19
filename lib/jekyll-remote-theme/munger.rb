@@ -23,7 +23,7 @@ module Jekyll
         downloader.run
         configure_theme
         enqueue_theme_cleanup
-        
+
         theme
       end
 

@@ -19,6 +19,6 @@ Gem::Specification.new do |s|
   s.add_dependency "jekyll", "~> 3.5"
   s.add_development_dependency "rubocop", "~> 0.4"
   s.add_development_dependency "rspec", "~> 3.0"
-  s.add_development_dependency "jekyll-theme-primer"
-  s.add_development_dependency "pry"
+  s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
+  s.add_development_dependency "pry", "~> 0.11"
 end

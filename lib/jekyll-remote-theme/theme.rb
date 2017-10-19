@@ -43,7 +43,7 @@ module Jekyll
 
       # Override Jekyll::Theme's native #root which calls gemspec.full_gem_path
       def root
-        @root
+        defined?(@root) ? @root : nil
       end
 
       def root=(path)
