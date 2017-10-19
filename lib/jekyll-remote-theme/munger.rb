@@ -3,7 +3,6 @@ module Jekyll
     class Munger
       extend Forwardable
       def_delegator :site, :config
-      attr_writer :cloner
       attr_reader :site
 
       def initialize(site)
@@ -21,9 +20,10 @@ module Jekyll
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
         return if munged?
 
-        cloner.run
+        downloader.run
         configure_theme
         enqueue_theme_cleanup
+        
         theme
       end
 
@@ -41,12 +41,8 @@ module Jekyll
         config[CONFIG_KEY]
       end
 
-      def cloner
-        @cloner ||= Cloner.new(
-          :git_url => theme.git_url,
-          :git_ref => theme.git_ref,
-          :path    => theme.root
-        )
+      def downloader
+        @downloader ||= Downloader.new(theme)
       end
 
       def configure_theme
@@ -59,9 +55,9 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          return unless munged? && cloner.cloned?
-          Jekyll.logger.info LOG_KEY, "Cleaning up #{theme.name_with_owner}"
-          FileUtils.rm_rf theme.root
+          return unless munged? && downloader.downloaded?
+          Jekyll.logger.debug LOG_KEY, "Cleaning up #{downloader.temp_dir}"
+          FileUtils.rm_rf downloader.temp_dir
         end
       end
     end

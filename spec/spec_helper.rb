@@ -1,6 +1,7 @@
 require_relative "../lib/jekyll-remote-theme"
 require "fileutils"
 require "open3"
+require 'pathname'
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = "spec/examples.txt"
@@ -25,27 +26,13 @@ def dest_dir
   @dest_dir ||= File.join tmp_dir, "dest"
 end
 
-def git_repo
-  @git_repo ||= File.join tmp_dir, "git_repo"
+def zip_file_path
+  @zip_file ||= File.join tmp_dir, "theme.zip"
 end
 
 def write_source_dir
   reset_tmp_dir
-  FileUtils.mkdir_p git_repo
   FileUtils.cp_r fixture_path("site"), source_dir
-end
-
-def write_git_repo
-  git_command "init", "--bare", git_repo
-  Dir.chdir fixture_path("theme") do
-    git_command "init"
-    git_command "add", "."
-    git_command "config", "--local", "commit.gpgsign", "false"
-    git_command "commit", "-m", "initial commit"
-    git_command "remote", "add", "origin", git_repo
-    git_command "push", "origin", "master"
-    FileUtils.rm_rf ".git"
-  end
 end
 
 def reset_tmp_dir
@@ -74,6 +61,16 @@ def git_command(*command)
   output, status = Open3.capture2e("git", *command)
   raise StandardError, output if status.exitstatus != 0
 end
+
+def start_server
+  @pid = Process.spawn("bundle exec jekyll serve --source #{tmp_dir} --dest #{tmp_dir}/_site --quiet")
+  sleep 5
+end
+
+def stop_server
+  Process.kill "INT", @pid
+end
+
 RSpec::Matchers.define :be_an_existing_file do
   match { |path| File.exist?(path) }
 end

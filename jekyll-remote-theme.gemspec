@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.authors       = ["Ben Balter"]
   s.email         = ["ben.balter@github.com"]
   s.homepage      = "https://github.com/benbalter/jekyll-remote-theme"
-  s.summary       = ""
+  s.summary       = "Jekyll plugin for building Jekyll sites with any GitHub-hosted theme"
 
   s.files         = `git ls-files app lib`.split("\n")
   s.platform      = Gem::Platform::RUBY

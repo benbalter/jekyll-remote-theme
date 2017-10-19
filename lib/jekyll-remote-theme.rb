@@ -1,11 +1,12 @@
 require "jekyll"
 require "fileutils"
+require "tempfile"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 module Jekyll
   module RemoteTheme
-    autoload :Cloner,      "jekyll-remote-theme/cloner"
+    autoload :Downloader,  "jekyll-remote-theme/downloader"
     autoload :Executor,    "jekyll-remote-theme/executor"
     autoload :MockGemspec, "jekyll-remote-theme/mock_gemspec"
     autoload :Munger,      "jekyll-remote-theme/munger"

@@ -5,7 +5,6 @@ module Jekyll
       NAME_REGEX  = %r!(?<name>[a-z0-9\-_]+)!i
       REF_REGEX   = %r!@(?<ref>[a-z0-9\.]+)!i
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i
-      GIT_HOST    = "https://github.com".freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
@@ -15,7 +14,6 @@ module Jekyll
       # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
       def initialize(raw_theme)
         @raw_theme = raw_theme.to_s.downcase.strip
-        super(@raw_theme)
       end
 
       def name
@@ -39,21 +37,21 @@ module Jekyll
         !valid?
       end
 
-      def git_url
-        "#{GIT_HOST}/#{owner}/#{name}"
-      end
-
       def git_ref
         theme_parts[:ref] || "master"
       end
 
-      def inspect
-        "#<Jekyll::RemoteTheme::Theme owner=\"#{owner}\" name=\"#{name}\">"
+      # Override Jekyll::Theme's native #root which calls gemspec.full_gem_path
+      def root
+        @root
       end
 
-      # Note: On OS X Dir.mktmpdir returns a symlink
-      def root
-        @root ||= File.realpath Dir.mktmpdir("jekyll-remote-theme-")
+      def root=(path)
+        @root = File.realpath(path)
+      end
+
+      def inspect
+        "#<Jekyll::RemoteTheme::Theme owner=\"#{owner}\" name=\"#{name}\">"
       end
 
       private
@@ -63,11 +61,7 @@ module Jekyll
       end
 
       def gemspec
-        @gemspec ||= if gem?
-                       Gem::Specification.find_by_name(name)
-                     else
-                       MockGemspec.new(self)
-                     end
+        @gemspec ||= MockGemspec.new(self)
       end
     end
   end
