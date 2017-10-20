@@ -3,8 +3,6 @@
 module Jekyll
   module RemoteTheme
     class Downloader
-      include RemoteTheme::Executor
-
       HOST = "https://codeload.github.com".freeze
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
       TYPHOEUS_OPTIONS = {
