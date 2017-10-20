@@ -3,8 +3,6 @@
 module Jekyll
   module RemoteTheme
     class Downloader
-      class DownloadError < StandardError; end
-
       include RemoteTheme::Executor
 
       HOST = "https://codeload.github.com".freeze
@@ -54,9 +52,12 @@ module Jekyll
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
-        request.on_headers  { |response| raise_if_unsuccessful(response) }
-        request.on_body     { |chunk| zip_file.write(chunk) }
-        request.on_complete { |_response| zip_file.close }
+        request.on_headers { |response| raise_if_unsuccessful(response) }
+        request.on_body { |chunk| zip_file.write(chunk) }
+        request.on_complete do |response|
+          raise_if_unsuccessful(response)
+          zip_file.close
+        end
         request.run
       end
 
@@ -99,7 +100,7 @@ module Jekyll
         elsif response.code.zero?
           raise DownloadError, response.return_message
         elsif response.code != 200
-          msg = "Request failed with #{response.code} #{response.status_message}"
+          msg = "Request failed with #{response.code} - #{response.status_message}"
           raise DownloadError, msg
         end
       end
