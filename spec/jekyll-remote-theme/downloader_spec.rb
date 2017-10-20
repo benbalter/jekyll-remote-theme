@@ -25,6 +25,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
   context "downloading" do
     before { subject.run }
+    after { FileUtils.rm_rf subject.temp_dir if Dir.exist?(subject.temp_dir) }
 
     it "knows it's downloaded" do
       expect(subject.downloaded?).to be_truthy
