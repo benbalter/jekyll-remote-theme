@@ -23,8 +23,10 @@ module Jekyll
       end
 
       def timeout_command
-        cmd = TIMEOUT_COMMANDS.find { |exe| executable_exists?(exe) }
-        cmd ? [cmd, TIMEOUT.to_s].freeze : [].freeze
+        @timeout_command ||= begin
+          cmd = TIMEOUT_COMMANDS.find { |exe| executable_exists?(exe) }
+          cmd ? [cmd, TIMEOUT.to_s].freeze : [].freeze
+        end
       end
 
       private
