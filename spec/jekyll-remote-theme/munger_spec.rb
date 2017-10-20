@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Munger do
-  let(:config) { {} }
+  let(:source) { source_dir }
+  let(:config) { { "source" => source } }
   let(:site) { make_site(config) }
   let(:theme_dir) { theme.root if theme }
   let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
@@ -27,8 +28,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "without a theme" do
-    let(:config) { { "theme" => nil } }
-    before { subject.munge! }
+    let(:source) { fixture_path("site-without-theme") }
 
     it "doesn't set a theme" do
       expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)

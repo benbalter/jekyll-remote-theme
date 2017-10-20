@@ -9,7 +9,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
   let(:args) do
     [
       "bundle", "exec", "jekyll", "build", "--config", config_path,
-      "--source", source_dir, "--dest", dest_dir, "--verbose"
+      "--source", source_dir, "--dest", dest_dir, "--verbose",
     ]
   end
   before { reset_tmp_dir }
@@ -22,7 +22,8 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
       expect(output).to match("Remote Theme: Using theme pages-themes/primer")
 
       expect(index_path).to be_an_existing_file
-      expect(index_contents).to match('<div class="container-lg px-3 my-5 markdown-body">')
+      expected = '<div class="container-lg px-3 my-5 markdown-body">'
+      expect(index_contents).to match(expected)
 
       expect(stylesheet_path).to be_an_existing_file
     end
