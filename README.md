@@ -2,7 +2,7 @@
 
 Jekyll plugin for building Jekyll sites with any GitHub-hosted theme
 
-[![Gem Version](https://badge.fury.io/rb/jekyll-readme-index.png)](http://badge.fury.io/rb/jekyll-readme-index) [![Build Status](https://travis-ci.org/benbalter/jekyll-readme-index.png?branch=master)](https://travis-ci.org/benbalter/jekyll-readme-index) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![Gem Version](https://badge.fury.io/rb/jekyll-remote-theme.png)](http://badge.fury.io/rb/jekyll-remote-theme) [![Build Status](https://travis-ci.org/benbalter/jekyll-remote-theme.png?branch=master)](https://travis-ci.org/benbalter/jekyll-remote-theme) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 
 ## Usage
