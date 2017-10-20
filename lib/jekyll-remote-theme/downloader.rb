@@ -46,28 +46,22 @@ module Jekyll
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
-        request.on_headers { |response| raise_if_unsuccessful(response) }
-        request.on_body { |chunk| zip_file.write(chunk) }
-        request.on_complete do |response|
-          raise_if_unsuccessful(response)
-          zip_file.close
-        end
+        request.on_headers  { |response| raise_if_unsuccessful(response) }
+        request.on_body     { |chunk| zip_file.write(chunk) }
+        request.on_complete { |response| raise_if_unsuccessful(response) }
         request.run
       end
 
       def unzip
         Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{theme.root}"
+
+        # File IO is already open, rewind pointer to start of file to read
+        zip_file.rewind
+
         Zip::File.open(zip_file) do |archive|
-          archive.each do |file|
-            # Codeload generated zip files contain a top level folder in the form of
-            # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
-            # the zip subfolder will respect the case in the repository's name, thus
-            # making it impossible to predict the true path to the theme. In case we're
-            # on a case-sensitive file system, strip the parent folder from all paths.
-            path = file.name.split("/").drop(1).join("/")
-            file.extract Jekyll.sanitized_path theme.root, path
-          end
+          archive.each { |file| file.extract path_without_name_and_ref(file.name) }
         end
+
         zip_file.unlink
       end
 
@@ -95,6 +89,15 @@ module Jekyll
           msg = "Request failed with #{response.code} - #{response.status_message}"
           raise DownloadError, msg
         end
+      end
+
+      # Codeload generated zip files contain a top level folder in the form of
+      # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
+      # the zip subfolder will respect the case in the repository's name, thus
+      # making it impossible to predict the true path to the theme. In case we're
+      # on a case-sensitive file system, strip the parent folder from all paths.
+      def path_without_name_and_ref(path)
+        Jekyll.sanitized_path theme.root, path.split("/").drop(1).join("/")
       end
     end
   end
