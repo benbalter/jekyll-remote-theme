@@ -9,7 +9,7 @@ module Jekyll
         :headers => {
           :user_agent => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
         },
-        :verbose => (Jekyll.logger.level == :verbose),
+        :verbose => (Jekyll.logger.level == :debug),
       }.freeze
 
       attr_reader :theme
