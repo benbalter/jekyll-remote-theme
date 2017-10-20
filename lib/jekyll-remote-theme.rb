@@ -5,6 +5,7 @@ require "fileutils"
 require "tempfile"
 require "addressable"
 require "typhoeus"
+require "zip"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -19,8 +20,9 @@ module Jekyll
     autoload :Theme,       "jekyll-remote-theme/theme"
     autoload :VERSION,     "jekyll-remote-theme/version"
 
-    CONFIG_KEY = "remote_theme".freeze
-    LOG_KEY    = "Remote Theme:".freeze
+    CONFIG_KEY  = "remote_theme".freeze
+    LOG_KEY     = "Remote Theme:".freeze
+    TEMP_PREFIX = "jekyll-remote-theme-".freeze
 
     def self.init(site)
       Munger.new(site).munge!

@@ -16,6 +16,7 @@ module Jekyll
       # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
       def initialize(raw_theme)
         @raw_theme = raw_theme.to_s.downcase.strip
+        super(@raw_theme)
       end
 
       def name
@@ -39,13 +40,8 @@ module Jekyll
         theme_parts[:ref] || "master"
       end
 
-      # Override Jekyll::Theme's native #root which calls gemspec.full_gem_path
       def root
-        defined?(@root) ? @root : nil
-      end
-
-      def root=(path)
-        @root = File.realpath(path)
+        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
 
       def inspect

@@ -58,8 +58,8 @@ module Jekyll
       def enqueue_theme_cleanup
         at_exit do
           return unless munged? && downloader.downloaded?
-          Jekyll.logger.debug LOG_KEY, "Cleaning up #{downloader.temp_dir}"
-          FileUtils.rm_rf downloader.temp_dir
+          Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
+          FileUtils.rm_rf theme.root
         end
       end
     end

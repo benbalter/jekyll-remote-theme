@@ -7,7 +7,6 @@ module Jekyll
 
       HOST = "https://codeload.github.com".freeze
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
-      TEMP_PREFIX = "jekyll-remote-theme-".freeze
       TYPHOEUS_OPTIONS = {
         :headers => {
           :user_agent => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
@@ -30,17 +29,12 @@ module Jekyll
 
         download
         unzip
-        set_theme_root
 
         @downloaded = true
       end
 
       def downloaded?
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
-      end
-
-      def temp_dir
-        @temp_dir ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
 
       private
@@ -52,31 +46,23 @@ module Jekyll
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
-        request.on_headers { |response| raise_if_unsuccessful(response) }
-        request.on_body { |chunk| zip_file.write(chunk) }
-        request.on_complete do |response|
-          raise_if_unsuccessful(response)
-          zip_file.close
-        end
+        request.on_headers  { |response| raise_if_unsuccessful(response) }
+        request.on_body     { |chunk| zip_file.write(chunk) }
+        request.on_complete { |response| raise_if_unsuccessful(response) }
         request.run
       end
 
       def unzip
-        Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{temp_dir}"
-        cmd = [*timeout_command, "unzip", zip_file.path, "-d", temp_dir]
-        run_command(*cmd)
-        zip_file.unlink
-      end
+        Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{theme.root}"
 
-      # Codeload generated zip files contain a top level folder in the form of
-      # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
-      # the zip subfolder will respect the case in the repository's name, thus
-      # making it impossible to predict the true path to the theme. In case we're
-      # on a case-sensitive file system, set the theme's root to the true theme
-      # directory, after we've extracted the zip and can determine its actual path.
-      def set_theme_root
-        theme.root = Dir["#{temp_dir}/*"].first
-        Jekyll.logger.debug LOG_KEY, "Setting theme root to #{theme.root}"
+        # File IO is already open, rewind pointer to start of file to read
+        zip_file.rewind
+
+        Zip::File.open(zip_file) do |archive|
+          archive.each { |file| file.extract path_without_name_and_ref(file.name) }
+        end
+
+        zip_file.unlink
       end
 
       # Full URL to codeload zip download endpoint for the given theme
@@ -103,6 +89,15 @@ module Jekyll
           msg = "Request failed with #{response.code} - #{response.status_message}"
           raise DownloadError, msg
         end
+      end
+
+      # Codeload generated zip files contain a top level folder in the form of
+      # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
+      # the zip subfolder will respect the case in the repository's name, thus
+      # making it impossible to predict the true path to the theme. In case we're
+      # on a case-sensitive file system, strip the parent folder from all paths.
+      def path_without_name_and_ref(path)
+        Jekyll.sanitized_path theme.root, path.split("/").drop(1).join("/")
       end
     end
   end

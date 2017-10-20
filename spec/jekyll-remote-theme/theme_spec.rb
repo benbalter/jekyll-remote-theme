@@ -73,13 +73,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  it "returns nil for root by default" do
-    expect(subject.root).to be_nil
-  end
-
-  it "stores root" do
-    subject.root = Dir.pwd
-    expect(subject.root).to eql(Dir.pwd)
+  it "knows its root" do
+    expect(Dir.exist?(subject.root)).to be_truthy
   end
 
   it "exposes gemspec" do
