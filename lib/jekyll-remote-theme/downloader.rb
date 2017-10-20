@@ -8,7 +8,6 @@ module Jekyll
       HOST = "https://codeload.github.com".freeze
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
       USER_AGENT  = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})".freeze
-      TEMP_PREFIX = "jekyll-remote-theme-".freeze
 
       attr_reader :theme
       private :theme
@@ -25,17 +24,12 @@ module Jekyll
 
         download
         unzip
-        set_theme_root
 
         @downloaded = true
       end
 
       def downloaded?
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
-      end
-
-      def temp_dir
-        @temp_dir ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
 
       private
@@ -54,21 +48,19 @@ module Jekyll
       end
 
       def unzip
-        Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{temp_dir}"
-        cmd = [*timeout_command, "unzip", zip_file.path, "-d", temp_dir]
-        run_command(*cmd)
+        Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{theme.root}"
+        Zip::File.open(zip_file) do |archive|
+          archive.each do |file|
+            # Codeload generated zip files contain a top level folder in the form of
+            # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
+            # the zip subfolder will respect the case in the repository's name, thus
+            # making it impossible to predict the true path to the theme. In case we're
+            # on a case-sensitive file system, strip the parent folder from all paths.
+            path = file.name.split("/").drop(1).join("/")
+            file.extract Jekyll.sanitized_path theme.root, path
+          end
+        end
         zip_file.unlink
-      end
-
-      # Codeload generated zip files contain a top level folder in the form of
-      # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
-      # the zip subfolder will respect the case in the repository's name, thus
-      # making it impossible to predict the true path to the theme. In case we're
-      # on a case-sensitive file system, set the theme's root to the true theme
-      # directory, after we've extracted the zip and can determine its actual path.
-      def set_theme_root
-        theme.root = Dir["#{temp_dir}/*"].first
-        Jekyll.logger.debug LOG_KEY, "Setting theme root to #{theme.root}"
       end
 
       # Full URL to codeload zip download endpoint for the given theme

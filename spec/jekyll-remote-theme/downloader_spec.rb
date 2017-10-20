@@ -11,28 +11,16 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     expect(subject.downloaded?).to be_falsy
   end
 
-  it "creates a temp dir" do
-    expect(Dir.exist?(subject.temp_dir)).to be_truthy
-  end
-
   it "creates a zip file" do
     expect(subject.send(:zip_file)).to be_an_existing_file
   end
 
-  it "knows the theme dir doesn't exist" do
-    expect(subject.send(:theme_dir_exists?)).to be_falsy
-  end
-
   context "downloading" do
     before { subject.run }
-    after { FileUtils.rm_rf subject.temp_dir if Dir.exist?(subject.temp_dir) }
+    after { FileUtils.rm_rf theme.root if Dir.exist?(theme.root) }
 
     it "knows it's downloaded" do
       expect(subject.downloaded?).to be_truthy
-    end
-
-    it "sets the theme root" do
-      expect(theme.root).to eql("#{subject.temp_dir}/primer-master")
     end
 
     it "extracts the theme" do
