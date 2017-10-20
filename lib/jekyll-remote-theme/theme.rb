@@ -35,10 +35,6 @@ module Jekyll
         theme_parts && name && owner
       end
 
-      def invalid?
-        !valid?
-      end
-
       def git_ref
         theme_parts[:ref] || "master"
       end

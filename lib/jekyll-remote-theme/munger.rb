@@ -14,7 +14,7 @@ module Jekyll
       def munge!
         return unless raw_theme
 
-        if theme.invalid?
+        unless theme.valid?
           Jekyll.logger.error LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
           return
         end

@@ -35,7 +35,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
   it "knows it's valid" do
     expect(subject).to be_valid
-    expect(subject).to_not be_invalid
   end
 
   context "a random string" do
@@ -43,7 +42,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
     it "isn't valid" do
       expect(subject).to_not be_valid
-      expect(subject).to be_invalid
     end
   end
 
@@ -52,7 +50,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
     it "isn't valid" do
       expect(subject).to_not be_valid
-      expect(subject).to be_invalid
     end
   end
 
@@ -61,7 +58,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
     it "isn't valid" do
       expect(subject).to_not be_valid
-      expect(subject).to be_invalid
     end
   end
 
