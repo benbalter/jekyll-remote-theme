@@ -3,7 +3,7 @@
 RSpec.describe Jekyll::RemoteTheme::Theme do
   let(:owner) { "foo" }
   let(:name) { "bar" }
-  let(:nwo) { "foo/bar" }
+  let(:nwo) { "#{owner}/#{name}" }
   let(:git_ref) { nil }
   let(:raw_theme) { git_ref ? "#{nwo}@#{git_ref}" : nwo }
   subject { described_class.new(raw_theme) }
