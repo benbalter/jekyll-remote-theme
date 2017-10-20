@@ -7,7 +7,12 @@ module Jekyll
 
       HOST = "https://codeload.github.com".freeze
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
-      USER_AGENT  = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})".freeze
+      TYPHOEUS_OPTIONS = {
+        :headers => {
+          :user_agent => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
+        },
+        :verbose => (Jekyll.logger.level == :verbose),
+      }.freeze
 
       attr_reader :theme
       private :theme
@@ -40,11 +45,14 @@ module Jekyll
 
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        cmd = [
-          *timeout_command, "curl", "--url", zip_url, "--output", zip_file.path,
-          "--user-agent", USER_AGENT, "--fail", "--silent", "--show-error",
-        ]
-        run_command(*cmd)
+        request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
+        request.on_headers { |response| raise_if_unsuccessful(response) }
+        request.on_body { |chunk| zip_file.write(chunk) }
+        request.on_complete do |response|
+          raise_if_unsuccessful(response)
+          zip_file.close
+        end
+        request.run
       end
 
       def unzip
@@ -76,6 +84,17 @@ module Jekyll
 
       def theme_dir_empty?
         Dir["#{theme.root}/*"].empty?
+      end
+
+      def raise_if_unsuccessful(response)
+        if response.timed_out?
+          raise DownloadError, "Request timed out"
+        elsif response.code.zero?
+          raise DownloadError, response.return_message
+        elsif response.code != 200
+          msg = "Request failed with #{response.code} - #{response.status_message}"
+          raise DownloadError, msg
+        end
       end
     end
   end
