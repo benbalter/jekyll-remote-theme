@@ -12,7 +12,6 @@ Gem::Specification.new do |s|
   s.summary       = "Jekyll plugin for building Jekyll sites with any GitHub-hosted theme"
 
   s.files         = `git ls-files app lib`.split("\n")
-  s.platform      = Gem::Platform::RUBY
   s.require_paths = ["lib"]
   s.license       = "MIT"
 
