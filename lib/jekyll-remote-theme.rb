@@ -4,6 +4,7 @@ require "jekyll"
 require "fileutils"
 require "tempfile"
 require "addressable"
+require "typhoeus"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
@@ -28,3 +29,5 @@ end
 Jekyll::Hooks.register :site, :after_reset do |site|
   Jekyll::RemoteTheme.init(site)
 end
+
+Ethon.logger = Jekyll.logger.writer
