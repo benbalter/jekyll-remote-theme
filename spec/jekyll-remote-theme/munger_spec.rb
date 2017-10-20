@@ -27,7 +27,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "without a theme" do
-    before { site.config["theme"] = nil }
+    let(:config) { { "theme" => nil } }
     before { subject.munge! }
 
     it "doesn't set a theme" do

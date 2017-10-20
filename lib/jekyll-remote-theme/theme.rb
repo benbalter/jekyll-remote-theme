@@ -49,7 +49,8 @@ module Jekyll
       end
 
       def inspect
-        "#<Jekyll::RemoteTheme::Theme owner=\"#{owner}\" name=\"#{name}\" ref=\"#{git_ref}\" root=\"#{root}\">"
+        "#<Jekyll::RemoteTheme::Theme owner=\"#{owner}\" name=\"#{name}\"" \
+        " ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
       private
