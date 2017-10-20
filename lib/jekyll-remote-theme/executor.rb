@@ -34,7 +34,7 @@ module Jekyll
       def executable_exists?(executable)
         ENV["PATH"].split(File::PATH_SEPARATOR).any? do |dir|
           exe = File.join(dir, executable)
-          File.executable?(exe) && !File.directory?(exe)
+          File.file?(exe) && File.executable?(exe)
         end
       end
     end
