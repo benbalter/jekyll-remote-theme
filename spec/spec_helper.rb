@@ -25,20 +25,11 @@ def tmp_dir
 end
 
 def source_dir
-  @source_dir ||= File.join tmp_dir, "source"
+  @source_dir ||= fixture_path "site"
 end
 
 def dest_dir
   @dest_dir ||= File.join tmp_dir, "dest"
-end
-
-def zip_file_path
-  @zip_file ||= File.join tmp_dir, "theme.zip"
-end
-
-def write_source_dir
-  reset_tmp_dir
-  FileUtils.cp_r fixture_path("site"), source_dir
 end
 
 def reset_tmp_dir

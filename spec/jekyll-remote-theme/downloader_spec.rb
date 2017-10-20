@@ -5,7 +5,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo) }
   subject { described_class.new(theme) }
 
-  before { write_source_dir }
+  before { reset_tmp_dir }
 
   it "knows it's not downloaded" do
     expect(subject.downloaded?).to be_falsy

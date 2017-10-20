@@ -13,7 +13,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   subject { described_class.new(site) }
 
   before { Jekyll.logger.log_level = :error }
-  before { write_source_dir }
+  before { reset_tmp_dir }
 
   # Remove :after_reset hook to allow themes to be stubbed prior to munging
   before(:each) do
