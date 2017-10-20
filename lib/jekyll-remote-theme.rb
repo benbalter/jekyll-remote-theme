@@ -4,11 +4,14 @@ require "jekyll"
 require "fileutils"
 require "tempfile"
 require "addressable"
+require "typhoeus"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
 module Jekyll
   module RemoteTheme
+    class DownloadError < StandardError; end
+
     autoload :Downloader,  "jekyll-remote-theme/downloader"
     autoload :Executor,    "jekyll-remote-theme/executor"
     autoload :MockGemspec, "jekyll-remote-theme/mock_gemspec"
@@ -28,3 +31,5 @@ end
 Jekyll::Hooks.register :site, :after_reset do |site|
   Jekyll::RemoteTheme.init(site)
 end
+
+Ethon.logger = Jekyll.logger.writer

@@ -51,4 +51,14 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       expect(subject.send(:theme_dir_empty?)).to be_falsy
     end
   end
+
+  context "with an invalid URL" do
+    let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+    before { allow(subject).to receive(:zip_url) { zip_url } }
+
+    it "raises a DownloadError" do
+      msg = "Request failed with 404 - Not Found"
+      expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+    end
+  end
 end

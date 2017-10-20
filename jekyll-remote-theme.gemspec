@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.add_dependency "jekyll", "~> 3.5"
+  s.add_dependency "typhoeus", "~> 1.1"
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"
