@@ -62,7 +62,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(site.config["theme"]).to eql("primer")
     end
 
-    it "clones" do
+    it "downloads" do
       expect(layout_path).to be_an_existing_file
     end
 

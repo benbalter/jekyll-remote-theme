@@ -20,7 +20,7 @@ module Jekyll
         end
 
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
-        return if munged?
+        return theme if munged?
 
         downloader.run
         configure_theme
