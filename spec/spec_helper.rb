@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "../lib/jekyll-remote-theme"
 require "fileutils"
 require "open3"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Jekyll::RemoteTheme::Downloader do
   let(:nwo) { "pages-themes/primer" }
   let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo) }

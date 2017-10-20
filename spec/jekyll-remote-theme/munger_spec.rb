@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:config) { {} }
   let(:site) { make_site(config) }

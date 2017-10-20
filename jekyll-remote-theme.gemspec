@@ -1,4 +1,4 @@
-# encoding: utf-8
+# frozen_string_literal: true
 
 $LOAD_PATH.unshift File.expand_path("lib", __dir__)
 require "jekyll-remote-theme/version"
@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.add_dependency "jekyll", "~> 3.5"
-  s.add_development_dependency "rubocop", "~> 0.4"
-  s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "pry", "~> 0.11"
+  s.add_development_dependency "rspec", "~> 3.0"
+  s.add_development_dependency "rubocop", "~> 0.4"
 end

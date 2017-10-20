@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Jekyll::RemoteTheme::Theme do
   let(:owner) { "foo" }
   let(:name) { "bar" }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jekyll
   module RemoteTheme
     # Jekyll::Theme expects the theme's gemspec to tell it things like
