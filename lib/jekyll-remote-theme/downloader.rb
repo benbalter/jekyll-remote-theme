@@ -73,7 +73,9 @@ module Jekyll
 
       # Full URL to codeload zip download endpoint for the given theme
       def zip_url
-        [HOST, theme.owner, theme.name, "zip", theme.git_ref].join("/")
+        Addressable::URI.join(
+          HOST, "#{theme.owner}/", "#{theme.name}/", "zip/", theme.git_ref
+        ).normalize
       end
 
       def theme_dir_exists?

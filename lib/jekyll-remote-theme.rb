@@ -3,6 +3,7 @@
 require "jekyll"
 require "fileutils"
 require "tempfile"
+require "addressable"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
