@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "jekyll", "~> 3.5"
   s.add_dependency "rubyzip", "~> 1.2"
-  s.add_dependency "typhoeus", "~> 1.1"
+  s.add_dependency "typhoeus", ">= 0.7", "< 2.0"
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"

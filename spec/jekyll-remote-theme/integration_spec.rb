@@ -18,6 +18,8 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
   it "builds with the remote theme" do
     Dir.chdir tmp_dir do
       output, status = Open3.capture2e(*args)
+      output = output.encode("UTF-8",
+        :invalid => :replace, :undef => :replace, :replace => "")
       expect(status.exitstatus).to eql(0), output
       expect(output).to match("Remote Theme: Using theme pages-themes/primer")
 
