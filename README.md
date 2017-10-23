@@ -36,10 +36,6 @@ Remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a Gi
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
-## Requirements
-
-Jekyll Remote Theme requires both `curl` and `unzip` to be available in your `PATH`.
-
 ## Debugging
 
-If the download fails, the full output of the `curl` and `unzip` commands will be outputted to console. Adding `--verbose` to the `build` or `serve` command may provide additional information.
+Adding `--verbose` to the `build` or `serve` command may provide additional information.
