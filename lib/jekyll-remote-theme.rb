@@ -13,11 +13,12 @@ module Jekyll
   module RemoteTheme
     class DownloadError < StandardError; end
 
-    autoload :Downloader,  "jekyll-remote-theme/downloader"
-    autoload :MockGemspec, "jekyll-remote-theme/mock_gemspec"
-    autoload :Munger,      "jekyll-remote-theme/munger"
-    autoload :Theme,       "jekyll-remote-theme/theme"
-    autoload :VERSION,     "jekyll-remote-theme/version"
+    autoload :DependencyManager, "jekyll-remote-theme/dependency_manager"
+    autoload :Downloader,        "jekyll-remote-theme/downloader"
+    autoload :MockGemspec,       "jekyll-remote-theme/mock_gemspec"
+    autoload :Munger,            "jekyll-remote-theme/munger"
+    autoload :Theme,             "jekyll-remote-theme/theme"
+    autoload :VERSION,           "jekyll-remote-theme/version"
 
     CONFIG_KEY  = "remote_theme".freeze
     LOG_KEY     = "Remote Theme:".freeze

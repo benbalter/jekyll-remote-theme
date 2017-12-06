@@ -24,6 +24,7 @@ module Jekyll
 
         downloader.run
         configure_theme
+        require_theme_dependencies
         enqueue_theme_cleanup
 
         theme
@@ -53,6 +54,11 @@ module Jekyll
         site.theme = theme
         site.theme.configure_sass
         site.send(:configure_include_paths)
+      end
+
+      def require_theme_dependencies
+        @deps_manager ||= DependencyManager.new(theme, site.config["whitelist"])
+        @deps_manager.require_dependencies
       end
 
       def enqueue_theme_cleanup
