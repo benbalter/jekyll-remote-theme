@@ -49,14 +49,14 @@ module Jekyll
         " ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
+      def gemspec
+        @gemspec ||= MockGemspec.new(self)
+      end
+
       private
 
       def theme_parts
         @theme_parts ||= @raw_theme.match(THEME_REGEX)
-      end
-
-      def gemspec
-        @gemspec ||= MockGemspec.new(self)
       end
     end
   end

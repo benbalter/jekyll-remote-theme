@@ -9,15 +9,42 @@ module Jekyll
       extend Forwardable
       def_delegator :theme, :root, :full_gem_path
 
+      DEPENDENCY_PREFIX = %r!^\s*[a-z]+\.add_(?:runtime_)?dependency!
+      DEPENDENCY_REGEX = %r!#{DEPENDENCY_PREFIX}\(?\s*["']([a-z_-]+)["']!
+
       def initialize(theme)
         @theme = theme
       end
 
       def runtime_dependencies
-        []
+        @runtime_dependencies ||= dependency_names.map do |name|
+          Gem::Dependency.new(name)
+        end
       end
 
       private
+
+      def contents
+        @contents ||= File.read(path) if path
+      end
+
+      def path
+        @path ||= potential_paths.find { |path| File.exist? path }
+      end
+
+      def potential_paths
+        [theme.name, "jekyll-theme-#{theme.name}"].map do |filename|
+          File.expand_path "#{filename}.gemspec", theme.root
+        end
+      end
+
+      def dependency_names
+        @dependency_names ||= if contents
+                                contents.scan(DEPENDENCY_REGEX).flatten
+                              else
+                                []
+                              end
+      end
 
       attr_reader :theme
     end

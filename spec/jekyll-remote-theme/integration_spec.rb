@@ -22,7 +22,6 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
         :invalid => :replace, :undef => :replace, :replace => "")
       expect(status.exitstatus).to eql(0), output
       expect(output).to match("Remote Theme: Using theme pages-themes/primer")
-
       expect(index_path).to be_an_existing_file
       expected = '<div class="container-lg px-3 my-5 markdown-body">'
       expect(index_contents).to match(expected)
