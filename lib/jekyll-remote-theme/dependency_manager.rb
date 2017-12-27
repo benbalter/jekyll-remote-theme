@@ -6,8 +6,8 @@ module Jekyll
     # execution, this class safely reads a gemspec file at the root of given theme
     # and handles any runtime dependencies declared within.
     class DependencyManager
-      DEPENDENCY_MATCHER = %r!add_(?:runtime_)?dependency!
-      EXTRACT_DEPENDENCY_REGEX = %r!#{DEPENDENCY_MATCHER}(?:[(|\s])["'](.*?[^\\])["']!
+      DEPENDENCY_MATCHER = %r![a-z]+\.add_(?:runtime_)?dependency!
+      EXTRACT_DEPENDENCY_REGEX = %r!$\s*#{DEPENDENCY_MATCHER}(?:[(|\s])["'](.*?[^\\])["']!
 
       # Returns an array of dependency gem-names.
       attr_reader :theme_dependencies
@@ -25,12 +25,7 @@ module Jekyll
       # calling +:theme_dependencies+
       def extract_dependencies
         return if @gemspec.nil? || !@theme_dependencies.empty?
-
-        File.read(@gemspec).each_line do |line|
-          next unless line =~ DEPENDENCY_MATCHER
-          line.match(EXTRACT_DEPENDENCY_REGEX)
-          @theme_dependencies << Regexp.last_match(1)
-        end
+        @theme_dependencies = File.read(@gemspec).scan(EXTRACT_DEPENDENCY_REGEX).flatten
       end
 
       # Traverse the array of dependencies and +require+ the dependency if its
