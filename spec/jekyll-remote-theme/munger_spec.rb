@@ -54,7 +54,14 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
   context "with a remote theme" do
     let(:config) { { "remote_theme" => "pages-themes/primer" } }
+    before do
+      @old_logger = Jekyll.logger
+      @stubbed_logger = StringIO.new
+      Jekyll.logger = Logger.new(@stubbed_logger)
+      Jekyll.logger.log_level = :debug
+    end
     before { subject.munge! }
+    after { Jekyll.instance_variable_set("@logger", @old_logger) }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
@@ -79,6 +86,11 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       site.read
       expect(site.layouts["default"]).to be_truthy
       expect(site.layouts["default"].path).to eql(layout_path)
+    end
+
+    it "requires plugins" do
+      @stubbed_logger.rewind
+      expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")
     end
   end
 end
