@@ -25,7 +25,7 @@ module Jekyll
       private
 
       def contents
-        @contents ||= File.read(path) if path
+        @contents ||= File.read(path, :encoding => "utf-8") if path
       end
 
       def path
