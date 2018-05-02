@@ -90,7 +90,7 @@ module Jekyll
       end
 
       # Codeload generated zip files contain a top level folder in the form of
-      # THEME_NAME-GIT_REF/. While requests for Git repos are case incensitive,
+      # THEME_NAME-GIT_REF/. While requests for Git repos are case insensitive,
       # the zip subfolder will respect the case in the repository's name, thus
       # making it impossible to predict the true path to the theme. In case we're
       # on a case-sensitive file system, strip the parent folder from all paths.
