@@ -53,7 +53,7 @@ module Jekyll
         IO.copy_stream io, zip_file.path
         OpenURI::Meta.init zip_file, io
         io
-      rescue OpenURI::HTTPError => e
+      rescue OpenURI::HTTPError, URI::InvalidURIError, SocketError => e
         raise DownloadError, "Request failed with #{e.message}"
       end
 
