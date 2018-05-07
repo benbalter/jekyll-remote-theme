@@ -52,9 +52,12 @@ module Jekyll
         io = URI(zip_url).open(OPTIONS)
         IO.copy_stream io, zip_file.path
         OpenURI::Meta.init zip_file, io
-        io
+        zip_file
       rescue OpenURI::HTTPError, URI::InvalidURIError, SocketError => e
         raise DownloadError, "Request failed with #{e.message}"
+      ensure
+        io.close if io
+        io.unlink if io && io.respond_to?(:unlink)
       end
 
       def unzip
@@ -66,7 +69,8 @@ module Jekyll
         Zip::File.open(zip_file) do |archive|
           archive.each { |file| file.extract path_without_name_and_ref(file.name) }
         end
-
+      ensure
+        zip_file.close
         zip_file.unlink
       end
 
