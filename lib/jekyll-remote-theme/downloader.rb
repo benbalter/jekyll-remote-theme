@@ -58,7 +58,7 @@ module Jekyll
       rescue OpenURI::HTTPError, URI::InvalidURIError, SocketError => e
         raise DownloadError, "Request failed with #{e.message}"
       ensure
-        io.close if io
+        io.close  if io
         io.unlink if io && io.respond_to?(:unlink)
       end
 
