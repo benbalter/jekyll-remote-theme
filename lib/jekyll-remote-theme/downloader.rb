@@ -52,7 +52,7 @@ module Jekyll
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         io = URI(zip_url).open(OPTIONS)
-        IO.copy_stream io, zip_file.path
+        IO.copy_stream io, zip_file
         OpenURI::Meta.init zip_file, io
         zip_file
       rescue OpenURI::HTTPError, URI::InvalidURIError, SocketError => e
