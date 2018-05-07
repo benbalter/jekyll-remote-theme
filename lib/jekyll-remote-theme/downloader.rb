@@ -5,11 +5,17 @@ module Jekyll
     class Downloader
       HOST = "https://codeload.github.com".freeze
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
-      TYPHOEUS_OPTIONS = {
-        :headers => {
-          :user_agent => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
+      MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
+      OPTIONS = {
+        "User-Agent"         => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
+        :content_length_proc => lambda { |size|
+          if size && size > MAX_FILE_SIZE
+            raise DownloadError, "Maximum file size exceeded"
+          end
         },
-        :verbose => (Jekyll.logger.level == :debug),
+        :progress_proc       => lambda { |size|
+          raise DownloadError, "Maximum file size exceeded" if size > MAX_FILE_SIZE
+        },
       }.freeze
 
       attr_reader :theme
@@ -38,16 +44,17 @@ module Jekyll
       private
 
       def zip_file
-        @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"])
+        @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
-        request.on_headers  { |response| raise_if_unsuccessful(response) }
-        request.on_body     { |chunk| zip_file.write(chunk) }
-        request.on_complete { |response| raise_if_unsuccessful(response) }
-        request.run
+        io = URI(zip_url).open(OPTIONS)
+        IO.copy_stream io, zip_file.path
+        OpenURI::Meta.init zip_file, io
+        io
+      rescue OpenURI::HTTPError => e
+        raise DownloadError, "Request failed with #{e.message}"
       end
 
       def unzip
@@ -76,17 +83,6 @@ module Jekyll
 
       def theme_dir_empty?
         Dir["#{theme.root}/*"].empty?
-      end
-
-      def raise_if_unsuccessful(response)
-        if response.timed_out?
-          raise DownloadError, "Request timed out"
-        elsif response.code.zero?
-          raise DownloadError, response.return_message
-        elsif response.code != 200
-          msg = "Request failed with #{response.code} - #{response.status_message}"
-          raise DownloadError, msg
-        end
       end
 
       # Codeload generated zip files contain a top level folder in the form of

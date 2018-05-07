@@ -4,6 +4,8 @@ require_relative "../lib/jekyll-remote-theme"
 require "fileutils"
 require "open3"
 require "pathname"
+require "webmock/rspec"
+WebMock.allow_net_connect!
 
 RSpec.configure do |config|
   config.example_status_persistence_file_path = "spec/examples.txt"

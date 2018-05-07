@@ -40,13 +40,39 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
   end
 
-  context "with an invalid URL" do
-    let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
-    before { allow(subject).to receive(:zip_url) { zip_url } }
+  context "with zip_url stubbed" do
+    before { allow(subject).to receive(:zip_url) { Addressable::URI.parse zip_url } }
 
-    it "raises a DownloadError" do
-      msg = "Request failed with 404 - Not Found"
-      expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+    context "with an invalid URL" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:status => [404, "Not Found"])
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError" do
+        msg = "Request failed with 404 Not Found"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+    end
+
+    context "with a large file" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      let(:content_length) { 10 * 1024 * 1024 * 1024 }
+      let(:headers) { { "Content-Length" => content_length } }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:headers => headers)
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError" do
+        msg = "Maximum file size exceeded"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
     end
   end
 end
