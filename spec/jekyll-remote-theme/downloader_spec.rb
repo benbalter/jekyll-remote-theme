@@ -70,7 +70,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "Maximum file size exceeded"
+        msg = "Maximum file size of 1073741824 bytes exceeded"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
