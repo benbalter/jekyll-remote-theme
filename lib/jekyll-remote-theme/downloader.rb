@@ -8,12 +8,12 @@ module Jekyll
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
       OPTIONS = {
         "User-Agent"         => "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})",
-        :content_length_proc => ->(size) { enforce_max_download_size!(size) },
-        :progress_proc       => ->(size) { enforce_max_download_size!(size) },
+        :content_length_proc => ->(size) { enforce_max_file_size!(size) },
+        :progress_proc       => ->(size) { enforce_max_file_size!(size) },
       }.freeze
 
       class << self
-        private def enforce_max_download_size!(size)
+        private def enforce_max_file_size!(size)
           if size && size > MAX_FILE_SIZE
             raise DownloadError, "Maximum file size of #{MAX_FILE_SIZE} bytes exceeded"
           end
