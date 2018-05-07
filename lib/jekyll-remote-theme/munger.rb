@@ -53,6 +53,7 @@ module Jekyll
         site.theme = theme
         site.theme.configure_sass
         site.send(:configure_include_paths)
+        site.plugin_manager.require_theme_deps
       end
 
       def enqueue_theme_cleanup

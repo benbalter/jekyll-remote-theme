@@ -32,6 +32,10 @@ def dest_dir
   @dest_dir ||= File.join tmp_dir, "dest"
 end
 
+def gemspec_dir(*contents)
+  File.join(fixture_path("gemspecs"), *contents)
+end
+
 def reset_tmp_dir
   FileUtils.rm_rf tmp_dir
   FileUtils.mkdir_p tmp_dir
