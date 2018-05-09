@@ -27,8 +27,6 @@ module Jekyll
 
         download
         unzip
-
-        @downloaded = true
       end
 
       def downloaded?
@@ -52,6 +50,7 @@ module Jekyll
             end
           end
         end
+        @downloaded = true
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
       end
