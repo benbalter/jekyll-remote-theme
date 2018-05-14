@@ -12,11 +12,13 @@ module Jekyll
         :verbose => (Jekyll.logger.level == :debug),
       }.freeze
 
-      attr_reader :theme
-      private :theme
+      attr_reader :theme, :cache_duration, :skip_download
+      private :theme, :cache_duration
 
-      def initialize(theme)
+      def initialize(theme, cache_duration = nil)
         @theme = theme
+        @cache_duration = cache_duration
+        @skip_download = false
       end
 
       def run
@@ -25,6 +27,7 @@ module Jekyll
           return
         end
 
+        @zip_file = zip_file_path
         download
         unzip
 
@@ -37,30 +40,59 @@ module Jekyll
 
       private
 
-      def zip_file
-        @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"])
+      def use_cache?
+        !@cache_duration.nil?
+      end
+
+      def zip_file_path
+        return Tempfile.new([TEMP_PREFIX, ".zip"]) unless use_cache?
+
+        cache_path = File.join(Dir.tmpdir, "#{TEMP_PREFIX}#{@theme.name}.zip")
+        unless File.exist?(cache_path)
+          FileUtils.touch(cache_path)
+          return File.open(cache_path, "w")
+        end
+
+        cache_file = File.open(cache_path, "r")
+        cache_age = Time.now - cache_file.ctime
+
+        # Still fresh
+        if cache_age < @cache_duration
+          @skip_download = true
+          return cache_file
+        end
+
+        # Too old, we delete and start anew
+        FileUtils.rm(cache_path)
+        FileUtils.touch(cache_path)
+        File.open(cache_path, "w")
       end
 
       def download
-        Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
+        if @skip_download
+          Jekyll.logger.debug LOG_KEY, "Using #{@zip_file.path} cache"
+          return
+        end
+
+        Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{@zip_file.path}"
         request = Typhoeus::Request.new zip_url, TYPHOEUS_OPTIONS
         request.on_headers  { |response| raise_if_unsuccessful(response) }
-        request.on_body     { |chunk| zip_file.write(chunk) }
+        request.on_body     { |chunk| @zip_file.write(chunk) }
         request.on_complete { |response| raise_if_unsuccessful(response) }
         request.run
       end
 
       def unzip
-        Jekyll.logger.debug LOG_KEY, "Unzipping #{zip_file.path} to #{theme.root}"
+        Jekyll.logger.debug LOG_KEY, "Unzipping #{@zip_file.path} to #{theme.root}"
 
         # File IO is already open, rewind pointer to start of file to read
-        zip_file.rewind
+        @zip_file.rewind
 
-        Zip::File.open(zip_file) do |archive|
+        Zip::File.open(@zip_file) do |archive|
           archive.each { |file| file.extract path_without_name_and_ref(file.name) }
         end
 
-        zip_file.unlink
+        @zip_file.unlink unless use_cache?
       end
 
       # Full URL to codeload zip download endpoint for the given theme

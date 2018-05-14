@@ -20,6 +20,7 @@ module Jekyll
     autoload :VERSION,     "jekyll-remote-theme/version"
 
     CONFIG_KEY  = "remote_theme".freeze
+    CACHE_KEY   = "remote_theme_cache".freeze
     LOG_KEY     = "Remote Theme:".freeze
     TEMP_PREFIX = "jekyll-remote-theme-".freeze
 
