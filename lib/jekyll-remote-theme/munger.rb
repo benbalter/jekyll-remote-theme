@@ -43,8 +43,12 @@ module Jekyll
         config[CONFIG_KEY]
       end
 
+      def cache_duration
+        config[CACHE_KEY]
+      end
+
       def downloader
-        @downloader ||= Downloader.new(theme)
+        @downloader ||= Downloader.new(theme, cache_duration)
       end
 
       def configure_theme
