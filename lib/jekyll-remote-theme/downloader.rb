@@ -8,7 +8,7 @@ module Jekyll
       USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})".freeze
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
       NET_HTTP_ERRORS = [
-        Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+        Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
 
