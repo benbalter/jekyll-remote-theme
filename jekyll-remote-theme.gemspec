@@ -17,10 +17,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency "jekyll", "~> 3.5"
   s.add_dependency "rubyzip", ">= 1.2.1", "< 3.0"
-  s.add_dependency "typhoeus", ">= 0.7", "< 2.0"
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "jekyll_test_plugin_malicious", "~> 0.2"
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rubocop", "~> 0.4", ">= 0.49.0"
+  s.add_development_dependency "webmock", "~> 3.0"
 end
