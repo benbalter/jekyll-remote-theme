@@ -21,6 +21,7 @@ Jekyll plugin for building Jekyll sites with any GitHub-hosted theme
   plugins:
     - jekyll-remote-theme
   ```
+  Note: If you are using a Jekyll version less than 3.5.0, use the `gems` key instead of `plugins`.
 
 3. Add the following to your site's `_config.yml` to choose your theme
 
