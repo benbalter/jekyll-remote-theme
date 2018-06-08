@@ -12,9 +12,6 @@ module Jekyll
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
 
-      attr_reader :theme
-      private :theme
-
       def initialize(theme)
         @theme = theme
       end
@@ -34,6 +31,8 @@ module Jekyll
       end
 
       private
+
+      attr_reader :theme
 
       def zip_file
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
