@@ -1,6 +1,6 @@
 # Jekyll Remote Theme
 
-Jekyll plugin for building Jekyll sites with any GitHub-hosted theme
+Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
 
 [![Gem Version](https://badge.fury.io/rb/jekyll-remote-theme.svg)](https://badge.fury.io/rb/jekyll-remote-theme) [![Build Status](https://travis-ci.org/benbalter/jekyll-remote-theme.svg?branch=master)](https://travis-ci.org/benbalter/jekyll-remote-theme) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
@@ -33,7 +33,7 @@ Jekyll plugin for building Jekyll sites with any GitHub-hosted theme
 
 Remote themes are specified by the `remote_theme` key in the site's config.
 
-Remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
+Remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a public GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
