@@ -2,7 +2,8 @@
 
 RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:source) { source_dir }
-  let(:config) { { "source" => source } }
+  let(:overrides) { {} }
+  let(:config) { { "source" => source, "safe" => true }.merge(overrides) }
   let(:site) { make_site(config) }
   let(:theme_dir) { theme.root if theme }
   let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
@@ -40,7 +41,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with theme as a hash" do
-    let(:config) { { "remote_theme" => { "foo" => "bar" } } }
+    let(:overrides) { { "remote_theme" => { "foo" => "bar" } } }
     before { subject.munge! }
 
     it "doesn't set a theme" do
@@ -53,8 +54,15 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with a remote theme" do
-    let(:config) { { "remote_theme" => "pages-themes/primer" } }
+    let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+    before do
+      @old_logger = Jekyll.logger
+      @stubbed_logger = StringIO.new
+      Jekyll.logger = Logger.new(@stubbed_logger)
+      Jekyll.logger.log_level = :debug
+    end
     before { subject.munge! }
+    after { Jekyll.instance_variable_set("@logger", @old_logger) }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
@@ -79,6 +87,39 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       site.read
       expect(site.layouts["default"]).to be_truthy
       expect(site.layouts["default"].path).to eql(layout_path)
+    end
+
+    it "requires plugins" do
+      @stubbed_logger.rewind
+      expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")
+    end
+  end
+
+  context "with a malicious theme" do
+    let(:overrides) { { "remote_theme" => "jekyll/jekyll-test-theme-malicious" } }
+    before do
+      @old_logger = Jekyll.logger
+      @stubbed_logger = StringIO.new
+      Jekyll.logger = Logger.new(@stubbed_logger)
+      Jekyll.logger.log_level = :debug
+    end
+    before { subject.munge! }
+    after { Jekyll.instance_variable_set("@logger", @old_logger) }
+
+    it "sets the theme" do
+      expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
+      expect(site.theme.name).to eql("jekyll-test-theme-malicious")
+      expect(site.config["theme"]).to eql("jekyll-test-theme-malicious")
+    end
+
+    it "requires whitelisted plugins" do
+      @stubbed_logger.rewind
+      expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")
+    end
+
+    it "doesn't require malicious plugins" do
+      @stubbed_logger.rewind
+      expect(@stubbed_logger.read).to_not include("jekyll_test_plugin_malicious")
     end
   end
 end
