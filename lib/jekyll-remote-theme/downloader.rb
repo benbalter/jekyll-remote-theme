@@ -11,8 +11,6 @@ module Jekyll
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
-
-      attr_reader :skip_download
       def initialize(theme, cache_duration = nil)
         @theme = theme
         @cache_duration = cache_duration
@@ -36,6 +34,10 @@ module Jekyll
       private
 
       attr_reader :theme, :cache_duration
+
+      def skip_download?
+        @skip_download
+      end
 
       def zip_file
         @zip_file ||= zip_file_path
@@ -70,7 +72,7 @@ module Jekyll
       end
 
       def download
-        if @skip_download
+        if skip_download?
           Jekyll.logger.debug LOG_KEY, "Using #{@zip_file.path} cache"
           return
         end
