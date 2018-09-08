@@ -73,7 +73,7 @@ module Jekyll
 
       def download
         if skip_download?
-          Jekyll.logger.debug LOG_KEY, "Using #{@zip_file.path} cache"
+          Jekyll.logger.debug LOG_KEY, "Using #{zip_file.path} cache"
           return
         end
 
@@ -115,7 +115,7 @@ module Jekyll
         # File IO is already open, rewind pointer to start of file to read
         zip_file.rewind
 
-        Zip::File.open(@zip_file) do |archive|
+        Zip::File.open(zip_file) do |archive|
           archive.each { |file| file.extract path_without_name_and_ref(file.name) }
         end
 
