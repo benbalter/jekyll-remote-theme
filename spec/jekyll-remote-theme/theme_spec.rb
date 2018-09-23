@@ -80,4 +80,15 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   it "exposes gemspec" do
     expect(subject.send(:gemspec)).to be_a(Jekyll::RemoteTheme::MockGemspec)
   end
+
+  context 'with cache dir' do
+    let(:cache_dir) { Dir.mktmpdir('foo') }
+    subject { described_class.new(raw_theme, cache_dir: cache_dir) }
+
+    it 'uses cache dir and theme info as root' do
+      root = subject.root
+      expect(Dir.exist?(root)).to be_truthy
+      expect(root).to eql(File.join("#{cache_dir}", "#{owner}_#{name}@master"))
+    end
+  end
 end

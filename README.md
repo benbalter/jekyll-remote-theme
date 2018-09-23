@@ -40,3 +40,14 @@ You may also optionally specify a branch, tag, or commit to use by appending an 
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
+
+## Cache options when running locally
+
+If you are in a slow network, or the remote theme is so big that you don't want to download it every time, you can specify options in `_config.yml` to enable cache. If you only want to enable cache in development environment, you can create `_config.dev.yml`, and specify it in `serve` command like `jekyll serve -c _config.yml,_config.dev.yml`, this will make jekyll override the options from `_config.yml`.
+
+```yml
+remote_theme_cache_enabled: true
+remote_theme_cache_dir: <SPECIFIED_CACHE_DIR>
+```
+
+Add above options in your `_config.yml` file. By default the `remote_theme_cache_dir` is `~/.jekyll-remote-theme-cache`. Then start your server locally, the first time it will download the theme. After that, it will use the cache.

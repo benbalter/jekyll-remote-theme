@@ -36,11 +36,27 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||=
+          if cache_enabled?
+            Theme.new(raw_theme, cache_dir: cache_dir)
+          else
+            Theme.new(raw_theme)
+          end
       end
 
       def raw_theme
         config[CONFIG_KEY]
+      end
+
+      def cache_enabled?
+        if @cache_enabled.nil?
+          @cache_enabled = config[CONFIG_CACHE_ENABLED_KEY] == true
+        end
+        @cache_enabled
+      end
+
+      def cache_dir
+        @cache_dir ||= File.expand_path(config[CONFIG_CACHE_DIR_KEY] || DEFAULT_CACHE_DIR)
       end
 
       def downloader
@@ -58,7 +74,7 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          return unless munged? && downloader.downloaded?
+          return unless !cache_enabled? && munged? && downloader.downloaded?
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root
         end

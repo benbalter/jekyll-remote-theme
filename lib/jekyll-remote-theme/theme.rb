@@ -8,14 +8,17 @@ module Jekyll
       REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i # May be a branch, tag, or commit
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i
 
+      attr_reader :options
+
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
       # raw_theme can be in the form of:
       #
       # 1. owner/theme-name - a GitHub owner + theme-name string
       # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
-      def initialize(raw_theme)
+      def initialize(raw_theme, options = {})
         @raw_theme = raw_theme.to_s.downcase.strip
+        @options = options
         super(@raw_theme)
       end
 
@@ -41,7 +44,14 @@ module Jekyll
       end
 
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        @root ||=
+          if cache_dir = options[:cache_dir]
+            dir = File.join(cache_dir, "#{owner}_#{name}@#{git_ref}")
+            FileUtils.mkdir_p dir
+            dir
+          else
+            File.realpath Dir.mktmpdir(TEMP_PREFIX)
+          end
       end
 
       def inspect

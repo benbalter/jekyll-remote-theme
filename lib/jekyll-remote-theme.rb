@@ -19,9 +19,12 @@ module Jekyll
     autoload :Theme,       "jekyll-remote-theme/theme"
     autoload :VERSION,     "jekyll-remote-theme/version"
 
-    CONFIG_KEY  = "remote_theme".freeze
-    LOG_KEY     = "Remote Theme:".freeze
-    TEMP_PREFIX = "jekyll-remote-theme-".freeze
+    CONFIG_KEY               = "remote_theme".freeze
+    CONFIG_CACHE_ENABLED_KEY = "remote_theme_cache_enabled".freeze
+    CONFIG_CACHE_DIR_KEY     = "remote_theme_cache_dir".freeze
+    DEFAULT_CACHE_DIR        = "~/.jekyll-remote-theme-cache".freeze
+    LOG_KEY                  = "Remote Theme:".freeze
+    TEMP_PREFIX              = "jekyll-remote-theme-".freeze
 
     def self.init(site)
       Munger.new(site).munge!

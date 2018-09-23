@@ -122,4 +122,53 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(@stubbed_logger.read).to_not include("jekyll_test_plugin_malicious")
     end
   end
+
+  context 'cache options' do
+    let(:munger2) { described_class.new(make_site(config)) }
+    let(:downloader2) { munger2.send(:downloader) }
+    before { subject.munge! }
+
+    it 'downloads theme every time by default' do
+      expect(downloader2.downloaded?).to be_falsey
+      munger2.munge!
+      expect(downloader2.downloaded?).to be_truthy
+    end
+
+    context 'with cache disabled' do
+      let(:overrides) { { 'remote_theme_cache_enabled' => false } }
+
+      it 'downloads theme every time' do
+        expect(downloader2.downloaded?).to be_falsey
+        munger2.munge!
+        expect(downloader2.downloaded?).to be_truthy
+      end
+    end
+
+    context 'with cache enabled' do
+      let(:overrides) { { 'remote_theme_cache_enabled' => true } }
+
+      it 'does not download theme the second time' do
+        expect(downloader2.downloaded?).to be_truthy
+      end
+
+      it 'stores theme into the default cache dir' do
+        cache_dir = File.expand_path(File.join(Jekyll::RemoteTheme::DEFAULT_CACHE_DIR, "#{theme.owner}_#{theme.name}@master"))
+        expect(theme.root).to eql(cache_dir)
+        expect(munger2.send(:theme).root).to eql(cache_dir)
+      end
+
+      context 'with cache dir' do
+        let(:dir) { Dir.mktmpdir('foo') }
+        let(:overrides) { { 'remote_theme_cache_enabled' => true, 'remote_theme_cache_dir' => dir } }
+
+        it 'stores theme into the specified cache dir' do
+          cache_dir = File.join(dir, "#{theme.owner}_#{theme.name}@master")
+          expect(theme.root).to eql(cache_dir)
+          expect(munger2.send(:theme).root).to eql(cache_dir)
+        end
+      end
+
+      after { FileUtils.rm_rf File.dirname(theme.root) }
+    end
+  end
 end
