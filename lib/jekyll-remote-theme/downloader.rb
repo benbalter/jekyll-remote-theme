@@ -3,9 +3,9 @@
 module Jekyll
   module RemoteTheme
     class Downloader
-      HOST = "https://codeload.github.com".freeze
-      PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme".freeze
-      USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})".freeze
+      HOST = "https://codeload.github.com"
+      PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme"
+      USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})"
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
       NET_HTTP_ERRORS = [
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
@@ -94,6 +94,7 @@ module Jekyll
 
       def request
         return @request if defined? @request
+
         @request = Net::HTTP::Get.new zip_url.request_uri
         @request["User-Agent"] = USER_AGENT
         @request
@@ -101,11 +102,13 @@ module Jekyll
 
       def raise_unless_sucess(response)
         return if response.is_a?(Net::HTTPSuccess)
+
         raise DownloadError, "#{response.code} - #{response.message}"
       end
 
       def enforce_max_file_size(size)
         return unless size && size > MAX_FILE_SIZE
+
         raise DownloadError, "Maximum file size of #{MAX_FILE_SIZE} bytes exceeded"
       end
 

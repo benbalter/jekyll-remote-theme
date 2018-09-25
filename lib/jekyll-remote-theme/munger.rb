@@ -32,7 +32,7 @@ module Jekyll
       private
 
       def munged?
-        site.theme && site.theme.is_a?(Jekyll::RemoteTheme::Theme)
+        site.theme&.is_a?(Jekyll::RemoteTheme::Theme)
       end
 
       def theme
@@ -53,6 +53,7 @@ module Jekyll
 
       def configure_theme
         return unless theme
+
         site.config["theme"] = theme.name
         site.theme = theme
         site.theme.configure_sass
@@ -63,6 +64,7 @@ module Jekyll
       def enqueue_theme_cleanup
         at_exit do
           return unless munged? && downloader.downloaded?
+
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root
         end
