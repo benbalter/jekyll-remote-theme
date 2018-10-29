@@ -3,10 +3,10 @@
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
-      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i
-      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i # May be a branch, tag, or commit
-      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i
+      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
+      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
+      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #

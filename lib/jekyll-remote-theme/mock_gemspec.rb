@@ -9,8 +9,8 @@ module Jekyll
       extend Forwardable
       def_delegator :theme, :root, :full_gem_path
 
-      DEPENDENCY_PREFIX = %r!^\s*[a-z]+\.add_(?:runtime_)?dependency!
-      DEPENDENCY_REGEX = %r!#{DEPENDENCY_PREFIX}\(?\s*["']([a-z_-]+)["']!
+      DEPENDENCY_PREFIX = %r!^\s*[a-z]+\.add_(?:runtime_)?dependency!.freeze
+      DEPENDENCY_REGEX = %r!#{DEPENDENCY_PREFIX}\(?\s*["']([a-z_-]+)["']!.freeze
 
       def initialize(theme)
         @theme = theme
