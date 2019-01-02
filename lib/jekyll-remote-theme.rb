@@ -6,6 +6,8 @@ require "tempfile"
 require "addressable"
 require "net/http"
 require "zip"
+require "git"
+require "semantic"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 

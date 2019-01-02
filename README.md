@@ -35,7 +35,12 @@ Remote themes are specified by the `remote_theme` key in the site's config.
 
 Remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a public GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
-You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
+You may also optionally specify
+
+* a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`) or
+* a pessmistic version number by appending `~>` and a semver (e.g., `benbalter/retlab~>1.0.0`), the latter of which is assumed to be a tag (possibly starting with `v`).
+
+If you don't specify a Git ref or semver, the `master` branch will be used.
 
 ## Debugging
 
