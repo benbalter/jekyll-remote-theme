@@ -22,8 +22,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rubocop", "~> 0.59"
-  s.add_development_dependency "webmock", "~> 3.0"
   s.add_development_dependency "rubocop-jekyll", "~> 0.3"
+  s.add_development_dependency "webmock", "~> 3.0"
 
   s.required_ruby_version = ">= 2.3.0"
 end
