@@ -5,7 +5,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:overrides) { {} }
   let(:config) { { "source" => source, "safe" => true }.merge(overrides) }
   let(:site) { make_site(config) }
-  let(:theme_dir) { theme.root if theme }
+  let(:theme_dir) { theme&.root }
   let(:layout_path) { File.expand_path "_layouts/default.html", theme_dir }
   let(:sass_dir) { File.expand_path "_sass/", theme_dir }
   let(:sass_path) { File.expand_path "jekyll-theme-primer.scss", sass_dir }

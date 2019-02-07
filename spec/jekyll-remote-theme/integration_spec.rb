@@ -22,7 +22,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     Dir.chdir tmp_dir do
       @output, @status = Open3.capture2e(*args(config_path))
       @output = @output.encode("UTF-8",
-        :invalid => :replace, :undef => :replace, :replace => "")
+                               :invalid => :replace, :undef => :replace, :replace => "")
     end
   end
 
