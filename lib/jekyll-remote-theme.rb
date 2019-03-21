@@ -22,9 +22,16 @@ module Jekyll
     CONFIG_KEY  = "remote_theme"
     LOG_KEY     = "Remote Theme:"
     TEMP_PREFIX = "jekyll-remote-theme-"
+    DEFAULT_TTL = 60 * 60
 
-    def self.init(site)
-      Munger.new(site).munge!
+    class << self
+      def init(site)
+        Munger.new(site).munge!
+      end
+
+      def cache
+        @cache ||= Jekyll::Cache.new(self.class.name) if defined?(Jekyll::Cache)
+      end
     end
   end
 end

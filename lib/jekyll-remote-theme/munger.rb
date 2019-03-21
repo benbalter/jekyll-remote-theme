@@ -59,7 +59,7 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          return unless munged? && downloader.downloaded?
+          return unless munged? && downloader.downloaded? && downloader.cache_expired?
 
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root

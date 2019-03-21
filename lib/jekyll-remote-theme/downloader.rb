@@ -17,17 +17,22 @@ module Jekyll
       end
 
       def run
-        if downloaded?
+        if downloaded? && !cache_expired?
           Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
           return
         end
 
         download
         unzip
+        Jekyll::RemoteTheme.cache["timestamp"] = Time.now.to_i if Jekyll::RemoteTheme.cache
       end
 
       def downloaded?
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
+      end
+
+      def cache_expired?
+        !cache_age || cache_age > DEFAULT_TTL
       end
 
       private
@@ -110,6 +115,13 @@ module Jekyll
       # on a case-sensitive file system, strip the parent folder from all paths.
       def path_without_name_and_ref(path)
         Jekyll.sanitized_path theme.root, path.split("/").drop(1).join("/")
+      end
+
+      def cache_age
+        return unless Jekyll::RemoteTheme.cache
+        return unless Jekyll::RemoteTheme.cache.key? "timestamp"
+
+        Time.now.to_i - Jekyll::RemoteTheme.cache["timestamp"]
       end
     end
   end

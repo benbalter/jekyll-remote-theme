@@ -41,7 +41,11 @@ module Jekyll
       end
 
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        @root ||= if Jekyll::RemoteTheme.cache
+                    Jekyll::RemoteTheme.cache.getset("root") { tmpdir }
+                  else
+                    tmpdir
+                  end
       end
 
       def inspect
@@ -57,6 +61,10 @@ module Jekyll
 
       def gemspec
         @gemspec ||= MockGemspec.new(self)
+      end
+
+      def tmpdir
+        @tmpdir ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
     end
   end
