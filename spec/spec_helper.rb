@@ -57,3 +57,5 @@ def make_site(options = {})
   config = Jekyll.configuration config_defaults.merge(options)
   Jekyll::Site.new(config)
 end
+
+Jekyll::Cache.base_dir = tmp_dir if defined? Jekyll::Cache
