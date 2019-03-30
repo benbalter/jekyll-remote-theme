@@ -13,6 +13,7 @@ RSpec.describe Jekyll::RemoteTheme do
   it "inits" do
     expect(subject.init(site)).to be_a(Jekyll::RemoteTheme::Theme)
     expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
+    expect(subject.cache).to be_a(Jekyll::Cache) if defined?(Jekyll::Cache)
     expect(File.join(site.theme.root, "_layouts/default.html")).to be_an_existing_file
   end
 end

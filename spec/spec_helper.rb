@@ -5,6 +5,8 @@ require "fileutils"
 require "open3"
 require "pathname"
 require "webmock/rspec"
+require "timecop"
+
 WebMock.allow_net_connect!
 
 RSpec.configure do |config|
@@ -59,3 +61,4 @@ def make_site(options = {})
 end
 
 Jekyll::Cache.base_dir = tmp_dir if defined? Jekyll::Cache
+Jekyll::Cache.disable_disk_cache! if defined? Jekyll::Cache
