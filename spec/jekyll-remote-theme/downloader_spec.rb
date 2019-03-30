@@ -6,6 +6,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   subject { described_class.new(theme) }
 
   before { reset_tmp_dir }
+  before { reset_cache }
   before { Timecop.freeze(Time.now) }
   after { Timecop.return }
 

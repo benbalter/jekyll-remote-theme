@@ -43,6 +43,10 @@ def reset_tmp_dir
   FileUtils.mkdir_p tmp_dir
 end
 
+def reset_cache
+  Jekyll::RemoteTheme.cache&.clear
+end
+
 def fixture_path(fixture)
   File.expand_path "fixtures/#{fixture}", __dir__
 end
