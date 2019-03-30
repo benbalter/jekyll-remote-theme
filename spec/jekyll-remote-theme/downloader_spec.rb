@@ -41,9 +41,11 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       expect(subject.send(:theme_dir_empty?)).to be_falsy
     end
 
-    it "stores the timestamp" do
-      expect(Jekyll::RemoteTheme.cache['timestamp']).to eql(Time.now.to_i)
-    end if defined?(Jekyll::Cache)
+    if defined?(Jekyll::Cache)
+      it "stores the timestamp" do
+        expect(Jekyll::RemoteTheme.cache["timestamp"]).to eql(Time.now.to_i)
+      end
+    end
   end
 
   context "with zip_url stubbed" do
@@ -94,7 +96,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
         end
 
         context "with an existing timestamp" do
-          before { Jekyll::RemoteTheme.cache['timestamp'] = (Time.now.to_i - 100) }
+          before { Jekyll::RemoteTheme.cache["timestamp"] = (Time.now.to_i - 100) }
 
           it "returns the cache_age" do
             expect(subject.send(:cache_age)).to eql(100)
@@ -105,7 +107,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
           end
 
           context "with an expired cache" do
-            before { Jekyll::RemoteTheme.cache['timestamp'] = Time.local(2000).to_i }
+            before { Jekyll::RemoteTheme.cache["timestamp"] = Time.local(2000).to_i }
 
             it "knows the cache is expired" do
               expect(subject.cache_expired?).to be_truthy
