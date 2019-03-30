@@ -10,6 +10,7 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   subject { described_class.new(theme) }
 
   before { File.write path, contents }
+  before { reset_cache }
 
   it "stores the theme" do
     expect(subject.send(:theme)).to eql(theme)

@@ -89,7 +89,11 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     if defined?(Jekyll::Cache)
       context "with Jekyll::Cache" do
         context "without a timestamp" do
-          before { Jekyll::RemoteTheme.cache.delete "timestamp" }
+          before do
+            next unless Jekyll::RemoteTheme.cache.key? "timestamp"
+
+            Jekyll::RemoteTheme.cache.delete "timestamp"
+          end
 
           it "is expired" do
             expect(subject.cache_expired?).to be_truthy

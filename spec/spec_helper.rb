@@ -65,4 +65,3 @@ def make_site(options = {})
 end
 
 Jekyll::Cache.base_dir = tmp_dir if defined? Jekyll::Cache
-Jekyll::Cache.disable_disk_cache! if defined? Jekyll::Cache
