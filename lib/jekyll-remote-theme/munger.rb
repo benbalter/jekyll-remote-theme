@@ -22,6 +22,7 @@ module Jekyll
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
         return theme if munged?
 
+        Jekyll.logger.info LOG_KEY, "Downloading..."
         downloader.run
         configure_theme
         enqueue_theme_cleanup
