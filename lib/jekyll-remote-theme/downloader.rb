@@ -3,7 +3,6 @@
 module Jekyll
   module RemoteTheme
     class Downloader
-      HOST = "https://codeload.github.com"
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme"
       USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})"
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
@@ -91,7 +90,7 @@ module Jekyll
       # Full URL to codeload zip download endpoint for the given theme
       def zip_url
         @zip_url ||= Addressable::URI.join(
-          HOST, "#{theme.owner}/", "#{theme.name}/", "zip/", theme.git_ref
+          "#{theme.host}/", "#{theme.owner}/", "#{theme.name}/", "zip/", theme.git_ref
         ).normalize
       end
 
