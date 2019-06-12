@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-require "uri"
-
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
+      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
+      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
+      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
+
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
       # raw_theme can be in the form of:
@@ -29,11 +32,11 @@ module Jekyll
       end
 
       def host
-        if theme_parts[:host] && theme_parts[:scheme]
-          return "#{theme_parts[:scheme]}://codeload.#{theme_parts[:host]}"
-        end
+        uri&.host
+      end
 
-        "https://codeload.github.com"
+      def scheme
+        uri&.scheme
       end
 
       def name_with_owner
@@ -42,11 +45,13 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
-        theme_parts && name && owner
+        return false unless uri && theme_parts && name && owner
+
+        host && valid_hosts.include?(host)
       end
 
       def git_ref
-        theme_parts[:git_ref]
+        theme_parts[:ref] || "master"
       end
 
       def root
@@ -60,29 +65,36 @@ module Jekyll
 
       private
 
+      def uri
+        return @uri if defined? @uri
+
+        @uri = if @raw_theme =~ THEME_REGEX
+                 Addressable::URI.new(
+                   :scheme => "https",
+                   :host   => "github.com",
+                   :path   => @raw_theme
+                 )
+               else
+                 Addressable::URI.parse @raw_theme
+               end
+      rescue Addressable::URI::InvalidURIError
+        @uri = nil
+      end
+
       def theme_parts
-        begin
-          uri = URI(@raw_theme)
-        rescue URI::InvalidURIError
-          return nil
-        end
-        @theme_parts = { :scheme => uri.scheme, :host => uri.host }
-        if uri.path.include? "@"
-          uri.path, @theme_parts[:git_ref] = uri.path.split("@")
-        else
-          uri.path = uri.path
-          @theme_parts[:git_ref] = "master"
-        end
-        # Make this a valid uri path even if it's just Owner/Name URI will fail if we don't
-        uri.path = "/#{uri.path}" unless uri.path[0] == "/"
-        # Since a valid uri path is absolute (starts with /)
-        # the first element of this split will always be empty string
-        @theme_parts[:owner], @theme_parts[:name] = uri.path.split("/")[1..-1]
-        @theme_parts
+        @theme_parts ||= uri.path[1..-1].match(THEME_REGEX) if uri
       end
 
       def gemspec
         @gemspec ||= MockGemspec.new(self)
+      end
+
+      def valid_hosts
+        @valid_hosts ||= [
+          "github.com",
+          ENV["PAGES_GITHUB_HOSTNAME"],
+          ENV["GITHUB_HOSTNAME"],
+        ].compact.to_set
       end
     end
   end

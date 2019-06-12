@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Downloader do
-  let(:nwo) { "pages-themes/primer" }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo) }
+  let(:raw_theme) { "pages-themes/primer" }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme) }
   subject { described_class.new(theme) }
 
   before { reset_tmp_dir }
@@ -37,6 +37,22 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
     it "knows the theme dir isn't empty" do
       expect(subject.send(:theme_dir_empty?)).to be_falsy
+    end
+  end
+
+  context "zip_url" do
+    it "builds the zip url" do
+      expected = "https://codeload.github.com/pages-themes/primer/zip/master"
+      expect(subject.send(:zip_url).to_s).to eql(expected)
+    end
+
+    context "a custom host" do
+      let(:raw_theme) { "http://example.com/pages-themes/primer" }
+
+      it "builds the zip url" do
+        expected = "http://codeload.example.com/pages-themes/primer/zip/master"
+        expect(subject.send(:zip_url).to_s).to eql(expected)
+      end
     end
   end
 

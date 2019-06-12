@@ -89,8 +89,10 @@ module Jekyll
 
       # Full URL to codeload zip download endpoint for the given theme
       def zip_url
-        @zip_url ||= Addressable::URI.join(
-          "#{theme.host}/", "#{theme.owner}/", "#{theme.name}/", "zip/", theme.git_ref
+        @zip_url ||= Addressable::URI.new(
+          :scheme => theme.scheme,
+          :host   => "codeload.#{theme.host}",
+          :path   => [theme.owner, theme.name, "zip", theme.git_ref].join("/")
         ).normalize
       end
 
