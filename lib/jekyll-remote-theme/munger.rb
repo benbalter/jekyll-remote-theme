@@ -4,11 +4,10 @@ module Jekyll
   module RemoteTheme
     class Munger
       extend Forwardable
-      def_delegator :site, :config
-      attr_reader :site
+      def_delegators Jekyll::RemoteTheme, :config, :site
 
       def initialize(site)
-        @site = site
+        Jekyll::RemoteTheme.site = site # Backwards compatability
       end
 
       def munge!
@@ -40,7 +39,11 @@ module Jekyll
       end
 
       def raw_theme
-        config[CONFIG_KEY]
+        if config.is_a?(String)
+          config
+        elsif config.is_a?(Hash)
+          config["theme"]
+        end
       end
 
       def downloader

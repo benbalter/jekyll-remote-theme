@@ -12,6 +12,9 @@ module Jekyll
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
 
+      extend Forwardable
+      def_delegator Jekyll::RemoteTheme, :config
+
       def initialize(theme)
         @theme = theme
       end
@@ -32,7 +35,7 @@ module Jekyll
       end
 
       def cache_expired?
-        !cache_age || cache_age > DEFAULT_TTL
+        !cache_age || cache_age > ttl
       end
 
       private
@@ -122,6 +125,16 @@ module Jekyll
         return unless Jekyll::RemoteTheme.cache.key? "timestamp"
 
         Time.now.to_i - Jekyll::RemoteTheme.cache["timestamp"]
+      end
+
+      def ttl
+        return 0 if config.is_a?(Hash) && config["cache"] == false
+
+        if config.is_a?(Hash) && config["ttl"].is_a?(Integer)
+          config["ttl"]
+        else
+          DEFAULT_TTL
+        end
       end
     end
   end

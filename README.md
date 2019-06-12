@@ -37,6 +37,25 @@ Remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a pu
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
+## Caching
+
+If you are using Jekyll Version 4.0 or later, by default, the remote theme is cached to speed up builds.
+
+To disable the cache entirely, change your config to the following:
+
+```yaml
+remote_theme:
+  theme: benbalter/retlab
+  cache: false
+```
+
+The cache will expire after 1 hour. You can set the cache's TTL (in seconds), by change your config to the following:
+
+```yaml
+remote_theme:
+  theme: benbalter/retlab
+  ttl: 60 # 1 minute
+```
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.

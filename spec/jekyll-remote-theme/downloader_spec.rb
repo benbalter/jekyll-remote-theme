@@ -3,11 +3,24 @@
 RSpec.describe Jekyll::RemoteTheme::Downloader do
   let(:nwo) { "pages-themes/primer" }
   let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo) }
+
+  let(:source) { source_dir }
+  let(:overrides) { {} }
+  let(:config) do
+    {
+      "source" => source,
+      "safe" => true,
+      "remote_theme" => nwo
+    }.merge(overrides)
+  end
+  let(:site) { make_site(config) }
+
   subject { described_class.new(theme) }
 
   before { reset_tmp_dir }
   before { reset_cache }
   before { Timecop.freeze(Time.now) }
+  before { Jekyll::RemoteTheme.site = site }
   after { Timecop.return }
 
   it "knows it's not downloaded" do
@@ -81,6 +94,14 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       it "raises a DownloadError" do
         msg = "Maximum file size of 1073741824 bytes exceeded"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+    end
+  end
+
+  context "ttl" do
+    context "with the config as a string" do
+      it "uses the default TTL" do
+        expect(subject.send(:ttl)).to eql(Jekyll::RemoteTheme::DEFAULT_TTL)
       end
     end
   end

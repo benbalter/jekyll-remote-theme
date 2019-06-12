@@ -25,12 +25,19 @@ module Jekyll
     DEFAULT_TTL = 60 * 60
 
     class << self
+      attr_accessor :site
+
       def init(site)
+        @site = site
         Munger.new(site).munge!
       end
 
       def cache
         @cache ||= Jekyll::Cache.new(self.class.name) if defined?(Jekyll::Cache)
+      end
+
+      def config
+        site.config[CONFIG_KEY] if site
       end
     end
   end
