@@ -57,3 +57,10 @@ def make_site(options = {})
   config = Jekyll.configuration config_defaults.merge(options)
   Jekyll::Site.new(config)
 end
+
+def with_env(key, value)
+  old_env = ENV[key]
+  ENV[key] = value
+  yield
+  ENV[key] = old_env
+end
