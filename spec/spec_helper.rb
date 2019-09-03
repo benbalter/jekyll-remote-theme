@@ -64,4 +64,11 @@ def make_site(options = {})
   Jekyll::Site.new(config)
 end
 
+def with_env(key, value)
+  old_env = ENV[key]
+  ENV[key] = value
+  yield
+  ENV[key] = old_env
+end
+
 Jekyll::Cache.base_dir = tmp_dir if defined? Jekyll::Cache

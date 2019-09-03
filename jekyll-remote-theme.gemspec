@@ -15,7 +15,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.license       = "MIT"
 
-  s.add_dependency "jekyll", ">= 3.7", "< 5.0"
+  s.add_dependency "addressable", "~> 2.0"
+  s.add_dependency "jekyll", ">= 3.5", "< 5.0"
   s.add_dependency "rubyzip", ">= 1.2.1", "< 3.0"
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "jekyll_test_plugin_malicious", "~> 0.2"
