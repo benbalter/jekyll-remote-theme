@@ -8,3 +8,7 @@ rvm:
 
 install: script/bootstrap
 script: script/cibuild
+
+env:
+  - JEKYLL_VERSION="~> 3.0"
+  - JEKYLL_VERSION="~> 4.0"
