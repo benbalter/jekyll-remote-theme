@@ -26,6 +26,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rubocop", "~> 0.71"
   s.add_development_dependency "rubocop-jekyll", "~> 0.10"
+  s.add_development_dependency "timecop", "~> 0.9"
   s.add_development_dependency "webmock", "~> 3.0"
+
   s.required_ruby_version = ">= 2.3.0"
 end

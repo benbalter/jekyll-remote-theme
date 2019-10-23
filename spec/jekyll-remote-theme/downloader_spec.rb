@@ -8,14 +8,12 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   let(:overrides) { {} }
   let(:config) do
     {
-      "source" => source,
-      "safe" => true,
-      "remote_theme" => raw_theme
+      "source"       => source,
+      "safe"         => true,
+      "remote_theme" => raw_theme,
     }.merge(overrides)
   end
   let(:site) { make_site(config) }
-
-
 
   subject { described_class.new(theme) }
 

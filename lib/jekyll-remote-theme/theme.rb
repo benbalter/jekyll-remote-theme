@@ -96,7 +96,7 @@ module Jekyll
       def tmpdir
         @tmpdir ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
-      
+
       def valid_hosts
         @valid_hosts ||= [
           "github.com",
