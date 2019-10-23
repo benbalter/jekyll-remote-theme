@@ -71,4 +71,4 @@ def with_env(key, value)
   ENV[key] = old_env
 end
 
-Jekyll::Cache.base_dir = tmp_dir if defined? Jekyll::Cache
+Jekyll::Cache.instance_variable_set("@base_dir", tmp_dir) if defined? Jekyll::Cache
