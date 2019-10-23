@@ -42,7 +42,8 @@ For public GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and 
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
-<<<<<<< HEAD
+For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
+
 ## Caching
 
 If you are using Jekyll Version 4.0 or later, by default, the remote theme is cached to speed up builds.
@@ -62,10 +63,7 @@ remote_theme:
   theme: benbalter/retlab
   ttl: 60 # 1 minute
 ```
-=======
-For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
 
->>>>>>> master
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
