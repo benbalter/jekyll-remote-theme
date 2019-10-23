@@ -17,7 +17,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency "addressable", "~> 2.0"
   s.add_dependency "jekyll", ">= 3.5", "< 5.0"
-  s.add_dependency "rubyzip", ">= 1.3.0"
+  s.add_dependency "jekyll-sass-converter", ">= 1.0", "<= 3.0.0", "!= 2.0.0"
+  s.add_dependency "rubyzip", ">= 1.3.0", "< 3.0"
+
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "jekyll_test_plugin_malicious", "~> 0.2"
   s.add_development_dependency "pry", "~> 0.11"
@@ -25,6 +27,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rubocop", "~> 0.71"
   s.add_development_dependency "rubocop-jekyll", "~> 0.10"
   s.add_development_dependency "webmock", "~> 3.0"
-
   s.required_ruby_version = ">= 2.3.0"
 end
