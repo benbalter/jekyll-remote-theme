@@ -76,7 +76,14 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
     it "sets sass paths" do
       expect(sass_path).to be_an_existing_file
-      expect(Sass.load_paths).to include(sass_dir)
+
+      if Jekyll::VERSION >= "4.0"
+        converter = Jekyll::Converters::Scss.new(site.config)
+
+        expect(converter.sass_configs[:load_paths]).to include(sass_dir)
+      else
+        expect(Sass.load_paths).to include(sass_dir)
+      end
     end
 
     it "sets include paths" do

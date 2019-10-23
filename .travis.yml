@@ -1,9 +1,11 @@
 language: ruby
 cache: bundler
 sudo: false
+rvm: 2.5
+
 install: script/bootstrap
 script: script/cibuild
 
 env:
   - JEKYLL_VERSION="~> 3.0"
-  - JEKYLL_VERSION=">= 4.0.0.pre.alpha1"
+  - JEKYLL_VERSION="~> 4.0"
