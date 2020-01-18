@@ -42,9 +42,15 @@ module Jekyll
         Net::HTTP.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
           http.request(request) do |response|
             raise_unless_sucess(response)
-            enforce_max_file_size(response.content_length)
+            file_size = response['content-length'].to_i
+            enforce_max_file_size(file_size)
+            amount_downloaded = 0
             response.read_body do |chunk|
               zip_file.write chunk
+              if file_size > 0
+                amount_downloaded += chunk.size
+                Jekyll.logger.info("\r%d%% downloaded" % (amount_downloaded.to_f / file_size * 100))
+              end
             end
           end
         end
