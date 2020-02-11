@@ -10,6 +10,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   let(:sass_dir) { File.expand_path "_sass/", theme_dir }
   let(:sass_path) { File.expand_path "jekyll-theme-primer.scss", sass_dir }
   let(:includes_dir) { File.expand_path "_includes/", theme_dir }
+  let(:includes_dir) { File.expand_path "_data", theme_dir }
   let(:theme) { subject.send(:theme) }
 
   subject { described_class.new(site) }
@@ -94,6 +95,10 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       site.read
       expect(site.layouts["default"]).to be_truthy
       expect(site.layouts["default"].path).to eql(layout_path)
+    end
+
+    it "sets data path" do
+      expect(site.data_load_paths).to include(includes_dir)
     end
 
     it "requires plugins" do
