@@ -20,10 +20,10 @@ module Jekyll
         end
 
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
-        return theme if munged?
-
-        downloader.run
-        configure_theme
+        unless munged?
+          downloader.run
+          configure_theme
+        end
         enqueue_theme_cleanup
 
         theme
@@ -59,8 +59,6 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          return unless munged? && downloader.downloaded?
-
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root
         end
