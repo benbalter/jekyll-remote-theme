@@ -15,6 +15,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     raw_theme
   end
   subject { described_class.new(raw_theme) }
+  after { FileUtils.rm_rf subject.root if Dir.exist?(subject.root) }
 
   it "stores the theme" do
     expect(subject.instance_variable_get("@raw_theme")).to eql(nwo)

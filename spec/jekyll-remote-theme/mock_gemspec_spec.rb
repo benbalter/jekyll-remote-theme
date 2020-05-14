@@ -10,6 +10,7 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   subject { described_class.new(theme) }
 
   before { File.write path, contents }
+  after { FileUtils.rm_rf theme.root if Dir.exist?(theme.root) }
 
   it "stores the theme" do
     expect(subject.send(:theme)).to eql(theme)

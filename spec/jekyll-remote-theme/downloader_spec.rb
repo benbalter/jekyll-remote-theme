@@ -6,6 +6,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   subject { described_class.new(theme) }
 
   before { reset_tmp_dir }
+  after { FileUtils.rm_rf theme.root if Dir.exist?(theme.root) }
 
   it "knows it's not downloaded" do
     expect(subject.downloaded?).to be_falsy
@@ -17,7 +18,6 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
   context "downloading" do
     before { subject.run }
-    after { FileUtils.rm_rf theme.root if Dir.exist?(theme.root) }
 
     it "knows it's downloaded" do
       expect(subject.downloaded?).to be_truthy

@@ -16,6 +16,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
   before { Jekyll.logger.log_level = :error }
   before { reset_tmp_dir }
+  after { FileUtils.rm_rf theme.root if Dir.exist?(theme.root) }
 
   # Remove :after_reset hook to allow themes to be stubbed prior to munging
   before(:each) do
