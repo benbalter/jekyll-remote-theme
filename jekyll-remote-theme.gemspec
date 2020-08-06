@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "jekyll_test_plugin_malicious", "~> 0.2"
+  s.add_development_dependency "kramdown-parser-gfm", "~> 1.1.0"
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rubocop", "~> 0.71"
