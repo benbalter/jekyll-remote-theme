@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Downloader do
-  let(:raw_theme) { "pages-themes/primer" }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme) }
+  let(:raw_theme) { "https://github.com/pages-themes/primer" }
+  let(:auth) { nil }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme, auth) }
   subject { described_class.new(theme) }
 
   before { reset_tmp_dir }
@@ -42,15 +43,15 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
   context "zip_url" do
     it "builds the zip url" do
-      expected = "https://codeload.github.com/pages-themes/primer/zip/master"
+      expected = "https://github.com/pages-themes/primer/archive/master.zip"
       expect(subject.send(:zip_url).to_s).to eql(expected)
     end
 
     context "a custom host" do
-      let(:raw_theme) { "http://example.com/pages-themes/primer" }
+      let(:raw_theme) { "https://example.com/pages-themes/primer/archive/master.zip" }
 
       it "builds the zip url" do
-        expected = "http://codeload.example.com/pages-themes/primer/zip/master"
+        expected = "https://example.com/pages-themes/primer/archive/master.zip"
         expect(subject.send(:zip_url).to_s).to eql(expected)
       end
     end
@@ -60,7 +61,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     before { allow(subject).to receive(:zip_url) { Addressable::URI.parse zip_url } }
 
     context "with an invalid URL" do
-      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      let(:zip_url) { "https://github.com/benbalter/_invalid_/archive/master.zip" }
       before do
         WebMock.disable_net_connect!
         stub_request(:get, zip_url).to_return(:status => [404, "Not Found"])
@@ -69,13 +70,13 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "404 - Not Found"
+        msg = "404 \"Not Found\""
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
 
     context "with a large file" do
-      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      let(:zip_url) { "https://github.com/benbalter/_invalid_/archive/master.zip" }
       let(:content_length) { 10 * 1024 * 1024 * 1024 }
       let(:headers) { { "Content-Length" => content_length } }
       before do

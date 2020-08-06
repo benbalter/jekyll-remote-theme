@@ -5,8 +5,9 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   let(:contents) { File.read gemspec_dir("#{fixture}.gemspec") }
   let(:filename) { "#{theme.name}.gemspec" }
   let(:path) { File.expand_path filename, theme.root }
-  let(:nwo) { "pages-themes/primer" }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo) }
+  let(:nwo) { "https://github.com/pages-themes/primer" }
+  let(:auth) { nil }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo, auth) }
   subject { described_class.new(theme) }
 
   before { File.write path, contents }

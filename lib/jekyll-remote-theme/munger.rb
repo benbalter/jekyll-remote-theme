@@ -19,7 +19,7 @@ module Jekyll
           return
         end
 
-        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
+        Jekyll.logger.info LOG_KEY, "Using theme #{theme.nwo}"
         unless munged?
           downloader.run
           configure_theme

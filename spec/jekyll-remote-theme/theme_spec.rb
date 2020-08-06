@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Theme do
-  let(:scheme) { nil }
-  let(:host) { nil }
+  let(:expected) { "https://github.com/foo/bar@master" }
+  let(:scheme) { "https" }
+  let(:host) { "github.com" }
   let(:owner) { "foo" }
   let(:name) { "bar" }
   let(:nwo) { "#{owner}/#{name}" }
-  let(:git_ref) { nil }
+  let(:git_ref) { "master" }
+  let(:auth) { nil }
   let(:raw_theme) do
     raw_theme = +""
     raw_theme << "#{scheme}://#{host}/" if scheme && host
@@ -14,17 +16,41 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     raw_theme << "@#{git_ref}" if git_ref
     raw_theme
   end
-  subject { described_class.new(raw_theme) }
+  subject { described_class.new(raw_theme, auth) }
 
   it "stores the theme" do
-    expect(subject.instance_variable_get("@raw_theme")).to eql(nwo)
+    expect(subject.instance_variable_get("@raw_theme")).to eql(expected)
+  end
+
+  context "with an abnormal owner" do
+    let(:owner) { " FoO " }
+
+    it "normalizes the owner" do
+      expect(subject.owner).to eql("foo")
+    end
+  end
+
+  context "with an abnormal name" do
+    let(:name) { " BaR " }
+
+    it "normalizes the name" do
+      expect(subject.name).to eql("bar")
+    end
   end
 
   context "with an abnormal NWO" do
     let(:nwo) { " FoO/bAr " }
 
     it "normalizes the nwo" do
-      expect(subject.instance_variable_get("@raw_theme")).to eql("foo/bar")
+      expect(subject.nwo).to eql("foo/bar")
+    end
+  end
+
+  context "with an abnormal git_ref" do
+    let(:git_ref) { " jAr " }
+
+    it "normalizes the git_ref" do
+      expect(subject.git_ref).to eql("jar")
     end
   end
 
@@ -36,12 +62,20 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     expect(subject.owner).to eql(owner)
   end
 
+  it "extracts the git_ref" do
+    expect(subject.git_ref).to eql(git_ref)
+  end
+
   it "uses the default host" do
     expect(subject.host).to eql("github.com")
   end
 
   it "uses the default scheme" do
     expect(subject.scheme).to eql("https")
+  end
+
+  it "uses the default git_ref" do
+    expect(subject.git_ref).to eql("master")
   end
 
   it "builds the name with owner" do
@@ -77,10 +111,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  it "defaults git_ref to master" do
-    expect(subject.git_ref).to eql("master")
-  end
-
   context "with a git_ref" do
     let(:git_ref) { "foo" }
 
@@ -98,9 +128,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   end
 
   context "a full URL" do
-    let(:host) { "github.com" }
-    let(:scheme) { "https" }
-
     it "extracts the name" do
       expect(subject.name).to eql(name)
     end
@@ -115,12 +142,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
     it "extracts the scheme" do
       expect(subject.scheme).to eql("https")
-    end
-
-    it "is valid" do
-      with_env "GITHUB_HOSTNAME", "enterprise.github.com" do
-        expect(subject).to be_valid
-      end
     end
 
     context "a custom host" do
@@ -141,18 +162,6 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
       it "extracts the scheme" do
         expect(subject.scheme).to eql(scheme)
-      end
-
-      it "is valid if a whitelisted host name" do
-        with_env "GITHUB_HOSTNAME", "example.com" do
-          expect(subject).to be_valid
-        end
-      end
-
-      it "is invalid if not a whitelisted host name" do
-        with_env "GITHUB_HOSTNAME", "enterprise.github.com" do
-          expect(subject).to_not be_valid
-        end
       end
 
       context "with a git ref" do

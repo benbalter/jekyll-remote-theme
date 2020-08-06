@@ -31,7 +31,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
   let(:index_contents) { File.read(index_path) }
   let(:stylesheet_path) { File.join dest_dir, "assets", "css", "style.css" }
 
-  context "the pages-themes/primer theme" do
+  context "the https://github.com/pages-themes/primer theme" do
     before(:all) { reset_tmp_dir }
     before(:all) { build_site(config_path) }
     after(:all) { reset_tmp_dir }
@@ -63,7 +63,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     end
   end
 
-  context "the jekyll/jekyll-test-theme-malicious theme" do
+  context "the https://github.com/jekyll/jekyll-test-theme-malicious theme" do
     let(:theme) { "jekyll/jekyll-test-theme-malicious" }
     before(:all) { reset_tmp_dir }
     before(:all) { build_site(malicious_config_path) }

@@ -3,10 +3,8 @@
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
-      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
-      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
-      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
+      SAFE_REGEX = %r!^[a-z0-9\._\-]+$!i.freeze
+      REF_REGEX = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
@@ -26,20 +24,32 @@ module Jekyll
 
       attr_reader :auth
 
+      def path
+        tmp = uri&.path
+        tmp[1..-1]
+      end
+
       def name
-        theme_parts[:name]
+        tmp = path
+        tmp &&= tmp.split("/")[1]
+        tmp &&= tmp.split("@")[0]
+        tmp &&= tmp.strip
+        tmp
       end
 
       def owner
-        theme_parts[:owner]
+        tmp = path
+        tmp &&= tmp.split("/")[0]
+        tmp &&= tmp.strip
+        tmp
       end
 
       def host
-        uri&.host
+        uri&.host || "github.com"
       end
 
       def scheme
-        uri&.scheme
+        uri&.scheme || "https"
       end
 
       def name_with_owner
@@ -48,13 +58,16 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
-        return false unless uri && theme_parts && name && owner
-
-        host && valid_hosts.include?(host)
+        !!(SAFE_REGEX.match(host) &&
+          SAFE_REGEX.match(scheme) &&
+          SAFE_REGEX.match(name) &&
+          SAFE_REGEX.match(git_ref) &&
+          SAFE_REGEX.match(owner))
       end
 
       def git_ref
-        theme_parts[:ref] || "master"
+        tmp = path.split("@")[1] || "master"
+        tmp.strip
       end
 
       def root
@@ -62,8 +75,9 @@ module Jekyll
       end
 
       def inspect
-        "#<Jekyll::RemoteTheme::Theme host=\"#{host}\" owner=\"#{owner}\" name=\"#{name}\"" \
-        " ref=\"#{git_ref}\" root=\"#{root}\">"
+        "#<Jekyll::RemoteTheme::Theme scheme=\"#{scheme}\" host=\"#{host}\"" \
+        " owner=\"#{owner}\" name=\"#{name}\" ref=\"#{git_ref}\" root=\"#{root}\"" \
+        "url=\"#{uri}\">"
       end
 
       private
@@ -71,34 +85,13 @@ module Jekyll
       def uri
         return @uri if defined? @uri
 
-        @uri = if @raw_theme =~ THEME_REGEX
-                 Addressable::URI.new(
-                   :scheme => scheme,
-                   :host   => host,
-                   :path   => name_with_owner
-                 )
-               else
-                 Addressable::URI.parse @raw_theme
-               end
+        @uri = Addressable::URI.parse(@raw_theme)
       rescue Addressable::URI::InvalidURIError
         @uri = nil
       end
 
-      def theme_parts
-        @theme_parts ||= uri.path[1..-1].match(THEME_REGEX) if uri
-      end
-
       def gemspec
         @gemspec ||= MockGemspec.new(self)
-      end
-
-      def valid_hosts
-        @valid_hosts ||= [
-          host,
-          "github.com",
-          ENV["PAGES_GITHUB_HOSTNAME"],
-          ENV["GITHUB_HOSTNAME"],
-        ].compact.to_set
       end
     end
   end

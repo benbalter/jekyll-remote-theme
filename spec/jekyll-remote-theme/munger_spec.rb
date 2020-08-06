@@ -54,7 +54,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with a remote theme" do
-    let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+    let(:overrides) { { "remote_theme" => "https://github.com/pages-themes/primer" } }
     before do
       @old_logger = Jekyll.logger
       @stubbed_logger = StringIO.new
@@ -103,7 +103,10 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
   end
 
   context "with a malicious theme" do
-    let(:overrides) { { "remote_theme" => "jekyll/jekyll-test-theme-malicious" } }
+    let(:overrides) do
+      { "remote_theme" => "https://github.com/jekyll/jekyll-test-theme-malicious" }
+    end
+
     before do
       @old_logger = Jekyll.logger
       @stubbed_logger = StringIO.new

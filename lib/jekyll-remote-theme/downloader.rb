@@ -37,56 +37,65 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-      def fetch(uri_str, limit = 10)
-        Jekyll.logger.debug LOG_KEY, "Finding redirect of #{uri_str}"
+      def fetch(uri_str, redirection_limit = 10)
+        raise DownloadError, "Too many redirect" if redirection_limit.zero?
 
-        raise DownloadError, "Too many redirect" if limit == 0
-      
         url = URI.parse(uri_str)
+        Jekyll.logger.debug LOG_KEY, "Redirecting to #{url}"
+
+        request = make_auth_request(url)
+        download_zipfile(url, request, redirection_limit)
+      end
+
+      def make_auth_request(url)
         req = Net::HTTP::Get.new url.path
         req["User-Agent"] = USER_AGENT
         req["Accept"] = "application/vnd.github.v3+json"
         req["Authorization"] = "token #{theme.auth}" unless theme.auth.nil?
-        Jekyll.logger.debug LOG_KEY, "Using #{req["Authorization"]}" unless theme.auth.nil?
+        req
+      end
 
-        Net::HTTP.start(url.host, url.port, use_ssl: true) do |http|
-          http.request(req) do |response|
-            case response
-            when Net::HTTPSuccess     then 
-              raise_unless_success(response)
-              enforce_max_file_size(response.content_length)
-              response.read_body do |chunk|
-                zip_file.write chunk
-              end
-            when Net::HTTPRedirection then 
-              fetch(response['location'], limit - 1)
-            else
-              response.error!
-            end
+      def download_zipfile(url, request, redirection_limit)
+        Net::HTTP.start(url.host, url.port, :use_ssl => true) do |http|
+          http.request(request) do |response|
+            write_chunks_to_zip(response, redirection_limit)
           end
         end
       end
-      
-      def download
 
+      def write_chunks_to_zip(response, redirection_limit)
+        case response
+        when Net::HTTPSuccess
+          raise_unless_success(response, Net::HTTPSuccess)
+          enforce_max_file_size(response.content_length, MAX_FILE_SIZE)
+          response.read_body do |chunk|
+            zip_file.write chunk
+          end
+        when Net::HTTPRedirection
+          fetch(response["location"], redirection_limit - 1)
+        else
+          response.error!
+        end
+      end
+
+      def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         fetch(zip_url)
         @downloaded = true
-        
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
       end
 
-      def raise_unless_success(response)
-        return if response.is_a?(Net::HTTPSuccess)
+      def raise_unless_success(response, status)
+        return if response.is_a?(status)
 
         raise DownloadError, "#{response.code} - #{response.message}"
       end
 
-      def enforce_max_file_size(size)
-        return unless size && size > MAX_FILE_SIZE
+      def enforce_max_file_size(size, maxsize)
+        return unless size && size > maxsize
 
-        raise DownloadError, "Maximum file size of #{MAX_FILE_SIZE} bytes exceeded"
+        raise DownloadError, "Maximum file size of #{maxsize} bytes exceeded"
       end
 
       def unzip
