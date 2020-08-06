@@ -20,6 +20,7 @@ module Jekyll
     autoload :VERSION,     "jekyll-remote-theme/version"
 
     CONFIG_KEY  = "remote_theme"
+    API_KEY     = "remote_auth_token"
     LOG_KEY     = "Remote Theme:"
     TEMP_PREFIX = "jekyll-remote-theme-"
 

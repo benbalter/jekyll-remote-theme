@@ -36,11 +36,15 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||= Theme.new(raw_theme, auth)
       end
 
       def raw_theme
         config[CONFIG_KEY]
+      end
+
+      def auth
+        config[API_KEY]
       end
 
       def downloader

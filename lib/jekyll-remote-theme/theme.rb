@@ -18,10 +18,13 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
-      def initialize(raw_theme)
+      def initialize(raw_theme, auth)
         @raw_theme = raw_theme.to_s.downcase.strip
+        @auth = auth
         super(@raw_theme)
       end
+
+      attr_reader :auth
 
       def name
         theme_parts[:name]
@@ -70,9 +73,9 @@ module Jekyll
 
         @uri = if @raw_theme =~ THEME_REGEX
                  Addressable::URI.new(
-                   :scheme => "https",
-                   :host   => "github.com",
-                   :path   => @raw_theme
+                   :scheme => scheme,
+                   :host   => host,
+                   :path   => name_with_owner
                  )
                else
                  Addressable::URI.parse @raw_theme
@@ -91,6 +94,7 @@ module Jekyll
 
       def valid_hosts
         @valid_hosts ||= [
+          host,
           "github.com",
           ENV["PAGES_GITHUB_HOSTNAME"],
           ENV["GITHUB_HOSTNAME"],
