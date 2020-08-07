@@ -58,8 +58,8 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
 
     context "a custom path" do
-      let(:expected) { "https://example.com/a/custom/long/path/pages-themes/primer/archive/master.zip" }
-      let(:raw_theme) { "https://example.com/a/custom/long/path/pages-themes/primer" }
+      let(:expected) { "https://example.com/a/custom/path/pages-themes/primer/archive/master.zip" }
+      let(:raw_theme) { "https://example.com/a/custom/path/pages-themes/primer" }
 
       it "builds the custom zip url" do
         expect(subject.send(:zip_url).to_s).to eql(expected)
