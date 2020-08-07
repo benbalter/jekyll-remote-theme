@@ -10,12 +10,11 @@ module Jekyll
       #
       # raw_theme can be in the form of:
       #
-      # 1. owner/theme-name - a GitHub owner + theme-name string
-      # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
-      # 3. http[s]://github.<yourEnterprise>.com/owner/theme-name
-      # - An enterprise GitHub instance + a GitHub owner + a theme-name string
-      # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
-      # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
+      # 1. http[s]://github.com/owner/theme-name[@git_ref]
+      #    a GitHub owner + theme-name string + Optional Git Ref
+      # 2. http[s]://github.<yourEnterprise>.com/owner/theme-name[@git_ref]
+      #    An enterprise GitHub instance + a GitHub owner + a theme-name + Optional Git ref string
+      #
       def initialize(raw_theme, auth)
         @raw_theme = raw_theme.to_s.downcase.strip
         @auth = auth
@@ -31,7 +30,7 @@ module Jekyll
 
       def name
         tmp = path
-        tmp &&= tmp.split("/")[1]
+        tmp &&= tmp.split("/")[-1]
         tmp &&= tmp.split("@")[0]
         tmp &&= tmp.strip
         tmp
@@ -39,7 +38,7 @@ module Jekyll
 
       def owner
         tmp = path
-        tmp &&= tmp.split("/")[0]
+        tmp &&= tmp.split("/")[-2]
         tmp &&= tmp.strip
         tmp
       end

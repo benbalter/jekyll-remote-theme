@@ -117,7 +117,7 @@ module Jekyll
         @zip_url ||= Addressable::URI.new(
           :scheme => theme.scheme,
           :host   => theme.host,
-          :path   => [theme.owner, theme.name, "archive", theme.git_ref + ".zip"].join("/")
+          :path   => [theme.path, "archive", theme.git_ref + ".zip"].join("/")
         ).normalize
       end
 
