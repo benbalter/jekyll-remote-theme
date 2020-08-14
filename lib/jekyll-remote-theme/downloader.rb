@@ -11,8 +11,9 @@ module Jekyll
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
 
-      def initialize(theme)
+      def initialize(theme, remote_headers)
         @theme = theme
+        @remote_headers = remote_headers
       end
 
       def run
@@ -29,6 +30,16 @@ module Jekyll
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
       end
 
+      def remote_headers
+        default_headers = {
+          "User-Agent" => USER_AGENT,
+          "Accept"     => "application/vnd.github.v3+json",
+        }
+
+        @remote_headers ||= default_headers
+        @remote_headers.merge(default_headers)
+      end
+
       private
 
       attr_reader :theme
@@ -37,31 +48,55 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-      def download
-        Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        Net::HTTP.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
-          http.request(request) do |response|
-            raise_unless_sucess(response)
-            enforce_max_file_size(response.content_length)
-            response.read_body do |chunk|
-              zip_file.write chunk
+      def create_request(url)
+        req = Net::HTTP::Get.new url.path
+
+        remote_headers&.each do |key, value|
+          req[key] = value unless value.nil?
+        end
+
+        req
+      end
+
+      def handle_response(response)
+        raise_unless_success(response)
+        enforce_max_file_size(response.content_length)
+        response.read_body do |chunk|
+          zip_file.write chunk
+        end
+      end
+
+      def fetch(uri_str, limit = 10)
+        Jekyll.logger.debug LOG_KEY, "Finding redirect of #{uri_str}"
+
+        raise DownloadError, "Too many redirect" if limit.zero?
+
+        url = URI.parse(uri_str)
+        req = create_request(url)
+
+        Net::HTTP.start(url.host, url.port, :use_ssl => true) do |http|
+          http.request(req) do |response|
+            case response
+            when Net::HTTPSuccess
+              handle_response(response)
+            when Net::HTTPRedirection
+              fetch(response["location"], limit - 1)
+            else
+              raise DownloadError, "#{response.code} - #{response.message}"
             end
           end
         end
+      end
+
+      def download
+        Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
+        fetch(zip_url)
         @downloaded = true
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
       end
 
-      def request
-        return @request if defined? @request
-
-        @request = Net::HTTP::Get.new zip_url.request_uri
-        @request["User-Agent"] = USER_AGENT
-        @request
-      end
-
-      def raise_unless_sucess(response)
+      def raise_unless_success(response)
         return if response.is_a?(Net::HTTPSuccess)
 
         raise DownloadError, "#{response.code} - #{response.message}"
@@ -91,8 +126,8 @@ module Jekyll
       def zip_url
         @zip_url ||= Addressable::URI.new(
           :scheme => theme.scheme,
-          :host   => "codeload.#{theme.host}",
-          :path   => [theme.owner, theme.name, "zip", theme.git_ref].join("/")
+          :host   => theme.host,
+          :path   => [theme.owner, theme.name, "archive", theme.git_ref + ".zip"].join("/")
         ).normalize
       end
 

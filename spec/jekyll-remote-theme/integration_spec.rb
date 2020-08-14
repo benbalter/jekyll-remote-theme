@@ -3,11 +3,19 @@
 RSpec.describe "Jekyll::RemoteTheme Integration" do
   attr_reader :output, :status
 
-  def config_path
-    File.join source_dir, "_config.yml"
+  def config_remote_as_path
+    File.join source_dir, "_config_remote_as_path.yml"
   end
 
-  def malicious_config_path
+  def config_remote_as_path_with_repository
+    File.join source_dir, "_config_remote_as_path_with_repository.yml"
+  end
+
+  def config_remote_as_uri
+    File.join source_dir, "_config_remote_as_uri.yml"
+  end
+
+  def config_malicious
     File.join source_dir, "_malicious_config.yml"
   end
 
@@ -26,14 +34,13 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     end
   end
 
-  let(:theme) { "pages-themes/primer" }
+  let(:theme) { "https://github.com/pages-themes/primer" }
+  let(:theme_signature_index_html) { '<div class="container-lg px-3 my-5 markdown-body">' }
   let(:index_path) { File.join dest_dir, "index.html" }
   let(:index_contents) { File.read(index_path) }
   let(:stylesheet_path) { File.join dest_dir, "assets", "css", "style.css" }
 
-  context "the pages-themes/primer theme" do
-    before(:all) { reset_tmp_dir }
-    before(:all) { build_site(config_path) }
+  shared_examples_for "a config" do
     after(:all) { reset_tmp_dir }
 
     it "returns a zero exit code" do
@@ -49,12 +56,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     end
 
     it "uses the theme" do
-      expected = '<div class="container-lg px-3 my-5 markdown-body">'
-      expect(index_contents).to match(expected)
-    end
-
-    it "builds stylesheets" do
-      expect(stylesheet_path).to be_an_existing_file
+      expect(index_contents).to match(theme_signature_index_html)
     end
 
     it "requires dependencies" do
@@ -63,31 +65,46 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     end
   end
 
-  context "the jekyll/jekyll-test-theme-malicious theme" do
-    let(:theme) { "jekyll/jekyll-test-theme-malicious" }
+  context "with a remote theme set as a path" do
     before(:all) { reset_tmp_dir }
-    before(:all) { build_site(malicious_config_path) }
-    after(:all) { reset_tmp_dir }
+    before(:all) { build_site(config_remote_as_path) }
 
-    it "returns a zero exit code" do
-      expect(status.exitstatus).to eql(0), output
-    end
+    it_should_behave_like "a config"
 
-    it "outputs that it's using a remote theme" do
-      expect(output).to match("Remote Theme: Using theme #{theme}")
+    it "builds stylesheets" do
+      expect(stylesheet_path).to be_an_existing_file
     end
+  end
 
-    it "build the index" do
-      expect(index_path).to be_an_existing_file
-    end
+  context "with a remote theme set as a path with remote host" do
+    before(:all) { reset_tmp_dir }
+    before(:all) { build_site(config_remote_as_path_with_repository) }
 
-    it "uses the theme" do
-      expect(index_contents).to include("Begin Jekyll SEO tag")
-    end
+    it_should_behave_like "a config"
 
-    it "requires whitelisted dependencies" do
-      expect(output).to include("Requiring: jekyll-seo-tag")
+    it "builds stylesheets" do
+      expect(stylesheet_path).to be_an_existing_file
     end
+  end
+
+  context "with a remote theme set as a uri" do
+    before(:all) { reset_tmp_dir }
+    before(:all) { build_site(config_remote_as_uri) }
+
+    it_should_behave_like "a config"
+
+    it "builds stylesheets" do
+      expect(stylesheet_path).to be_an_existing_file
+    end
+  end
+
+  context "the jekyll/jekyll-test-theme-malicious theme" do
+    let(:theme) { "https://github.com/jekyll/jekyll-test-theme-malicious" }
+    let(:theme_signature_index_html) { "Begin Jekyll SEO tag" }
+    before(:all) { reset_tmp_dir }
+    before(:all) { build_site(config_malicious) }
+
+    it_should_behave_like "a config"
 
     it "dosn't requires unsafe dependencies" do
       expect(output).to_not include("jekyll_test_plugin_malicious"), output

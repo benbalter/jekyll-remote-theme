@@ -1,0 +1,9 @@
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: pages-themes/PrImeR
+
+whitelist:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-github-metadata

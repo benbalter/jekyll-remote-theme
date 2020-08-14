@@ -24,37 +24,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     Jekyll::Hooks.instance_variable_set("@registry", hooks)
   end
 
-  it "stores the site" do
-    expect(subject.site).to be_a(Jekyll::Site)
-  end
-
-  context "without a theme" do
-    let(:source) { fixture_path("site-without-theme") }
-
-    it "doesn't set a theme" do
-      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
-    end
-
-    it "doesn't clone" do
-      expect(layout_path).to_not be_an_existing_file
-    end
-  end
-
-  context "with theme as a hash" do
-    let(:overrides) { { "remote_theme" => { "foo" => "bar" } } }
-    before { subject.munge! }
-
-    it "doesn't set a theme" do
-      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
-    end
-
-    it "doesn't clone" do
-      expect(layout_path).to_not be_an_existing_file
-    end
-  end
-
-  context "with a remote theme" do
-    let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+  shared_examples_for "a munger" do
     before do
       @old_logger = Jekyll.logger
       @stubbed_logger = StringIO.new
@@ -102,8 +72,73 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
   end
 
+  it "stores the site" do
+    expect(subject.site).to be_a(Jekyll::Site)
+  end
+
+  context "without a theme" do
+    let(:source) { fixture_path("site-without-theme") }
+
+    it "doesn't set a theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with theme as a hash" do
+    let(:overrides) { { :remote_theme => { "foo" => "bar" } } }
+    before { subject.munge! }
+
+    it "doesn't set a theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with theme as a array" do
+    let(:overrides) { { :remote_theme => [1, 2] } }
+    before { subject.munge! }
+
+    it "doesn't set a theme" do
+      expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    it "doesn't clone" do
+      expect(layout_path).to_not be_an_existing_file
+    end
+  end
+
+  context "with a remote theme set as a path" do
+    let(:overrides) { { :remote_theme => "pages-themes/primer" } }
+
+    it_should_behave_like "a munger"
+  end
+
+  context "with a remote theme set as a uri" do
+    let(:overrides) { { :remote_theme => "https://github.com/pages-themes/primer" } }
+
+    it_should_behave_like "a munger"
+  end
+
+  context "with a remote theme set as a path" do
+    let(:overrides) do
+      {
+        :remote_theme => "pages-themes/primer",
+        :repository   => "https://github.com",
+      }
+    end
+
+    it_should_behave_like "a munger"
+  end
+
   context "with a malicious theme" do
-    let(:overrides) { { "remote_theme" => "jekyll/jekyll-test-theme-malicious" } }
+    let(:overrides) { { :remote_theme => "jekyll/jekyll-test-theme-malicious" } }
     before do
       @old_logger = Jekyll.logger
       @stubbed_logger = StringIO.new

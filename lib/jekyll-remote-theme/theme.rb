@@ -3,24 +3,35 @@
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
-      OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
-      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
-      THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
+      DEFAULT_SCHEME = "https"
+      DEFAULT_HOST = "github.com"
+      ALPHANUMERIC_WITH_DASH_REGEX = %r![\w\-]+!i.freeze
+      ALPHANUMERIC_WITH_DASH_DOT_REGEX = %r![\w\-\.]+!i.freeze
+      OWNER_REGEX = %r!(?<owner>#{ALPHANUMERIC_WITH_DASH_REGEX})!i.freeze
+      NAME_REGEX  = %r!(?<name>#{ALPHANUMERIC_WITH_DASH_DOT_REGEX})!i.freeze
+      REF_REGEX   = %r!@(?<ref>#{ALPHANUMERIC_WITH_DASH_DOT_REGEX})!i.freeze
+      THEME_REGEX = %r!\A/?#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
-      # raw_theme can be in the form of:
+      # here are the valid combinations for repository/remote_theme
       #
-      # 1. owner/theme-name - a GitHub owner + theme-name string
-      # 2. owner/theme-name@git_ref - a GitHub owner + theme-name + Git ref string
-      # 3. http[s]://github.<yourEnterprise>.com/owner/theme-name
-      # - An enterprise GitHub instance + a GitHub owner + a theme-name string
-      # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
-      # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
-      def initialize(raw_theme)
-        @raw_theme = raw_theme.to_s.downcase.strip
-        super(@raw_theme)
+      #   [scheme://host/]owner/theme-name[@git_ref]
+      #
+      #   optional scheme://host
+      #     scheme (default: https): Could be any scheme but generally should be http, https or git
+      #     host (default: github.com): Could be any host
+      #
+      #   owner: Git repo owner
+      #   theme-name: Git repo name
+      #   optional @git_ref (default: master): Git Reference hash, tag or branch
+      #
+      # Header to pass to remote call
+      #
+      def initialize(repository, remote_theme)
+        @repository = repository
+        @remote_theme = remote_theme.to_s.downcase
+        super(@remote_theme)
       end
 
       def name
@@ -63,26 +74,45 @@ module Jekyll
         " ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
+      def to_s
+        uri.to_s
+      end
+
       private
+
+      def default_host
+        ENV["GITHUB_HOSTNAME"] || ENV["PAGES_GITHUB_HOSTNAME"] || DEFAULT_HOST
+      end
 
       def uri
         return @uri if defined? @uri
 
-        @uri = if @raw_theme =~ THEME_REGEX
-                 Addressable::URI.new(
-                   :scheme => "https",
-                   :host   => "github.com",
-                   :path   => @raw_theme
-                 )
-               else
-                 Addressable::URI.parse @raw_theme
-               end
+        remote_theme_parsed = Addressable::URI.parse(@remote_theme)
+        @uri =  if @repository
+                  # Use the remote host as the uri and the remote theme as the path
+                  repository_parsed = Addressable::URI.parse(@repository)
+                  Addressable::URI.new(
+                    :scheme => repository_parsed.scheme,
+                    :host   => repository_parsed.host,
+                    :path   => remote_theme_parsed.path
+                  )
+                elsif remote_theme_parsed.scheme && remote_theme_parsed.host
+                  # Use the remote theme as the uri
+                  remote_theme_parsed
+                else
+                  # Otherwise, make some assumptions, using remote theme as the path
+                  Addressable::URI.new(
+                    :scheme => DEFAULT_SCHEME,
+                    :host   => default_host,
+                    :path   => remote_theme_parsed.path
+                  )
+                end
       rescue Addressable::URI::InvalidURIError
         @uri = nil
       end
 
       def theme_parts
-        @theme_parts ||= uri.path[1..-1].match(THEME_REGEX) if uri
+        @theme_parts ||= uri.path.match(THEME_REGEX) if uri
       end
 
       def gemspec
@@ -91,9 +121,8 @@ module Jekyll
 
       def valid_hosts
         @valid_hosts ||= [
-          "github.com",
-          ENV["PAGES_GITHUB_HOSTNAME"],
-          ENV["GITHUB_HOSTNAME"],
+          host,
+          default_host,
         ].compact.to_set
       end
     end

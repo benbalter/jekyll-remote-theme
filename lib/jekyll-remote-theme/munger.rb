@@ -12,14 +12,14 @@ module Jekyll
       end
 
       def munge!
-        return unless raw_theme
+        return unless remote_theme
 
         unless theme.valid?
-          Jekyll.logger.error LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
+          Jekyll.logger.error LOG_KEY, "#{theme} is not a valid remote theme"
           return
         end
 
-        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
+        Jekyll.logger.info LOG_KEY, "Using theme #{theme}"
         unless munged?
           downloader.run
           configure_theme
@@ -36,21 +36,35 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||= Theme.new(repository, remote_theme)
       end
 
-      def raw_theme
-        config[CONFIG_KEY]
+      def remote_theme
+        config[CONFIG_THEME_KEY]
+      end
+
+      def remote_header
+        config[CONFIG_HEADERS_KEY]
+      end
+
+      def repository
+        config[CONFIG_REPOSITORY_KEY]
       end
 
       def downloader
-        @downloader ||= Downloader.new(theme)
+        @downloader ||= Downloader.new(theme, remote_header)
+      end
+
+      def setup_site_config
+        site.config["theme"] = theme.name
+        site.config["repository"] = "#{theme.scheme}://#{theme.host}"
       end
 
       def configure_theme
         return unless theme
 
-        site.config["theme"] = theme.name
+        setup_site_config
+
         site.theme = theme
         site.theme.configure_sass if site.theme.respond_to?(:configure_sass)
         site.send(:configure_include_paths)
