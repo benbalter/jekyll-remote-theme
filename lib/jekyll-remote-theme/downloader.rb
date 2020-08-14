@@ -11,8 +11,9 @@ module Jekyll
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
       ].freeze
 
-      def initialize(theme)
+      def initialize(theme, remote_headers)
         @theme = theme
+        @remote_headers = remote_headers
       end
 
       def run
@@ -29,6 +30,16 @@ module Jekyll
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
       end
 
+      def remote_headers
+        default_headers = {
+          "User-Agent" => USER_AGENT,
+          "Accept"     => "application/vnd.github.v3+json",
+        }
+
+        @remote_headers ||= default_headers
+        @remote_headers.merge(default_headers)
+      end
+
       private
 
       attr_reader :theme
@@ -37,44 +48,43 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-      def fetch(uri_str, redirection_limit = 10)
-        raise DownloadError, "Too many redirect" if redirection_limit.zero?
-
-        url = URI.parse(uri_str)
-        Jekyll.logger.debug LOG_KEY, "Redirecting to #{url}"
-
-        request = make_auth_request(url)
-        download_zipfile(url, request, redirection_limit)
-      end
-
-      def make_auth_request(url)
+      def create_request(url)
         req = Net::HTTP::Get.new url.path
-        req["User-Agent"] = USER_AGENT
-        req["Accept"] = "application/vnd.github.v3+json"
-        req["Authorization"] = "token #{theme.auth}" unless theme.auth.nil?
+
+        remote_headers&.each do |key, value|
+          req[key] = value unless value.nil?
+        end
+
         req
       end
 
-      def download_zipfile(url, request, redirection_limit)
-        Net::HTTP.start(url.host, url.port, :use_ssl => true) do |http|
-          http.request(request) do |response|
-            write_chunks_to_zip(response, redirection_limit)
-          end
+      def handle_response(response)
+        raise_unless_success(response)
+        enforce_max_file_size(response.content_length)
+        response.read_body do |chunk|
+          zip_file.write chunk
         end
       end
 
-      def write_chunks_to_zip(response, redirection_limit)
-        case response
-        when Net::HTTPSuccess
-          raise_unless_success(response, Net::HTTPSuccess)
-          enforce_max_file_size(response.content_length, MAX_FILE_SIZE)
-          response.read_body do |chunk|
-            zip_file.write chunk
+      def fetch(uri_str, limit = 10)
+        Jekyll.logger.debug LOG_KEY, "Finding redirect of #{uri_str}"
+
+        raise DownloadError, "Too many redirect" if limit.zero?
+
+        url = URI.parse(uri_str)
+        req = create_request(url)
+
+        Net::HTTP.start(url.host, url.port, :use_ssl => true) do |http|
+          http.request(req) do |response|
+            case response
+            when Net::HTTPSuccess
+              handle_response(response)
+            when Net::HTTPRedirection
+              fetch(response["location"], limit - 1)
+            else
+              raise DownloadError, "#{response.code} - #{response.message}"
+            end
           end
-        when Net::HTTPRedirection
-          fetch(response["location"], redirection_limit - 1)
-        else
-          response.error!
         end
       end
 
@@ -86,16 +96,16 @@ module Jekyll
         raise DownloadError, e.message
       end
 
-      def raise_unless_success(response, status)
-        return if response.is_a?(status)
+      def raise_unless_success(response)
+        return if response.is_a?(Net::HTTPSuccess)
 
         raise DownloadError, "#{response.code} - #{response.message}"
       end
 
-      def enforce_max_file_size(size, maxsize)
-        return unless size && size > maxsize
+      def enforce_max_file_size(size)
+        return unless size && size > MAX_FILE_SIZE
 
-        raise DownloadError, "Maximum file size of #{maxsize} bytes exceeded"
+        raise DownloadError, "Maximum file size of #{MAX_FILE_SIZE} bytes exceeded"
       end
 
       def unzip
@@ -117,7 +127,7 @@ module Jekyll
         @zip_url ||= Addressable::URI.new(
           :scheme => theme.scheme,
           :host   => theme.host,
-          :path   => [theme.path, "archive", theme.git_ref + ".zip"].join("/")
+          :path   => [theme.owner, theme.name, "archive", theme.git_ref + ".zip"].join("/")
         ).normalize
       end
 

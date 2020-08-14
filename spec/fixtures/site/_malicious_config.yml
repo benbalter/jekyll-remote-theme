@@ -1,7 +1,7 @@
 plugins:
   - jekyll-remote-theme
 
-remote_theme: https://github.com/jekyll/jekyll-test-theme-malicious
+remote_theme: jekyll/jekyll-test-theme-malicious
 
 whitelist:
   - jekyll-remote-theme

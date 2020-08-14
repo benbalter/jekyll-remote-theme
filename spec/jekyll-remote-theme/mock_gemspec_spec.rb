@@ -5,60 +5,83 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   let(:contents) { File.read gemspec_dir("#{fixture}.gemspec") }
   let(:filename) { "#{theme.name}.gemspec" }
   let(:path) { File.expand_path filename, theme.root }
-  let(:nwo) { "https://github.com/pages-themes/primer" }
-  let(:auth) { nil }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(nwo, auth) }
+  let(:remote_host) { nil }
+  let(:remote_theme) { nil }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(remote_host, remote_theme) }
   subject { described_class.new(theme) }
 
   before { File.write path, contents }
 
-  it "stores the theme" do
-    expect(subject.send(:theme)).to eql(theme)
-  end
+  shared_examples_for "a mock" do
+    it "stores the theme" do
+      expect(subject.send(:theme)).to eql(theme)
+    end
 
-  it "determines the path" do
-    expect(subject.send(:path)).to eql(path)
-  end
+    it "determines the path" do
+      expect(subject.send(:path)).to eql(path)
+    end
 
-  it "reads the contents" do
-    expect(subject.send(:contents)).to eql(contents)
-  end
+    it "reads the contents" do
+      expect(subject.send(:contents)).to eql(contents)
+    end
 
-  it "builds potential_paths" do
-    expect(subject.send(:potential_paths)).to include(path)
-  end
+    it "builds potential_paths" do
+      expect(subject.send(:potential_paths)).to include(path)
+    end
 
-  it "returns the theme root" do
-    expect(subject.full_gem_path).to eql(theme.root)
-  end
+    it "returns the theme root" do
+      expect(subject.full_gem_path).to eql(theme.root)
+    end
 
-  context "fixtures" do
-    let(:dependency_names) { subject.send(:dependency_names) }
-    let(:runtime_dependencies) { subject.runtime_dependencies }
+    context "fixtures" do
+      let(:dependency_names) { subject.send(:dependency_names) }
+      let(:runtime_dependencies) { subject.runtime_dependencies }
 
-    # Hash in the form of gemspec fixture => expected dependencies
-    {
-      "alldeps" => %w(jekyll jekyll-feed jekyll-sitemap bundler rake),
-      "braces"  => %w(jekyll jekyll-feed jekyll-sitemap bundler rake),
-      "rundev"  => %w(jekyll jekyll-feed jekyll-sitemap),
-      "nodeps"  => [],
-    }.each do |fixture, expected|
-      context "the #{fixture} gemspec" do
-        let(:fixture) { fixture }
+      # Hash in the form of gemspec fixture => expected dependencies
+      {
+        "alldeps" => %w(jekyll jekyll-feed jekyll-sitemap bundler rake),
+        "braces"  => %w(jekyll jekyll-feed jekyll-sitemap bundler rake),
+        "rundev"  => %w(jekyll jekyll-feed jekyll-sitemap),
+        "nodeps"  => [],
+      }.each do |fixture, expected|
+        context "the #{fixture} gemspec" do
+          let(:fixture) { fixture }
 
-        it "returns dependency names" do
-          expect(dependency_names).to eql(expected)
-        end
+          it "returns dependency names" do
+            expect(dependency_names).to eql(expected)
+          end
 
-        it "returns #{expected.count} runtime dependencies" do
-          expect(runtime_dependencies.count).to eql(expected.count)
+          it "returns #{expected.count} runtime dependencies" do
+            expect(runtime_dependencies.count).to eql(expected.count)
 
-          unless expected.empty?
-            expect(runtime_dependencies.first).to be_a(Gem::Dependency)
-            expect(runtime_dependencies.map(&:name)).to eql(expected)
+            unless expected.empty?
+              expect(runtime_dependencies.first).to be_a(Gem::Dependency)
+              expect(runtime_dependencies.map(&:name)).to eql(expected)
+            end
           end
         end
       end
     end
+  end
+
+  context "with a remote theme set as a path" do
+    let(:remote_host) { nil }
+    let(:remote_theme) { "pages-themes/primer" }
+
+    it_should_behave_like "a mock"
+  end
+
+  context "with a remote theme set as a uri" do
+    let(:remote_host) { nil }
+    let(:remote_theme) { "https://custom.com/pages-themes/primer" }
+
+    it_should_behave_like "a mock"
+  end
+
+  context "with a remote theme set as a path" do
+    let(:remote_host) { "https://custom.com" }
+    let(:remote_theme) { "pages-themes/primer" }
+
+    it_should_behave_like "a mock"
   end
 end

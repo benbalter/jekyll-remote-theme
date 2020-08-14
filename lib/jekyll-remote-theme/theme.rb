@@ -3,52 +3,51 @@
 module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
-      SAFE_REGEX = %r!^[a-z0-9\._\-]+$!i.freeze
-      REF_REGEX = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze
+      DEFAULT_SCHEME = "https"
+      DEFAULT_HOST = "github.com"
+      ALPHANUMERIC_WITH_DASH_REGEX = %r![\w\-]+!i.freeze
+      ALPHANUMERIC_WITH_DASH_DOT_REGEX = %r![\w\-\.]+!i.freeze
+      OWNER_REGEX = %r!(?<owner>#{ALPHANUMERIC_WITH_DASH_REGEX})!i.freeze
+      NAME_REGEX  = %r!(?<name>#{ALPHANUMERIC_WITH_DASH_DOT_REGEX})!i.freeze
+      REF_REGEX   = %r!@(?<ref>#{ALPHANUMERIC_WITH_DASH_DOT_REGEX})!i.freeze
+      THEME_REGEX = %r!\A/?#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
-      # raw_theme can be in the form of:
+      # here are the valid combinations for remote_host/remote_theme
       #
-      # 1. http[s]://github.com/owner/theme-name[@git_ref]
-      #    a GitHub owner + theme-name string + Optional Git Ref
-      # 2. http[s]://github.<yourEnterprise>.com/owner/theme-name[@git_ref]
-      #    An enterprise GitHub instance + a GitHub owner + a theme-name + Optional Git ref string
+      #   [scheme://host/]owner/theme-name[@git_ref]
       #
-      def initialize(raw_theme, auth)
-        @raw_theme = raw_theme.to_s.downcase.strip
-        @auth = auth
-        super(@raw_theme)
-      end
-
-      attr_reader :auth
-
-      def path
-        tmp = uri&.path
-        tmp[1..-1]
+      #   optional scheme://host
+      #     scheme (default: https): Could be any scheme but generally should be http, https or git
+      #     host (default: github.com): Could be any host
+      #
+      #   owner: Git repo owner
+      #   theme-name: Git repo name
+      #   optional @git_ref (default: master): Git Reference hash, tag or branch
+      #
+      # Header to pass to remote call
+      #
+      def initialize(remote_host, remote_theme)
+        @remote_host = remote_host
+        @remote_theme = remote_theme.to_s.downcase
+        super(@remote_theme)
       end
 
       def name
-        tmp = path
-        tmp &&= tmp.split("/")[-1]
-        tmp &&= tmp.split("@")[0]
-        tmp &&= tmp.strip
-        tmp
+        theme_parts[:name]
       end
 
       def owner
-        tmp = path
-        tmp &&= tmp.split("/")[-2]
-        tmp &&= tmp.strip
-        tmp
+        theme_parts[:owner]
       end
 
       def host
-        uri&.host || "github.com"
+        uri&.host
       end
 
       def scheme
-        uri&.scheme || "https"
+        uri&.scheme
       end
 
       def name_with_owner
@@ -57,16 +56,13 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
-        !!(SAFE_REGEX.match(host) &&
-          SAFE_REGEX.match(scheme) &&
-          SAFE_REGEX.match(name) &&
-          SAFE_REGEX.match(git_ref) &&
-          SAFE_REGEX.match(owner))
+        return false unless uri && theme_parts && name && owner
+
+        host && valid_hosts.include?(host)
       end
 
       def git_ref
-        tmp = path.split("@")[1] || "master"
-        tmp.strip
+        theme_parts[:ref] || "master"
       end
 
       def root
@@ -74,23 +70,60 @@ module Jekyll
       end
 
       def inspect
-        "#<Jekyll::RemoteTheme::Theme scheme=\"#{scheme}\" host=\"#{host}\"" \
-        " owner=\"#{owner}\" name=\"#{name}\" ref=\"#{git_ref}\" root=\"#{root}\"" \
-        "url=\"#{uri}\">"
+        "#<Jekyll::RemoteTheme::Theme host=\"#{host}\" owner=\"#{owner}\" name=\"#{name}\"" \
+        " ref=\"#{git_ref}\" root=\"#{root}\">"
+      end
+
+      def to_s
+        uri.to_s
       end
 
       private
 
+      def default_host
+        ENV["GITHUB_HOSTNAME"] || ENV["PAGES_GITHUB_HOSTNAME"] || DEFAULT_HOST
+      end
+
       def uri
         return @uri if defined? @uri
 
-        @uri = Addressable::URI.parse(@raw_theme)
+        remote_theme_parsed = Addressable::URI.parse(@remote_theme)
+        @uri =  if @remote_host
+                  # Use the remote host as the uri and the remote theme as the path
+                  remote_host_parsed = Addressable::URI.parse(@remote_host)
+                  Addressable::URI.new(
+                    :scheme => remote_host_parsed.scheme,
+                    :host   => remote_host_parsed.host,
+                    :path   => remote_theme_parsed.path
+                  )
+                elsif remote_theme_parsed.scheme && remote_theme_parsed.host
+                  # Use the remote theme as the uri
+                  remote_theme_parsed
+                else
+                  # Otherwise, make some assumptions, using remote theme as the path
+                  Addressable::URI.new(
+                    :scheme => DEFAULT_SCHEME,
+                    :host   => default_host,
+                    :path   => remote_theme_parsed.path
+                  )
+                end
       rescue Addressable::URI::InvalidURIError
         @uri = nil
       end
 
+      def theme_parts
+        @theme_parts ||= uri.path.match(THEME_REGEX) if uri
+      end
+
       def gemspec
         @gemspec ||= MockGemspec.new(self)
+      end
+
+      def valid_hosts
+        @valid_hosts ||= [
+          host,
+          default_host,
+        ].compact.to_set
       end
     end
   end

@@ -21,46 +21,50 @@ Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
    plugins:
      - jekyll-remote-theme
    ```
-
    Note: If you are using a Jekyll version less than 3.5.0, use the `gems` key instead of `plugins`.
 
 3. Add the following to your site's `_config.yml` to choose your theme
 
    ```yml
-   remote_theme: https://github.com/benbalter/retlab
+   remote_theme: benbalter/retlab
    ```
-
-   Or for a public GitHub Enterprise:
-   
+   or
    ```yml
    remote_theme: https://github.<Enterprise>.com/benbalter/retlab
    ```
-
-   Note: In order to use an internal or private repository:
-  
-    1. Refer to Github's [Create a personal access token documentation](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
-
-    2. Add your Personal access token to your site's `_config.yml`
-
-       ```yml
-       remote_auth_token: <personal access token>
-       ```
-       
-       Note: Make sure that your token have **repo** - *Full control of private repositories* to the theme repository and that your site is private or internal. Failure to do so exposes a security risk.
+   or
+   ```yml
+   remote_host: https://github.<Enterprise>.com
+   remote_theme: benbalter/retlab
+   ```
 
 
 ## Declaring your theme
 
-Remote themes are specified by the `remote_theme` key in the site's config.
+Remote themes are specified by the `remote_theme` key in the site's config.  By default, this will use `https://github.com` as the host.  If you would like to specify your own host, either specify the host part of the `remote_theme` (e.g., `https://github.com/benbalter/retlab`) or by specifying `remote_host` (e.g., `https://github.com`).
 
-For public GitHub, remote themes must be in the form of `https://github.com/OWNER/REPOSITORY`, and must represent a public GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
+For GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
-You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `https://github.com/benbalter/retlab@v1.0.0` or `https://github.com/benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
+You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
-For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and, if you are using a private repository, follow the Github's [Create a personal access token documentation](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to generate a token and to set the `remote_auth_token`.  GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
+To use your own host, such as for Enterprise GitHub, you can specify `remote_theme` providing the full url (e.g., `https://GITHUBHOST.com/OWNER/REPOSITORY`), and must represent GitHub-hosted Jekyll theme. Alternatively, you can specify `remote_host`.  This works exactly the same as the GitHub usage.
+
+## Private and Internal Themes
+
+If you would like to use a private or internal hosted theme (or have other specific headers needs):
+
+1. Create a Personal Access Token following the [Creating a personal access token on GitHub guides](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
+
+2. Add the `remote_header` in your `_config.yml`
+
+   ```yml
+   remote_header: 
+     Authorization: token <personal autorization token>
+   ```
+   Where the personal autorization token is the token  provided by the github repo setting page.
+
+   > :warning: **Storing credentials can lead to security issues** - As stated in the [Creating a personal access   token on GitHub guides](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) Treat your tokens like passwords and keep them secret. When working with the API, use tokens as environment variables instead of hardcoding them into your programs.
 
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
-
-##
