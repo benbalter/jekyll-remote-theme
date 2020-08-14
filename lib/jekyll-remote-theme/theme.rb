@@ -14,7 +14,7 @@ module Jekyll
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
-      # here are the valid combinations for remote_host/remote_theme
+      # here are the valid combinations for repository/remote_theme
       #
       #   [scheme://host/]owner/theme-name[@git_ref]
       #
@@ -28,8 +28,8 @@ module Jekyll
       #
       # Header to pass to remote call
       #
-      def initialize(remote_host, remote_theme)
-        @remote_host = remote_host
+      def initialize(repository, remote_theme)
+        @repository = repository
         @remote_theme = remote_theme.to_s.downcase
         super(@remote_theme)
       end
@@ -88,12 +88,12 @@ module Jekyll
         return @uri if defined? @uri
 
         remote_theme_parsed = Addressable::URI.parse(@remote_theme)
-        @uri =  if @remote_host
+        @uri =  if @repository
                   # Use the remote host as the uri and the remote theme as the path
-                  remote_host_parsed = Addressable::URI.parse(@remote_host)
+                  repository_parsed = Addressable::URI.parse(@repository)
                   Addressable::URI.new(
-                    :scheme => remote_host_parsed.scheme,
-                    :host   => remote_host_parsed.host,
+                    :scheme => repository_parsed.scheme,
+                    :host   => repository_parsed.host,
                     :path   => remote_theme_parsed.path
                   )
                 elsif remote_theme_parsed.scheme && remote_theme_parsed.host

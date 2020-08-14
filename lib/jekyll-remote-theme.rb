@@ -19,9 +19,9 @@ module Jekyll
     autoload :Theme,       "jekyll-remote-theme/theme"
     autoload :VERSION,     "jekyll-remote-theme/version"
 
-    CONFIG_HOST_KEY    = "remote_host"
-    CONFIG_THEME_KEY   = "remote_theme"
-    CONFIG_HEADERS_KEY = "remote_headers"
+    CONFIG_REPOSITORY_KEY = "repository"
+    CONFIG_THEME_KEY      = "remote_theme"
+    CONFIG_HEADERS_KEY    = "remote_headers"
 
     LOG_KEY     = "Remote Theme:"
     TEMP_PREFIX = "jekyll-remote-theme-"

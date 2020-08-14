@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Downloader do
-  let(:remote_host) { nil }
+  let(:repository) { nil }
   let(:remote_theme) { nil }
   let(:remote_headers) { nil }
   let(:resolved_zip) { "https://github.com/pages-themes/primer/archive/master.zip" }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(remote_host, remote_theme) }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(repository, remote_theme) }
   subject { described_class.new(theme, remote_headers) }
 
   before { reset_tmp_dir }
@@ -95,22 +95,22 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
   end
 
-  describe "a remote_theme set to a path with no remote_host" do
-    let(:remote_host) { nil }
+  describe "a remote_theme set to a path with no repository" do
+    let(:repository) { nil }
     let(:remote_theme) { "pages-themes/primer" }
 
     it_should_behave_like "a downloaded theme"
   end
 
-  describe "a remote_theme set to a path with a remote_host set to an uri" do
-    let(:remote_host) { nil }
+  describe "a remote_theme set to a path with a repository set to an uri" do
+    let(:repository) { nil }
     let(:remote_theme) { "https://github.com/pages-themes/primer" }
 
     it_should_behave_like "a downloaded theme"
   end
 
-  describe "a remote_theme set to a path with a remote_host set to an uri" do
-    let(:remote_host) { "https://github.com" }
+  describe "a remote_theme set to a path with a repository set to an uri" do
+    let(:repository) { "https://github.com" }
     let(:remote_theme) { "pages-themes/primer" }
 
     it_should_behave_like "a downloaded theme"

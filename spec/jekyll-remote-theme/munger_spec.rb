@@ -130,7 +130,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     let(:overrides) do
       {
         :remote_theme => "pages-themes/primer",
-        :remote_host  => "https://github.com",
+        :repository   => "https://github.com",
       }
     end
 

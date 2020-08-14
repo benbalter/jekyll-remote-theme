@@ -5,9 +5,9 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   let(:contents) { File.read gemspec_dir("#{fixture}.gemspec") }
   let(:filename) { "#{theme.name}.gemspec" }
   let(:path) { File.expand_path filename, theme.root }
-  let(:remote_host) { nil }
+  let(:repository) { nil }
   let(:remote_theme) { nil }
-  let(:theme) { Jekyll::RemoteTheme::Theme.new(remote_host, remote_theme) }
+  let(:theme) { Jekyll::RemoteTheme::Theme.new(repository, remote_theme) }
   subject { described_class.new(theme) }
 
   before { File.write path, contents }
@@ -65,21 +65,21 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
   end
 
   context "with a remote theme set as a path" do
-    let(:remote_host) { nil }
+    let(:repository) { nil }
     let(:remote_theme) { "pages-themes/primer" }
 
     it_should_behave_like "a mock"
   end
 
   context "with a remote theme set as a uri" do
-    let(:remote_host) { nil }
+    let(:repository) { nil }
     let(:remote_theme) { "https://custom.com/pages-themes/primer" }
 
     it_should_behave_like "a mock"
   end
 
   context "with a remote theme set as a path" do
-    let(:remote_host) { "https://custom.com" }
+    let(:repository) { "https://custom.com" }
     let(:remote_theme) { "pages-themes/primer" }
 
     it_should_behave_like "a mock"

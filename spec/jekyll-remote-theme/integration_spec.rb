@@ -7,8 +7,8 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     File.join source_dir, "_config_remote_as_path.yml"
   end
 
-  def config_remote_as_path_with_remote_host
-    File.join source_dir, "_config_remote_as_path_with_remote_host.yml"
+  def config_remote_as_path_with_repository
+    File.join source_dir, "_config_remote_as_path_with_repository.yml"
   end
 
   def config_remote_as_uri
@@ -78,7 +78,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
 
   context "with a remote theme set as a path with remote host" do
     before(:all) { reset_tmp_dir }
-    before(:all) { build_site(config_remote_as_path_with_remote_host) }
+    before(:all) { build_site(config_remote_as_path_with_repository) }
 
     it_should_behave_like "a config"
 

@@ -34,20 +34,20 @@ Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
    ```
    or
    ```yml
-   remote_host: https://github.<Enterprise>.com
+   repository: https://github.<Enterprise>.com
    remote_theme: benbalter/retlab
    ```
 
 
 ## Declaring your theme
 
-Remote themes are specified by the `remote_theme` key in the site's config.  By default, this will use `https://github.com` as the host.  If you would like to specify your own host, either specify the host part of the `remote_theme` (e.g., `https://github.com/benbalter/retlab`) or by specifying `remote_host` (e.g., `https://github.com`).
+Remote themes are specified by the `remote_theme` key in the site's config.  By default, this will use `https://github.com` as the host.  If you would like to specify your own host, either specify the host part of the `remote_theme` (e.g., `https://github.com/benbalter/retlab`) or by specifying `repository` (e.g., `https://github.com`).
 
 For GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `master` branch will be used.
 
-To use your own host, such as for Enterprise GitHub, you can specify `remote_theme` providing the full url (e.g., `https://GITHUBHOST.com/OWNER/REPOSITORY`), and must represent GitHub-hosted Jekyll theme. Alternatively, you can specify `remote_host`.  This works exactly the same as the GitHub usage.
+To use your own host, such as for Enterprise GitHub, you can specify `remote_theme` providing the full url (e.g., `https://GITHUBHOST.com/OWNER/REPOSITORY`), and must represent GitHub-hosted Jekyll theme. Alternatively, you can specify `repository`.  This works exactly the same as the GitHub usage.
 
 ## Private and Internal Themes
 

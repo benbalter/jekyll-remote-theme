@@ -1,7 +1,7 @@
 plugins:
   - jekyll-remote-theme
 
-remote_theme: https://github.com
+repository: https://github.com
 remote_theme: pages-themes/PrImeR
 
 whitelist:

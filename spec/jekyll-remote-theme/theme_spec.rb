@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Jekyll::RemoteTheme::Theme do
-  let(:remote_host) { nil }
+  let(:repository) { nil }
   let(:remote_theme) { nil }
-  subject { described_class.new(remote_host, remote_theme) }
+  subject { described_class.new(repository, remote_theme) }
 
   shared_examples_for "a theme" do
     let(:scheme) { uri.scheme }
@@ -48,8 +48,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  context "with a remote_theme set as a path without remote_host" do
-    let(:remote_host) { nil }
+  context "with a remote_theme set as a path without repository" do
+    let(:repository) { nil }
     let(:remote_theme) { "custom/theme" }
 
     it_should_behave_like "a theme" do
@@ -60,8 +60,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  context "with a remote_theme set to a uri without remote_host" do
-    let(:remote_host) { nil }
+  context "with a remote_theme set to a uri without repository" do
+    let(:repository) { nil }
     let(:remote_theme) { "https://custom.com/custom/theme" }
 
     it_should_behave_like "a theme" do
@@ -72,8 +72,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  context "with a remote_theme set to a path with remote_host set to an uri" do
-    let(:remote_host) { "https://custom.com" }
+  context "with a remote_theme set to a path with repository set to an uri" do
+    let(:repository) { "https://custom.com" }
     let(:remote_theme) { "custom/theme" }
 
     it_should_behave_like "a theme" do
@@ -85,7 +85,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   end
 
   context "with a remote_theme set" do
-    let(:remote_host) { nil }
+    let(:repository) { nil }
 
     context "to a path with no owner/name structure" do
       let(:remote_theme) { "foo" }

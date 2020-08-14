@@ -36,7 +36,7 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(remote_host, remote_theme)
+        @theme ||= Theme.new(repository, remote_theme)
       end
 
       def remote_theme
@@ -47,18 +47,24 @@ module Jekyll
         config[CONFIG_HEADERS_KEY]
       end
 
-      def remote_host
-        config[CONFIG_HOST_KEY]
+      def repository
+        config[CONFIG_REPOSITORY_KEY]
       end
 
       def downloader
         @downloader ||= Downloader.new(theme, remote_header)
       end
 
+      def setup_site_config
+        site.config["theme"] = theme.name
+        site.config["repository"] = "#{theme.scheme}://#{theme.host}"
+      end
+
       def configure_theme
         return unless theme
 
-        site.config["theme"] = theme.name
+        setup_site_config
+
         site.theme = theme
         site.theme.configure_sass if site.theme.respond_to?(:configure_sass)
         site.send(:configure_include_paths)
