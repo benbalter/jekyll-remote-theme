@@ -64,7 +64,7 @@ module Jekyll
       def raise_unless_sucess(response)
         return if response.is_a?(Net::HTTPSuccess)
 
-        raise DownloadError, "#{response.code} - #{response.message}"
+        raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
       end
 
       def enforce_max_file_size(size)
