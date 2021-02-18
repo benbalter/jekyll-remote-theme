@@ -68,7 +68,7 @@ module Jekyll
       def uri
         return @uri if defined? @uri
 
-        @uri = if @raw_theme =~ THEME_REGEX
+        @uri = if THEME_REGEX.match?(@raw_theme)
                  Addressable::URI.new(
                    :scheme => "https",
                    :host   => "github.com",
