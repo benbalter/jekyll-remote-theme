@@ -69,7 +69,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "404 - Not Found"
+        msg = "404 - Not Found - Loading URL: https://codeload.github.com/benbalter/_invalid_/zip/master"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
