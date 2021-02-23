@@ -42,7 +42,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
   context "zip_url" do
     it "builds the zip url" do
-      expected = "https://codeload.github.com/pages-themes/primer/zip/master"
+      expected = "https://codeload.github.com/pages-themes/primer/zip/HEAD"
       expect(subject.send(:zip_url).to_s).to eql(expected)
     end
 
@@ -50,7 +50,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       let(:raw_theme) { "http://example.com/pages-themes/primer" }
 
       it "builds the zip url" do
-        expected = "http://codeload.example.com/pages-themes/primer/zip/master"
+        expected = "http://codeload.example.com/pages-themes/primer/zip/HEAD"
         expect(subject.send(:zip_url).to_s).to eql(expected)
       end
     end
@@ -60,7 +60,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     before { allow(subject).to receive(:zip_url) { Addressable::URI.parse zip_url } }
 
     context "with an invalid URL" do
-      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/HEAD" }
       before do
         WebMock.disable_net_connect!
         stub_request(:get, zip_url).to_return(:status => [404, "Not Found"])
@@ -69,13 +69,13 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "404 - Not Found - Loading URL: https://codeload.github.com/benbalter/_invalid_/zip/master"
+        msg = "404 - Not Found - Loading URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
 
     context "with a large file" do
-      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/master" }
+      let(:zip_url) { "https://codeload.github.com/benbalter/_invalid_/zip/HEAD" }
       let(:content_length) { 10 * 1024 * 1024 * 1024 }
       let(:headers) { { "Content-Length" => content_length } }
       before do

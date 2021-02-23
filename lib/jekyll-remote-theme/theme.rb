@@ -51,7 +51,7 @@ module Jekyll
       end
 
       def git_ref
-        theme_parts[:ref] || "master"
+        theme_parts[:ref] || "HEAD"
       end
 
       def root
