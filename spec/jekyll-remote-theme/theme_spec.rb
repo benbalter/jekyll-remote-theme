@@ -77,8 +77,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
-  it "defaults git_ref to master" do
-    expect(subject.git_ref).to eql("master")
+  it "defaults git_ref to HEAD" do
+    expect(subject.git_ref).to eql("HEAD")
   end
 
   context "with a git_ref" do
