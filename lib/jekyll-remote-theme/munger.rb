@@ -24,7 +24,7 @@ module Jekyll
           downloader.run
           configure_theme
         end
-        enqueue_theme_cleanup
+        enqueue_theme_cleanup unless theme.local?
 
         theme
       end
@@ -59,8 +59,8 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
-          FileUtils.rm_rf theme.root
+          Jekyll.logger.info LOG_KEY, "Cleaning up #{theme.root}"
+          #FileUtils.rm_rf theme.root
         end
       end
     end
