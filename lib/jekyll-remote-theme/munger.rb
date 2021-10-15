@@ -19,8 +19,7 @@ module Jekyll
           return
         end
 
-        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
-        Jekyll.logger.debug LOG_KEY,"Theme path #{theme.root}"
+        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner} => #{theme.root}"
         unless munged?
           downloader.run
           configure_theme
