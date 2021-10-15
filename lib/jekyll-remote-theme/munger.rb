@@ -20,6 +20,7 @@ module Jekyll
         end
 
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
+        Jekyll.logger.debug LOG_KEY,"Theme path #{theme.root}"
         unless munged?
           downloader.run
           configure_theme
@@ -59,8 +60,8 @@ module Jekyll
 
       def enqueue_theme_cleanup
         at_exit do
-          Jekyll.logger.info LOG_KEY, "Cleaning up #{theme.root}"
-          #FileUtils.rm_rf theme.root
+          Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
+          FileUtils.rm_rf theme.root
         end
       end
     end
