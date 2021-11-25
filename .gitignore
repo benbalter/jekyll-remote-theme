@@ -3,5 +3,3 @@ spec/examples.txt
 *.gem
 tmp/
 spec/fixtures/site/.jekyll-cache
-.idea
-.project

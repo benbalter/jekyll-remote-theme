@@ -55,10 +55,6 @@ module Jekyll
         theme_parts[:ref] || "HEAD"
       end
 
-      def local?
-        owner == "local"
-      end
-
       def root
         @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
