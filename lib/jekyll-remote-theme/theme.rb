@@ -4,8 +4,8 @@ module Jekyll
   module RemoteTheme
     class Theme < Jekyll::Theme
       OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
-      NAME_REGEX = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
+      NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
@@ -76,8 +76,8 @@ module Jekyll
         @uri = if THEME_REGEX.match?(@raw_theme)
                  Addressable::URI.new(
                    :scheme => "https",
-                   :host => "github.com",
-                   :path => @raw_theme
+                   :host   => "github.com",
+                   :path   => @raw_theme
                  )
                else
                  Addressable::URI.parse @raw_theme
