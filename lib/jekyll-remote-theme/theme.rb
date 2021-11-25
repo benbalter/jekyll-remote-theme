@@ -60,11 +60,7 @@ module Jekyll
       end
 
       def root
-        if local?
-          @root = File.realpath(name, "/Users/indi/git/")
-        else
-          @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
-        end
+        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
       end
 
       def inspect

@@ -19,12 +19,12 @@ module Jekyll
           return
         end
 
-        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner} => #{theme.root}"
+        Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
         unless munged?
           downloader.run
           configure_theme
         end
-        enqueue_theme_cleanup unless theme.local?
+        enqueue_theme_cleanup
 
         theme
       end

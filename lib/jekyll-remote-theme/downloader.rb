@@ -26,11 +26,7 @@ module Jekyll
       end
 
       def downloaded?
-        if theme.local?
-          @downloaded ||= true
-        else
-          @downloaded ||= theme_dir_exists? && !theme_dir_empty?
-        end
+        @downloaded ||= theme_dir_exists? && !theme_dir_empty?
       end
 
       private
