@@ -50,4 +50,4 @@ Adding `--verbose` to the `build` or `serve` command may provide additional info
 
 ## Catalogues
 
-In addition to the default directories `assets`, `_includes`, `_layouts`, and `_sass` you can now also host catalogues in your remote theme’s `_data` directory as supposed in #68.  
+In addition to the default directories `assets`, `_includes`, `_layouts`, and `_sass` also catalogues in the remote theme's `_data` directory are considered.  
