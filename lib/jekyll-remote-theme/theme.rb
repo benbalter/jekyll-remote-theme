@@ -42,7 +42,6 @@ module Jekyll
       def name_with_owner
         [owner, name].join("/")
       end
-
       alias_method :nwo, :name_with_owner
 
       def valid?
