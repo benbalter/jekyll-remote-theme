@@ -47,3 +47,7 @@ For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOS
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
+
+## Catalogues
+
+In addition to the default directories `assets`, `_includes`, `_layouts`, and `_sass` also catalogues in the remote theme's `_data` directory are considered.  
