@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "addressable", "~> 2.0"
   s.add_dependency "jekyll", ">= 3.5", "< 5.0"
-  s.add_dependency "jekyll-sass-converter", ">= 1.0", "<= 3.0.0", "!= 2.0.0"
+  s.add_dependency "jekyll-sass-converter", ">= 1.0", "!= 2.0.0", "<= 4.0.0"
   s.add_dependency "rubyzip", ">= 1.3.0", "< 3.0"
 
   s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
