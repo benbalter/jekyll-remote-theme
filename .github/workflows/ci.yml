@@ -21,7 +21,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '2.5'
+        ruby-version: '3.0'
         bundler-cache: true # Runs bundle install and caches installed gems
     
     - name: Install dependencies
