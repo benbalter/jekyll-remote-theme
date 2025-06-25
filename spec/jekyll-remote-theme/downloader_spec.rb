@@ -69,7 +69,9 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "404 - Not Found - Loading URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
+        msg = "The repository 'pages-themes/primer' could not be found. " \
+              "Please check that the repository name is correct, publicly accessible, and contains a valid Jekyll theme. " \
+              "URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
