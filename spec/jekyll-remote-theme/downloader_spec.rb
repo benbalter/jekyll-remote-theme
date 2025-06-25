@@ -92,5 +92,20 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
+
+    context "with a server error" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_server_error_/zip/HEAD" }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:status => [500, "Internal Server Error"])
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError with standard format" do
+        msg = "500 - Internal Server Error - Loading URL: https://codeload.github.com/benbalter/_server_error_/zip/HEAD"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+    end
   end
 end
