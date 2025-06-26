@@ -64,7 +64,14 @@ module Jekyll
       def raise_unless_sucess(response)
         return if response.is_a?(Net::HTTPSuccess)
 
-        raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
+        case response.code
+        when "404"
+          raise DownloadError, "The repository '#{theme.name_with_owner}' could not be found. " \
+                             "Please check that the repository name is correct, publicly accessible, and contains a valid Jekyll theme. " \
+                             "URL: #{zip_url}"
+        else
+          raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
+        end
       end
 
       def enforce_max_file_size(size)
