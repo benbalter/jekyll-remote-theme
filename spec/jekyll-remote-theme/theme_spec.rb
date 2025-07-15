@@ -89,6 +89,15 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
+  context "with a case-sensitive git_ref" do
+    let(:git_ref) { "CaseSensitive-Branch" }
+
+    it "preserves the case of the git ref" do
+      expect(subject.instance_variable_get("@raw_theme")).to eql("#{nwo}@#{git_ref}")
+      expect(subject.git_ref).to eql(git_ref)
+    end
+  end
+
   it "knows its root" do
     expect(Dir.exist?(subject.root)).to be_truthy
   end

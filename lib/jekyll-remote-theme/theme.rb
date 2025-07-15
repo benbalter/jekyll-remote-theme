@@ -19,7 +19,18 @@ module Jekyll
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
       def initialize(raw_theme)
-        @raw_theme = raw_theme.to_s.downcase.strip
+        raw_string = raw_theme.to_s.strip
+        if raw_string.include?("@")
+          # Split by '@' to separate the NWO from the git ref
+          parts = raw_string.split("@", 2)
+          nwo = parts[0].downcase
+          git_ref = parts[1]
+          # Recombine with the original case git_ref
+          @raw_theme = "#{nwo}@#{git_ref}"
+        else
+          # No git ref, can safely downcase the whole string
+          @raw_theme = raw_string.downcase
+        end
         super(@raw_theme)
       end
 
