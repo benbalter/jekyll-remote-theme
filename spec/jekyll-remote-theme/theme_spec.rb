@@ -206,7 +206,11 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     before do
       WebMock.disable_net_connect!
       stub_request(:get, api_url)
-        .to_return(:status => 200, :body => api_response_body, :headers => { "Content-Type" => "application/json" })
+        .to_return(
+          :status  => 200,
+          :body    => api_response_body,
+          :headers => { "Content-Type" => "application/json" }
+        )
     end
 
     after { WebMock.allow_net_connect! }

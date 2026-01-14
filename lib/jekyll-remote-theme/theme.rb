@@ -110,32 +110,58 @@ module Jekyll
       end
 
       def fetch_latest_release_tag
-        api_url = Addressable::URI.new(
+        api_url = build_api_url
+        response = make_api_request(api_url)
+
+        if response.is_a?(Net::HTTPSuccess)
+          parse_tag_from_response(response)
+        else
+          log_no_releases_warning
+          nil
+        end
+      rescue StandardError => e
+        log_api_error(e)
+        nil
+      end
+
+      def build_api_url
+        Addressable::URI.new(
           :scheme => scheme,
           :host   => api_host,
           :path   => api_path
         )
+      end
 
-        response = Net::HTTP.start(api_url.host, api_url.port, :use_ssl => api_url.scheme == "https") do |http|
+      def make_api_request(api_url)
+        Net::HTTP.start(
+          api_url.host,
+          api_url.port,
+          :use_ssl => api_url.scheme == "https"
+        ) do |http|
           request = Net::HTTP::Get.new(api_url.request_uri)
           request["Accept"] = "application/vnd.github.v3+json"
           request["User-Agent"] = Downloader::USER_AGENT
           http.request(request)
         end
+      end
 
-        if response.is_a?(Net::HTTPSuccess)
-          require "json"
-          data = JSON.parse(response.body)
-          tag = data["tag_name"]
-          Jekyll.logger.debug LOG_KEY, "Resolved @latest to #{tag} for #{name_with_owner}"
-          tag
-        else
-          Jekyll.logger.warn LOG_KEY, "No releases found for #{name_with_owner}, using HEAD"
-          nil
-        end
-      rescue StandardError => e
-        Jekyll.logger.warn LOG_KEY, "Failed to fetch latest release for #{name_with_owner}: #{e.message}, using HEAD"
-        nil
+      def parse_tag_from_response(response)
+        require "json"
+        data = JSON.parse(response.body)
+        tag = data["tag_name"]
+        Jekyll.logger.debug LOG_KEY, "Resolved @latest to #{tag} for #{name_with_owner}"
+        tag
+      end
+
+      def log_no_releases_warning
+        Jekyll.logger.warn LOG_KEY,
+                           "No releases found for #{name_with_owner}, using HEAD"
+      end
+
+      def log_api_error(error)
+        Jekyll.logger.warn LOG_KEY,
+                           "Failed to fetch latest release for #{name_with_owner}: " \
+                           "#{error.message}, using HEAD"
       end
 
       def api_host
