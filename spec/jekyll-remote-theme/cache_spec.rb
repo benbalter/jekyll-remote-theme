@@ -153,7 +153,20 @@ RSpec.describe "Jekyll::RemoteTheme Caching" do
     it "sanitizes double dots to prevent directory traversal" do
       sanitized = theme.send(:sanitize_path_component, "../../../etc/shadow")
       expect(sanitized).not_to include("..")
-      expect(sanitized).to eq("______etc_shadow")
+      expect(sanitized).not_to include("/")
+      expect(sanitized).not_to include("\\")
+      # Verify no directory traversal possible
+      expect(File.expand_path(sanitized, "/base")).to eq("/base/#{sanitized}")
+    end
+
+    it "sanitizes mixed directory traversal patterns" do
+      sanitized = theme.send(:sanitize_path_component, "../..")
+      expect(sanitized).not_to include("..")
+      expect(File.expand_path(sanitized, "/base")).to eq("/base/#{sanitized}")
+
+      sanitized2 = theme.send(:sanitize_path_component, ".././")
+      expect(sanitized2).not_to include("..")
+      expect(File.expand_path(sanitized2, "/base")).to eq("/base/#{sanitized2}")
     end
 
     it "sanitizes backslashes" do
