@@ -4,6 +4,7 @@ require "jekyll"
 require "fileutils"
 require "tempfile"
 require "addressable"
+require "openssl"
 require "net/http"
 require "zip"
 
