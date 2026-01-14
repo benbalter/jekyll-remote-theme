@@ -100,9 +100,9 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       expect(subject).to receive(:clone_with_submodules).and_call_original
       expect(subject).not_to receive(:download)
       expect(subject).not_to receive(:unzip)
-      
-      # Mock the git clone operation
-      allow(subject).to receive(:system).and_return(true)
+
+      # Mock the git clone operation with Open3
+      allow(Open3).to receive(:capture2e).and_return(["", double(:success? => true)])
       subject.run
     end
 

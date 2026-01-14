@@ -125,9 +125,11 @@ module Jekyll
 
         # Clone with submodules
         cmd = git_clone_command
+        output, status = Open3.capture2e(*cmd)
 
-        result = system(*cmd, :out => File::NULL, :err => File::NULL)
-        raise DownloadError, "Failed to clone #{git_url} with submodules" unless result
+        unless status.success?
+          raise DownloadError, "Failed to clone #{git_url} with submodules: #{output}"
+        end
 
         @downloaded = true
       rescue StandardError => e

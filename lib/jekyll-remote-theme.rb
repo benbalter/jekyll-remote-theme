@@ -6,6 +6,7 @@ require "tempfile"
 require "addressable"
 require "net/http"
 require "zip"
+require "open3"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
