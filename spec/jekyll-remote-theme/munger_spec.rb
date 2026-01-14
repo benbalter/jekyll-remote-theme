@@ -137,12 +137,12 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
     it "uses local layout instead of theme layout" do
       site.read
-      
+
       # Verify the local default layout is used
       expect(site.layouts["default"]).to be_truthy
       local_layout_path = File.join(source, "_layouts", "default.html")
       expect(site.layouts["default"].path).to eql(local_layout_path)
-      
+
       # Verify content includes local layout marker
       content = File.read(site.layouts["default"].path)
       expect(content).to include("LOCAL LAYOUT")
@@ -151,7 +151,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
     it "uses theme layout when no local override exists" do
       site.read
-      
+
       # Verify the theme's home layout is used (no local override)
       expect(site.layouts["home"]).to be_truthy
       expect(site.layouts["home"].path).to include(theme_dir)
