@@ -9,6 +9,7 @@ module Jekyll
       NET_HTTP_ERRORS = [
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
+        OpenSSL::SSL::SSLError,
       ].freeze
 
       def initialize(theme)

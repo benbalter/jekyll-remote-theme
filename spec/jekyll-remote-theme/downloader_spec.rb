@@ -90,5 +90,20 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
+
+    context "with an SSL error" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_ssl_error_/zip/HEAD" }
+      let(:ssl_error_msg) { "certificate verify failed (unable to get certificate CRL)" }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_raise(OpenSSL::SSL::SSLError.new(ssl_error_msg))
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError for SSL errors" do
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, ssl_error_msg)
+      end
+    end
   end
 end

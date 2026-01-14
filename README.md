@@ -28,6 +28,19 @@ Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
   ```yml
   remote_theme: benbalter/retlab
   ```
+
+  To use a specific release or branch:
+
+  ```yml
+  remote_theme: benbalter/retlab@v1.0.0
+  ```
+
+  To automatically use the latest tagged release:
+
+  ```yml
+  remote_theme: benbalter/retlab@latest
+  ```
+
 or <sup>1</sup>
   ```yml
   remote_theme: http[s]://github.<Enterprise>.com/benbalter/retlab
@@ -41,6 +54,8 @@ Remote themes are specified by the `remote_theme` key in the site's config.
 For public GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a public GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `HEAD` ref will be used.
+
+To automatically use the latest tagged release, you can specify `@latest` (e.g., `benbalter/retlab@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
 
