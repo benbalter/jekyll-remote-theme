@@ -51,7 +51,11 @@ module Jekyll
       end
 
       def git_ref
-        theme_parts[:ref] || "HEAD"
+        parsed_ref = theme_parts[:ref]
+        return "HEAD" unless parsed_ref
+        return resolve_latest_release if parsed_ref == "latest"
+
+        parsed_ref
       end
 
       def root
@@ -95,6 +99,63 @@ module Jekyll
           ENV["PAGES_GITHUB_HOSTNAME"],
           ENV["GITHUB_HOSTNAME"],
         ].compact.to_set
+      end
+
+      def resolve_latest_release
+        return @resolved_latest_release if defined? @resolved_latest_release
+
+        Jekyll.logger.debug LOG_KEY, "Resolving @latest for #{name_with_owner}"
+
+        @resolved_latest_release = fetch_latest_release_tag || "HEAD"
+      end
+
+      def fetch_latest_release_tag
+        api_url = Addressable::URI.new(
+          :scheme => scheme,
+          :host   => api_host,
+          :path   => api_path
+        )
+
+        response = Net::HTTP.start(api_url.host, api_url.port, :use_ssl => api_url.scheme == "https") do |http|
+          request = Net::HTTP::Get.new(api_url.request_uri)
+          request["Accept"] = "application/vnd.github.v3+json"
+          request["User-Agent"] = Downloader::USER_AGENT
+          http.request(request)
+        end
+
+        if response.is_a?(Net::HTTPSuccess)
+          require "json"
+          data = JSON.parse(response.body)
+          tag = data["tag_name"]
+          Jekyll.logger.debug LOG_KEY, "Resolved @latest to #{tag} for #{name_with_owner}"
+          tag
+        else
+          Jekyll.logger.warn LOG_KEY, "No releases found for #{name_with_owner}, using HEAD"
+          nil
+        end
+      rescue StandardError => e
+        Jekyll.logger.warn LOG_KEY, "Failed to fetch latest release for #{name_with_owner}: #{e.message}, using HEAD"
+        nil
+      end
+
+      def api_host
+        case host
+        when "github.com"
+          "api.github.com"
+        else
+          # For GitHub Enterprise, API is typically at hostname/api/v3
+          host
+        end
+      end
+
+      def api_path
+        case host
+        when "github.com"
+          "/repos/#{name_with_owner}/releases/latest"
+        else
+          # For GitHub Enterprise
+          "/api/v3/repos/#{name_with_owner}/releases/latest"
+        end
       end
     end
   end
