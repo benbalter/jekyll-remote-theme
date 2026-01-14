@@ -18,8 +18,11 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
-      def initialize(raw_theme)
+      #
+      # site is optional and used for cache configuration
+      def initialize(raw_theme, site = nil)
         @raw_theme = raw_theme.to_s.downcase.strip
+        @site = site
         super(@raw_theme)
       end
 
@@ -54,8 +57,36 @@ module Jekyll
         theme_parts[:ref] || "HEAD"
       end
 
+      def cache_enabled?
+        return false unless @site
+
+        cache_config = @site.config[CACHE_CONFIG_KEY]
+        return false unless cache_config.is_a?(Hash)
+
+        cache_config["enabled"] == true
+      end
+
+      def cache_path
+        return nil unless cache_enabled?
+
+        cache_config = @site.config[CACHE_CONFIG_KEY]
+        custom_path = cache_config["path"]
+
+        if custom_path
+          File.expand_path(custom_path, @site.source)
+        else
+          File.expand_path(DEFAULT_CACHE_DIR, @site.source)
+        end
+      end
+
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        @root ||= if cache_enabled?
+                    path = File.join(cache_path, owner, name, git_ref)
+                    FileUtils.mkdir_p(path)
+                    File.realpath(path)
+                  else
+                    File.realpath Dir.mktmpdir(TEMP_PREFIX)
+                  end
       end
 
       def inspect

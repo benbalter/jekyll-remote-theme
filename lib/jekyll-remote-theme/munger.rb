@@ -36,7 +36,7 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||= Theme.new(raw_theme, site)
       end
 
       def raw_theme
@@ -58,6 +58,9 @@ module Jekyll
       end
 
       def enqueue_theme_cleanup
+        # Don't clean up if caching is enabled
+        return if theme.cache_enabled?
+
         at_exit do
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root
