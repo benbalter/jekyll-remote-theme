@@ -4,9 +4,11 @@ require "jekyll"
 require "fileutils"
 require "tempfile"
 require "addressable"
+require "openssl"
 require "net/http"
 require "zip"
 require "open3"
+require "json"
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
