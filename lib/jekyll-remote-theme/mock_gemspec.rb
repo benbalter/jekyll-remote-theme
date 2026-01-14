@@ -14,9 +14,12 @@ module Jekyll
 
       # Regex patterns for extracting gemspec metadata
       AUTHORS_REGEX = %r!^\s*[a-z_]+\.authors\s*=\s*\[(.*?)\]!m.freeze
-      VERSION_REGEX = %r!^\s*[a-z_]+\.version\s*=\s*["']([^"'\s]+)["']!.freeze
+      VERSION_REGEX = %r!^\s*[a-z_]+\.version\s*=\s*["']([^"']+)["']!.freeze
       SUMMARY_REGEX = %r!^\s*[a-z_]+\.summary\s*=\s*["'](.*?)["']!.freeze
       DESCRIPTION_REGEX = %r!^\s*[a-z_]+\.description\s*=\s*["'](.*?)["']!.freeze
+
+      # Default version when gemspec is missing or version cannot be determined
+      DEFAULT_VERSION = "0.0.0"
 
       def initialize(theme)
         @theme = theme
@@ -46,16 +49,16 @@ module Jekyll
       # It cannot evaluate version constants like MyGem::VERSION.
       def version
         @version ||= begin
-                       return Gem::Version.new("0.0.0") unless contents
+                       return Gem::Version.new(DEFAULT_VERSION) unless contents
 
                        match = contents.match(VERSION_REGEX)
-                       return Gem::Version.new("0.0.0") unless match
+                       return Gem::Version.new(DEFAULT_VERSION) unless match
 
                        # Extract the version string and convert to Gem::Version
                        Gem::Version.new(match[1])
                      rescue ArgumentError
                        # If the version string is invalid, return default
-                       Gem::Version.new("0.0.0")
+                       Gem::Version.new(DEFAULT_VERSION)
                      end
       end
 
