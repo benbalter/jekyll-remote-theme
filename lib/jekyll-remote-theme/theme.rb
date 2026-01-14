@@ -148,9 +148,9 @@ module Jekyll
         return "" if component.nil?
 
         # Replace path separators and backslashes, but preserve dots in version strings
-        # The regex /\.\.+/ matches two or more consecutive dots (e.g., "..", "...")
+        # The regex %r!\.\.+! matches two or more consecutive dots (e.g., "..", "...")
         # but NOT single dots (e.g., "v1.2.3" remains unchanged)
-        component.to_s.gsub(%r{[/\\]}, "_").gsub(/\.\.+/, "_")
+        component.to_s.gsub(%r![/\\]!, "_").gsub(%r!\.\.+!, "_")
       end
 
       def resolve_latest_release
