@@ -141,7 +141,9 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
 
     context "in hash format" do
-      let(:overrides) { { "remote_theme" => { "url" => "pages-themes/primer", "submodules" => true } } }
+      let(:overrides) do
+        { "remote_theme" => { "url" => "pages-themes/primer", "submodules" => true } }
+      end
 
       it "passes submodules to theme" do
         theme = subject.send(:theme)
@@ -150,7 +152,9 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
 
     context "with symbol keys in hash format" do
-      let(:overrides) { { "remote_theme" => { :url => "pages-themes/primer", :submodules => true } } }
+      let(:overrides) do
+        { "remote_theme" => { :url => "pages-themes/primer", :submodules => true } }
+      end
 
       it "passes submodules to theme" do
         theme = subject.send(:theme)
