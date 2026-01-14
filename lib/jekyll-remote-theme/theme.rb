@@ -100,6 +100,7 @@ module Jekyll
 
       def uri
         return @uri if defined? @uri
+        return @uri = nil if local_theme?
 
         @uri = if THEME_REGEX.match?(@raw_theme)
                  Addressable::URI.new(
@@ -115,6 +116,8 @@ module Jekyll
       end
 
       def theme_parts
+        return nil if local_theme?
+
         @theme_parts ||= uri.path[1..-1].match(THEME_REGEX) if uri
       end
 
