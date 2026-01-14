@@ -102,7 +102,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   end
 
   context "with submodules enabled" do
-    subject { described_class.new(nwo, submodules: true) }
+    subject { described_class.new(nwo, :submodules => true) }
 
     it "stores the submodules setting" do
       expect(subject.submodules?).to be_truthy

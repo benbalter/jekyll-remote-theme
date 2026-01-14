@@ -119,12 +119,23 @@ module Jekyll
 
       def clone_with_submodules
         Jekyll.logger.debug LOG_KEY, "Cloning #{git_url} to #{theme.root} with submodules"
-        
+
         # Remove the empty directory created by mktmpdir
         FileUtils.rm_rf(theme.root) if Dir.exist?(theme.root)
-        
+
         # Clone with submodules
-        cmd = [
+        cmd = git_clone_command
+
+        result = system(*cmd, :out => File::NULL, :err => File::NULL)
+        raise DownloadError, "Failed to clone #{git_url} with submodules" unless result
+
+        @downloaded = true
+      rescue StandardError => e
+        raise DownloadError, "Git clone failed: #{e.message}"
+      end
+
+      def git_clone_command
+        [
           "git", "clone",
           "--quiet",
           "--depth", "1",
@@ -134,15 +145,6 @@ module Jekyll
           git_url.to_s,
           theme.root,
         ]
-        
-        result = system(*cmd, :out => File::NULL, :err => File::NULL)
-        unless result
-          raise DownloadError, "Failed to clone #{git_url} with submodules"
-        end
-        
-        @downloaded = true
-      rescue StandardError => e
-        raise DownloadError, "Git clone failed: #{e.message}"
       end
 
       def git_url

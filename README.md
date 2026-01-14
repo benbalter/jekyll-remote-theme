@@ -44,6 +44,29 @@ You may also optionally specify a branch, tag, or commit to use by appending an 
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
 
+### Using themes with Git submodules
+
+If your remote theme includes Git submodules, you can enable submodule support by using either of the following configurations:
+
+**Option 1: Using a separate `submodules` key:**
+
+```yml
+remote_theme: owner/repo
+submodules: true
+```
+
+**Option 2: Using hash syntax:**
+
+```yml
+remote_theme:
+  url: owner/repo
+  submodules: true
+```
+
+When `submodules` is enabled, the theme will be cloned using `git clone --recurse-submodules` instead of downloading a ZIP archive. This ensures that all submodules are properly initialized and checked out.
+
+**Note:** Enabling submodules requires Git to be available on your system and may take longer to download depending on the size and number of submodules.
+
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.

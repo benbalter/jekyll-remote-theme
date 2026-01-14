@@ -93,7 +93,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   end
 
   context "with submodules enabled" do
-    let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme, submodules: true) }
+    let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme, :submodules => true) }
     subject { described_class.new(theme) }
 
     it "uses git clone method" do

@@ -37,7 +37,7 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(theme_url, submodules: submodules?)
+        @theme ||= Theme.new(theme_url, :submodules => submodules?)
       end
 
       def raw_theme
