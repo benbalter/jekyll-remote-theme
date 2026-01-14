@@ -144,7 +144,8 @@ module Jekyll
         return "" if component.nil?
 
         # Replace path separators and backslashes, but preserve dots in version strings
-        # Only replace ".." sequences that could lead to directory traversal
+        # The regex /\.\.+/ matches two or more consecutive dots (e.g., "..", "...")
+        # but NOT single dots (e.g., "v1.2.3" remains unchanged)
         component.to_s.gsub(%r{[/\\]}, "_").gsub(/\.\.+/, "_")
       end
     end
