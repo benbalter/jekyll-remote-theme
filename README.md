@@ -28,6 +28,19 @@ Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
   ```yml
   remote_theme: benbalter/retlab
   ```
+
+  To use a specific release or branch:
+
+  ```yml
+  remote_theme: benbalter/retlab@v1.0.0
+  ```
+
+  To automatically use the latest tagged release:
+
+  ```yml
+  remote_theme: benbalter/retlab@latest
+  ```
+
 or <sup>1</sup>
   ```yml
   remote_theme: http[s]://github.<Enterprise>.com/benbalter/retlab
@@ -42,7 +55,26 @@ For public GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and 
 
 You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). If you don't specify a Git ref, the `HEAD` ref will be used.
 
+To automatically use the latest tagged release, you can specify `@latest` (e.g., `benbalter/retlab@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
+
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
+
+## Customizing your theme
+
+You can override any file from the remote theme by creating a file with the same path in your Jekyll site. This works for:
+
+* **Layouts** (`_layouts/`) - Create a file with the same name in your `_layouts` directory to override a theme layout
+* **Includes** (`_includes/`) - Create a file with the same name in your `_includes` directory to override a theme include
+* **Sass files** (`_sass/`) - Add custom Sass files in your `_sass` directory
+* **Assets** (`assets/`) - Override or add assets in your `assets` directory
+
+### Example
+
+If your remote theme has a `_layouts/default.html` file, you can override it by creating your own `_layouts/default.html` file in your site. Your local version will be used instead of the theme's version.
+
+Similarly, if the theme has an `_includes/header.html` file, you can override it by creating `_includes/header.html` in your site.
+
+**Note**: Only the specific files you override will use your local versions. All other theme files will continue to work as provided by the theme.
 
 ## Debugging
 

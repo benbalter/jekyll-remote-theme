@@ -31,6 +31,52 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
     expect(subject.full_gem_path).to eql(theme.root)
   end
 
+  it "returns authors" do
+    expect(subject.authors).to be_an(Array)
+    expect(subject.authors).to include("John Doe")
+  end
+
+  it "returns version" do
+    expect(subject.version).to be_a(Gem::Version)
+  end
+
+  it "returns summary" do
+    expect(subject.summary).to be_a(String)
+    expect(subject.summary).to eq("Dummy gemspec")
+  end
+
+  it "returns description" do
+    expect(subject.description).to be_a(String).or be_nil
+  end
+
+  it "returns metadata" do
+    expect(subject.metadata).to be_a(Hash)
+  end
+
+  context "without a gemspec file" do
+    let(:path) { File.expand_path "nonexistent.gemspec", theme.root }
+
+    it "returns empty authors array" do
+      expect(subject.authors).to eq([])
+    end
+
+    it "returns default version" do
+      expect(subject.version).to eq(Gem::Version.new("0.0.0"))
+    end
+
+    it "returns empty summary" do
+      expect(subject.summary).to eq("")
+    end
+
+    it "returns nil description" do
+      expect(subject.description).to be_nil
+    end
+
+    it "returns empty metadata hash" do
+      expect(subject.metadata).to eq({})
+    end
+  end
+
   context "fixtures" do
     let(:dependency_names) { subject.send(:dependency_names) }
     let(:runtime_dependencies) { subject.runtime_dependencies }
@@ -57,6 +103,30 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
             expect(runtime_dependencies.map(&:name)).to eql(expected)
           end
         end
+      end
+    end
+
+    context "the complete gemspec with all metadata" do
+      let(:fixture) { "complete" }
+
+      it "extracts multiple authors" do
+        expect(subject.authors).to eq(["Jane Smith", "John Doe"])
+      end
+
+      it "extracts summary" do
+        expect(subject.summary).to eq("A complete test gemspec")
+      end
+
+      it "extracts description" do
+        expect(subject.description).to eq("A longer description of the test theme")
+      end
+
+      it "extracts version" do
+        expect(subject.version).to eq(Gem::Version.new("1.2.3"))
+      end
+
+      it "returns metadata" do
+        expect(subject.metadata).to be_a(Hash)
       end
     end
   end

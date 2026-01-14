@@ -9,6 +9,7 @@ module Jekyll
       NET_HTTP_ERRORS = [
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
+        OpenSSL::SSL::SSLError,
       ].freeze
 
       def initialize(theme)
@@ -37,9 +38,10 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
+      # rubocop:disable Metrics/AbcSize
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        Net::HTTP.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
+        http_class.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
           http.request(request) do |response|
             raise_unless_sucess(response)
             enforce_max_file_size(response.content_length)
@@ -52,6 +54,7 @@ module Jekyll
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
       end
+      # rubocop:enable Metrics/AbcSize
 
       def request
         return @request if defined? @request
@@ -94,6 +97,52 @@ module Jekyll
           :host   => "codeload.#{theme.host}",
           :path   => [theme.owner, theme.name, "zip", theme.git_ref].join("/")
         ).normalize
+      end
+
+      # Returns an HTTP class that respects proxy environment variables
+      def http_class
+        @http_class ||= Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass)
+      end
+
+      # Extracts proxy settings from environment variables
+      def proxy_uri
+        return @proxy_uri if defined?(@proxy_uri)
+
+        proxy_env = find_proxy_env_var
+        @proxy_uri = parse_proxy_uri(proxy_env)
+      end
+
+      def find_proxy_env_var
+        # Check for HTTPS proxy first if the URL uses HTTPS
+        if theme.scheme == "https"
+          ENV["https_proxy"] || ENV["HTTPS_PROXY"] || ENV["http_proxy"] || ENV["HTTP_PROXY"]
+        else
+          ENV["http_proxy"] || ENV["HTTP_PROXY"]
+        end
+      end
+
+      def parse_proxy_uri(proxy_env)
+        return nil unless proxy_env
+
+        Addressable::URI.parse(proxy_env)
+      rescue Addressable::URI::InvalidURIError
+        nil
+      end
+
+      def proxy_host
+        proxy_uri&.host
+      end
+
+      def proxy_port
+        proxy_uri&.port
+      end
+
+      def proxy_user
+        proxy_uri&.user
+      end
+
+      def proxy_pass
+        proxy_uri&.password
       end
 
       def theme_dir_exists?
