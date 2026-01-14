@@ -129,4 +129,38 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(@stubbed_logger.read).to_not include("jekyll_test_plugin_malicious")
     end
   end
+
+  context "with local layout override" do
+    let(:source) { fixture_path("site-with-local-layouts") }
+    let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+    before { subject.munge! }
+
+    it "uses local layout instead of theme layout" do
+      site.read
+
+      # Verify the local default layout is used
+      expect(site.layouts["default"]).to be_truthy
+      local_layout_path = File.join(source, "_layouts", "default.html")
+      expect(site.layouts["default"].path).to eql(local_layout_path)
+
+      # Verify content includes local layout marker
+      content = File.read(site.layouts["default"].path)
+      expect(content).to include("LOCAL LAYOUT")
+      expect(content).to include("local-layout-marker")
+    end
+
+    it "uses theme layout when no local override exists" do
+      site.read
+
+      # Verify the theme's home layout is used (no local override)
+      expect(site.layouts["home"]).to be_truthy
+      expect(site.layouts["home"].path).to include(theme_dir)
+      expect(site.layouts["home"].path).to_not include(source)
+    end
+
+    it "prioritizes local includes over theme includes" do
+      # Verify local includes directory is first in the load paths
+      expect(site.includes_load_paths.first).to eql(site.in_source_dir("_includes"))
+    end
+  end
 end

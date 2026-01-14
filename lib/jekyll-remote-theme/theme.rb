@@ -5,7 +5,7 @@ module Jekyll
     class Theme < Jekyll::Theme
       OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
       NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, commit, or "latest"
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
@@ -54,7 +54,11 @@ module Jekyll
       end
 
       def git_ref
-        theme_parts[:ref] || "HEAD"
+        parsed_ref = theme_parts[:ref]
+        return "HEAD" unless parsed_ref
+        return resolve_latest_release if parsed_ref == "latest"
+
+        parsed_ref
       end
 
       def cache_config
@@ -147,6 +151,100 @@ module Jekyll
         # The regex /\.\.+/ matches two or more consecutive dots (e.g., "..", "...")
         # but NOT single dots (e.g., "v1.2.3" remains unchanged)
         component.to_s.gsub(%r{[/\\]}, "_").gsub(/\.\.+/, "_")
+      end
+
+      def resolve_latest_release
+        return @resolved_latest_release if defined? @resolved_latest_release
+
+        Jekyll.logger.debug LOG_KEY, "Resolving @latest for #{name_with_owner}"
+
+        @resolved_latest_release = fetch_latest_release_tag || "HEAD"
+      end
+
+      def fetch_latest_release_tag
+        api_url = build_api_url
+        response = make_api_request(api_url)
+
+        if response.is_a?(Net::HTTPSuccess)
+          parse_tag_from_response(response)
+        else
+          log_no_releases_warning
+          nil
+        end
+      rescue StandardError => e
+        log_api_error(e)
+        nil
+      end
+
+      def build_api_url
+        Addressable::URI.new(
+          :scheme => scheme,
+          :host   => api_host,
+          :path   => api_path
+        )
+      end
+
+      def make_api_request(api_url)
+        Net::HTTP.start(
+          api_url.host,
+          api_url.port,
+          :use_ssl => api_url.scheme == "https"
+        ) do |http|
+          request = Net::HTTP::Get.new(api_url.request_uri)
+          request["Accept"] = "application/vnd.github.v3+json"
+          request["User-Agent"] = Downloader::USER_AGENT
+          http.request(request)
+        end
+      end
+
+      def parse_tag_from_response(response)
+        data = JSON.parse(response.body)
+        tag = data["tag_name"]
+
+        if tag.nil? || tag.empty?
+          Jekyll.logger.warn LOG_KEY,
+                             "No tag_name in API response for #{name_with_owner}, using HEAD"
+          return nil
+        end
+
+        Jekyll.logger.debug LOG_KEY, "Resolved @latest to #{tag} for #{name_with_owner}"
+        tag
+      rescue JSON::ParserError => e
+        Jekyll.logger.warn LOG_KEY,
+                           "Failed to parse API response for #{name_with_owner}: " \
+                           "#{e.message}, using HEAD"
+        nil
+      end
+
+      def log_no_releases_warning
+        Jekyll.logger.warn LOG_KEY,
+                           "No releases found for #{name_with_owner}, using HEAD"
+      end
+
+      def log_api_error(error)
+        Jekyll.logger.warn LOG_KEY,
+                           "Failed to fetch latest release for #{name_with_owner}: " \
+                           "#{error.message}, using HEAD"
+      end
+
+      def api_host
+        case host
+        when "github.com"
+          "api.github.com"
+        else
+          # For GitHub Enterprise, API is typically at hostname/api/v3
+          host
+        end
+      end
+
+      def api_path
+        case host
+        when "github.com"
+          "/repos/#{name_with_owner}/releases/latest"
+        else
+          # For GitHub Enterprise
+          "/api/v3/repos/#{name_with_owner}/releases/latest"
+        end
       end
     end
   end
