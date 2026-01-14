@@ -105,26 +105,26 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
         end
       end
     end
-    
+
     context "the complete gemspec with all metadata" do
       let(:fixture) { "complete" }
-      
+
       it "extracts multiple authors" do
         expect(subject.authors).to eq(["Jane Smith", "John Doe"])
       end
-      
+
       it "extracts summary" do
         expect(subject.summary).to eq("A complete test gemspec")
       end
-      
+
       it "extracts description" do
         expect(subject.description).to eq("A longer description of the test theme")
       end
-      
+
       it "returns version" do
         expect(subject.version).to be_a(Gem::Version)
       end
-      
+
       it "returns metadata" do
         expect(subject.metadata).to be_a(Hash)
       end

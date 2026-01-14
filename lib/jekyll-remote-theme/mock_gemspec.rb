@@ -11,7 +11,7 @@ module Jekyll
 
       DEPENDENCY_PREFIX = %r!^\s*[a-z]+\.add_(?:runtime_)?dependency!.freeze
       DEPENDENCY_REGEX = %r!#{DEPENDENCY_PREFIX}\(?\s*["']([a-z_-]+)["']!.freeze
-      
+
       # Regex patterns for extracting gemspec metadata
       AUTHORS_REGEX = %r!^\s*[a-z_]+\.authors\s*=\s*\[(.*?)\]!m.freeze
       VERSION_REGEX = %r!^\s*[a-z_]+\.version\s*=\s*["']?([^"'\s]+)["']?!.freeze
@@ -28,55 +28,55 @@ module Jekyll
           Gem::Dependency.new(name)
         end
       end
-      
+
       # Returns an array of authors from the gemspec
       def authors
         @authors ||= begin
           return [] unless contents
-          
+
           match = contents.match(AUTHORS_REGEX)
           return [] unless match
-          
+
           # Extract author names from the array string
-          match[1].scan(/["']([^"']+)["']/).flatten
+          match[1].scan(%r!["']([^"']+)["']!).flatten
         end
       end
-      
+
       # Returns the version from the gemspec
       # Note: This returns a string since actual version evaluation would require
       # loading the version file, which may not be safe
       def version
         @version ||= begin
           return Gem::Version.new("0.0.0") unless contents
-          
+
           match = contents.match(VERSION_REGEX)
           return Gem::Version.new("0.0.0") unless match
-          
+
           # Return a generic version since we can't safely evaluate VERSION constants
           Gem::Version.new("0.0.0")
         end
       end
-      
+
       # Returns the summary from the gemspec
       def summary
         @summary ||= begin
           return "" unless contents
-          
+
           match = contents.match(SUMMARY_REGEX)
           match ? match[1] : ""
         end
       end
-      
+
       # Returns the description from the gemspec
       def description
         @description ||= begin
           return nil unless contents
-          
+
           match = contents.match(DESCRIPTION_REGEX)
           match ? match[1] : nil
         end
       end
-      
+
       # Returns metadata hash from the gemspec
       def metadata
         @metadata ||= {}
