@@ -47,7 +47,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
     after(:all) { reset_tmp_dir }
 
     it "returns a zero exit code" do
-      skip "GitHub API not accessible in this environment" unless github_api_accessible? || status.exitstatus.zero?
+      skip "GitHub API not accessible - build failed" if !github_api_accessible? && !status.exitstatus.zero?
       expect(status.exitstatus).to eql(0), output
     end
 
