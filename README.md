@@ -59,6 +59,23 @@ To automatically use the latest tagged release, you can specify `@latest` (e.g.,
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
 
+## Customizing your theme
+
+You can override any file from the remote theme by creating a file with the same path in your Jekyll site. This works for:
+
+* **Layouts** (`_layouts/`) - Create a file with the same name in your `_layouts` directory to override a theme layout
+* **Includes** (`_includes/`) - Create a file with the same name in your `_includes` directory to override a theme include
+* **Sass files** (`_sass/`) - Add custom Sass files in your `_sass` directory
+* **Assets** (`assets/`) - Override or add assets in your `assets` directory
+
+### Example
+
+If your remote theme has a `_layouts/default.html` file, you can override it by creating your own `_layouts/default.html` file in your site. Your local version will be used instead of the theme's version.
+
+Similarly, if the theme has an `_includes/header.html` file, you can override it by creating `_includes/header.html` in your site.
+
+**Note**: Only the specific files you override will use your local versions. All other theme files will continue to work as provided by the theme.
+
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
