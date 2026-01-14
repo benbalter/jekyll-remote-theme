@@ -121,8 +121,8 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
         expect(subject.description).to eq("A longer description of the test theme")
       end
 
-      it "returns version" do
-        expect(subject.version).to be_a(Gem::Version)
+      it "extracts version" do
+        expect(subject.version).to eq(Gem::Version.new("1.2.3"))
       end
 
       it "returns metadata" do

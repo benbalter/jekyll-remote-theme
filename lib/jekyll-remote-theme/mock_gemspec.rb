@@ -14,10 +14,9 @@ module Jekyll
 
       # Regex patterns for extracting gemspec metadata
       AUTHORS_REGEX = %r!^\s*[a-z_]+\.authors\s*=\s*\[(.*?)\]!m.freeze
-      VERSION_REGEX = %r!^\s*[a-z_]+\.version\s*=\s*["']?([^"'\s]+)["']?!.freeze
+      VERSION_REGEX = %r!^\s*[a-z_]+\.version\s*=\s*["']([^"'\s]+)["']!.freeze
       SUMMARY_REGEX = %r!^\s*[a-z_]+\.summary\s*=\s*["'](.*?)["']!.freeze
       DESCRIPTION_REGEX = %r!^\s*[a-z_]+\.description\s*=\s*["'](.*?)["']!.freeze
-      METADATA_REGEX = %r!^\s*[a-z_]+\.metadata\s*=\s*\{(.*?)\}!m.freeze
 
       def initialize(theme)
         @theme = theme
@@ -42,19 +41,22 @@ module Jekyll
         end
       end
 
-      # Returns the version from the gemspec
-      # Note: This returns a string since actual version evaluation would require
-      # loading the version file, which may not be safe
+      # Returns the version from the gemspec as a Gem::Version object
+      # Note: This extracts literal version strings like "1.2.3" from the gemspec.
+      # It cannot evaluate version constants like MyGem::VERSION.
       def version
         @version ||= begin
-          return Gem::Version.new("0.0.0") unless contents
+                       return Gem::Version.new("0.0.0") unless contents
 
-          match = contents.match(VERSION_REGEX)
-          return Gem::Version.new("0.0.0") unless match
+                       match = contents.match(VERSION_REGEX)
+                       return Gem::Version.new("0.0.0") unless match
 
-          # Return a generic version since we can't safely evaluate VERSION constants
-          Gem::Version.new("0.0.0")
-        end
+                       # Extract the version string and convert to Gem::Version
+                       Gem::Version.new(match[1])
+                     rescue ArgumentError
+                       # If the version string is invalid, return default
+                       Gem::Version.new("0.0.0")
+                     end
       end
 
       # Returns the summary from the gemspec
@@ -78,6 +80,7 @@ module Jekyll
       end
 
       # Returns metadata hash from the gemspec
+      # Note: Metadata parsing is not currently implemented
       def metadata
         @metadata ||= {}
       end
