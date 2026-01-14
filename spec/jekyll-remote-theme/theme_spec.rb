@@ -89,6 +89,39 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
+  context "with @latest ref" do
+    let(:git_ref) { "latest" }
+    let(:api_response_body) { '{"tag_name": "v1.2.3"}' }
+
+    before do
+      allow(subject).to receive(:fetch_latest_release_tag).and_return("v1.2.3")
+    end
+
+    it "resolves to the latest release tag" do
+      expect(subject.git_ref).to eql("v1.2.3")
+    end
+
+    context "when no releases exist" do
+      before do
+        allow(subject).to receive(:fetch_latest_release_tag).and_return(nil)
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when API call fails" do
+      before do
+        allow(subject).to receive(:fetch_latest_release_tag).and_return(nil)
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+  end
+
   it "knows its root" do
     expect(Dir.exist?(subject.root)).to be_truthy
   end
@@ -248,6 +281,89 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
       it "is invalid when directory doesn't exist" do
         expect(subject).to_not be_valid
+      end
+    end
+  end
+
+  context "with @latest ref and real API calls" do
+    let(:git_ref) { "latest" }
+    let(:api_url) { "https://api.github.com/repos/foo/bar/releases/latest" }
+    let(:api_response_body) { '{"tag_name": "v2.5.0"}' }
+
+    before do
+      WebMock.disable_net_connect!
+      stub_request(:get, api_url)
+        .to_return(
+          :status  => 200,
+          :body    => api_response_body,
+          :headers => { "Content-Type" => "application/json" }
+        )
+    end
+
+    after { WebMock.allow_net_connect! }
+
+    it "fetches the latest release from GitHub API" do
+      expect(subject.git_ref).to eql("v2.5.0")
+    end
+
+    context "when the API returns 404" do
+      before do
+        stub_request(:get, api_url).to_return(:status => 404)
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API call raises an error" do
+      before do
+        stub_request(:get, api_url).to_raise(StandardError.new("Network error"))
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API returns malformed JSON" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(:status => 200, :body => "not valid json")
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API returns JSON without tag_name" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(
+            :status  => 200,
+            :body    => '{"name": "Release 1"}',
+            :headers => { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API returns empty tag_name" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(
+            :status  => 200,
+            :body    => '{"tag_name": ""}',
+            :headers => { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
       end
     end
   end

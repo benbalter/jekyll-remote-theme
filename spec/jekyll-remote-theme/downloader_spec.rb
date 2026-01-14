@@ -90,6 +90,88 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
+
+    context "with an SSL error" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_ssl_error_/zip/HEAD" }
+      let(:ssl_error_msg) { "certificate verify failed (unable to get certificate CRL)" }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_raise(OpenSSL::SSL::SSLError.new(ssl_error_msg))
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError for SSL errors" do
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, ssl_error_msg)
+      end
+    end
+  end
+
+  context "proxy configuration" do
+    after do
+      ENV.delete("http_proxy")
+      ENV.delete("https_proxy")
+      ENV.delete("HTTP_PROXY")
+      ENV.delete("HTTPS_PROXY")
+    end
+
+    it "returns nil proxy_uri when no proxy is set" do
+      expect(subject.send(:proxy_uri)).to be_nil
+    end
+
+    it "returns nil proxy_host when no proxy is set" do
+      expect(subject.send(:proxy_host)).to be_nil
+    end
+
+    it "parses http_proxy environment variable" do
+      ENV["http_proxy"] = "http://proxy.example.com:8080"
+      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
+      expect(subject.send(:proxy_port)).to eq(8080)
+    end
+
+    it "parses https_proxy environment variable for https URLs" do
+      ENV["https_proxy"] = "http://secure-proxy.example.com:8443"
+      expect(subject.send(:proxy_host)).to eq("secure-proxy.example.com")
+      expect(subject.send(:proxy_port)).to eq(8443)
+    end
+
+    it "prefers https_proxy over http_proxy for https URLs" do
+      ENV["http_proxy"] = "http://proxy.example.com:8080"
+      ENV["https_proxy"] = "http://secure-proxy.example.com:8443"
+      expect(subject.send(:proxy_host)).to eq("secure-proxy.example.com")
+      expect(subject.send(:proxy_port)).to eq(8443)
+    end
+
+    it "parses proxy with authentication" do
+      ENV["http_proxy"] = "http://user:password@proxy.example.com:8080"
+      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
+      expect(subject.send(:proxy_port)).to eq(8080)
+      expect(subject.send(:proxy_user)).to eq("user")
+      expect(subject.send(:proxy_pass)).to eq("password")
+    end
+
+    it "handles uppercase environment variables" do
+      ENV["HTTP_PROXY"] = "http://proxy.example.com:8080"
+      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
+      expect(subject.send(:proxy_port)).to eq(8080)
+    end
+
+    it "returns Net::HTTP class when no proxy is set" do
+      expect(subject.send(:http_class)).to eq(Net::HTTP)
+    end
+
+    it "returns Net::HTTP::Proxy class when proxy is set" do
+      ENV["http_proxy"] = "http://proxy.example.com:8080"
+      http_class = subject.send(:http_class)
+      expect(http_class).not_to eq(Net::HTTP)
+      expect(http_class.proxy_address).to eq("proxy.example.com")
+      expect(http_class.proxy_port).to eq(8080)
+    end
+
+    it "handles invalid proxy URIs gracefully" do
+      ENV["http_proxy"] = "://invalid"
+      expect(subject.send(:proxy_host)).to be_nil
+    end
   end
 
   context "with a local theme" do

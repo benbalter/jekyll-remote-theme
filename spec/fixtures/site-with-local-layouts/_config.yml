@@ -1,0 +1,8 @@
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: pages-themes/primer
+
+whitelist:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
