@@ -5,3 +5,8 @@ inherit_gem:
 AllCops:
   Exclude:
     - vendor/**/*
+
+# Disable Layout/BlockAlignment cop due to crashes with current RuboCop version
+# See: https://github.com/rubocop-hq/rubocop/issues
+Layout/BlockAlignment:
+  Enabled: false
