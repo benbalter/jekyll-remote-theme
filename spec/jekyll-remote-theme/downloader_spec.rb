@@ -91,4 +91,24 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       end
     end
   end
+
+  context "with submodules enabled" do
+    let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme, submodules: true) }
+    subject { described_class.new(theme) }
+
+    it "uses git clone method" do
+      expect(subject).to receive(:clone_with_submodules).and_call_original
+      expect(subject).not_to receive(:download)
+      expect(subject).not_to receive(:unzip)
+      
+      # Mock the git clone operation
+      allow(subject).to receive(:system).and_return(true)
+      subject.run
+    end
+
+    it "builds the correct git url" do
+      expected = "https://github.com/pages-themes/primer"
+      expect(subject.send(:git_url).to_s).to eql(expected)
+    end
+  end
 end

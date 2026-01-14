@@ -129,4 +129,42 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(@stubbed_logger.read).to_not include("jekyll_test_plugin_malicious")
     end
   end
+
+  context "with submodules config" do
+    context "as a separate key with string theme" do
+      let(:overrides) { { "remote_theme" => "pages-themes/primer", "submodules" => true } }
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "in hash format" do
+      let(:overrides) { { "remote_theme" => { "url" => "pages-themes/primer", "submodules" => true } } }
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "with symbol keys in hash format" do
+      let(:overrides) { { "remote_theme" => { :url => "pages-themes/primer", :submodules => true } } }
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "without submodules specified" do
+      let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+
+      it "defaults to false" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_falsy
+      end
+    end
+  end
 end

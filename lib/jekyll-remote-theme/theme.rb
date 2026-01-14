@@ -18,8 +18,12 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
-      def initialize(raw_theme)
+      #
+      # options:
+      # - submodules: boolean - whether to clone submodules (default: false)
+      def initialize(raw_theme, submodules: false)
         @raw_theme = raw_theme.to_s.downcase.strip
+        @submodules = submodules
         super(@raw_theme)
       end
 
@@ -52,6 +56,10 @@ module Jekyll
 
       def git_ref
         theme_parts[:ref] || "HEAD"
+      end
+
+      def submodules?
+        @submodules
       end
 
       def root

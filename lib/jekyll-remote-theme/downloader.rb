@@ -21,8 +21,12 @@ module Jekyll
           return
         end
 
-        download
-        unzip
+        if theme.submodules?
+          clone_with_submodules
+        else
+          download
+          unzip
+        end
       end
 
       def downloaded?
@@ -111,6 +115,42 @@ module Jekyll
       # on a case-sensitive file system, strip the parent folder from all paths.
       def path_without_name_and_ref(path)
         Jekyll.sanitized_path theme.root, path.split("/").drop(1).join("/")
+      end
+
+      def clone_with_submodules
+        Jekyll.logger.debug LOG_KEY, "Cloning #{git_url} to #{theme.root} with submodules"
+        
+        # Remove the empty directory created by mktmpdir
+        FileUtils.rm_rf(theme.root) if Dir.exist?(theme.root)
+        
+        # Clone with submodules
+        cmd = [
+          "git", "clone",
+          "--quiet",
+          "--depth", "1",
+          "--recurse-submodules",
+          "--shallow-submodules",
+          "--branch", theme.git_ref,
+          git_url.to_s,
+          theme.root,
+        ]
+        
+        result = system(*cmd, :out => File::NULL, :err => File::NULL)
+        unless result
+          raise DownloadError, "Failed to clone #{git_url} with submodules"
+        end
+        
+        @downloaded = true
+      rescue StandardError => e
+        raise DownloadError, "Git clone failed: #{e.message}"
+      end
+
+      def git_url
+        @git_url ||= Addressable::URI.new(
+          :scheme => theme.scheme,
+          :host   => theme.host,
+          :path   => [theme.owner, theme.name].join("/")
+        ).normalize
       end
     end
   end

@@ -13,6 +13,7 @@ module Jekyll
 
       def munge!
         return unless raw_theme
+        return unless theme_url # Return early if no valid theme URL
 
         unless theme.valid?
           Jekyll.logger.error LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
@@ -36,11 +37,24 @@ module Jekyll
       end
 
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||= Theme.new(theme_url, submodules: submodules?)
       end
 
       def raw_theme
         config[CONFIG_KEY]
+      end
+
+      def theme_url
+        return raw_theme unless raw_theme.is_a?(Hash)
+
+        raw_theme["url"] || raw_theme[:url]
+      end
+
+      def submodules?
+        return config["submodules"] if raw_theme.is_a?(String)
+        return false unless raw_theme.is_a?(Hash)
+
+        raw_theme["submodules"] || raw_theme[:submodules] || false
       end
 
       def downloader
