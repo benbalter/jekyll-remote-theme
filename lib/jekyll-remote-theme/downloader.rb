@@ -135,16 +135,17 @@ module Jekyll
       end
 
       def git_clone_command
-        [
+        cmd = [
           "git", "clone",
           "--quiet",
           "--depth", "1",
           "--recurse-submodules",
           "--shallow-submodules",
-          "--branch", theme.git_ref,
-          git_url.to_s,
-          theme.root,
         ]
+        # Only specify branch if git_ref is not HEAD (default)
+        cmd.concat(["--branch", theme.git_ref]) unless theme.git_ref == "HEAD"
+        cmd.concat([git_url.to_s, theme.root])
+        cmd
       end
 
       def git_url
