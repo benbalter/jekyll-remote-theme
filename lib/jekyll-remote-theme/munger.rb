@@ -55,6 +55,17 @@ module Jekyll
         site.theme.configure_sass if site.theme.respond_to?(:configure_sass)
         site.send(:configure_include_paths)
         site.plugin_manager.require_theme_deps
+        initialize_github_metadata
+      end
+
+      # Initialize GitHub metadata munger if it was loaded after :after_init hook
+      def initialize_github_metadata
+        return unless defined?(Jekyll::GitHubMetadata::SiteGitHubMunger)
+        return if Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger
+
+        munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
+        munger.munge!
+        Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = munger
       end
 
       def enqueue_theme_cleanup
