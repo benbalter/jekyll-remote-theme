@@ -16,6 +16,11 @@ module Jekyll
       end
 
       def run
+        if theme.local_theme?
+          Jekyll.logger.debug LOG_KEY, "Using local theme at #{theme.root}"
+          return
+        end
+
         if downloaded?
           Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
           return
@@ -26,6 +31,8 @@ module Jekyll
       end
 
       def downloaded?
+        return true if theme.local_theme?
+
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
       end
 

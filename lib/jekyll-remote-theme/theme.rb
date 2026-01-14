@@ -18,16 +18,23 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
+      # 5. /absolute/path/to/theme - an absolute local file path
+      # 6. ../relative/path/to/theme - a relative local file path
       def initialize(raw_theme)
-        @raw_theme = raw_theme.to_s.downcase.strip
+        @raw_theme = raw_theme.to_s.strip
+        @raw_theme = @raw_theme.downcase unless local_theme?
         super(@raw_theme)
       end
 
       def name
+        return File.basename(@raw_theme) if local_theme?
+
         theme_parts[:name]
       end
 
       def owner
+        return "local" if local_theme?
+
         theme_parts[:owner]
       end
 
@@ -45,6 +52,7 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
+        return local_path_valid? if local_theme?
         return false unless uri && theme_parts && name && owner
 
         host && valid_hosts.include?(host)
@@ -55,7 +63,13 @@ module Jekyll
       end
 
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        return @root if defined?(@root) && @root
+
+        if local_theme?
+          @root = File.expand_path(@raw_theme)
+        else
+          @root = File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        end
       end
 
       def inspect
@@ -63,7 +77,21 @@ module Jekyll
         " ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
+      def local_theme?
+        @local_theme ||= looks_like_local_path?(@raw_theme)
+      end
+
       private
+
+      def looks_like_local_path?(path)
+        # Check if it looks like a local path (starts with /, ./, or ../)
+        path.start_with?("/", "./", "../")
+      end
+
+      def local_path_valid?
+        expanded_path = File.expand_path(@raw_theme)
+        Dir.exist?(expanded_path)
+      end
 
       def uri
         return @uri if defined? @uri

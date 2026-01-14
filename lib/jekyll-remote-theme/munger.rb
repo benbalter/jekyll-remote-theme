@@ -58,6 +58,8 @@ module Jekyll
       end
 
       def enqueue_theme_cleanup
+        return if theme.local_theme? # Don't clean up local theme directories
+
         at_exit do
           Jekyll.logger.debug LOG_KEY, "Cleaning up #{theme.root}"
           FileUtils.rm_rf theme.root
