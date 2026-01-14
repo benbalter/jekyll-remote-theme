@@ -18,7 +18,7 @@ RSpec.describe "Jekyll::RemoteTheme Caching" do
     end
 
     it "uses temp directory" do
-      expect(theme.root).to match(/^\/tmp\/jekyll-remote-theme-/)
+      expect(theme.root).to include(Jekyll::RemoteTheme::TEMP_PREFIX)
     end
 
     it "cache_path returns nil" do
@@ -132,6 +132,44 @@ RSpec.describe "Jekyll::RemoteTheme Caching" do
 
     it "v2 cache includes v0.6.0" do
       expect(theme_v2.root).to include("v0.6.0")
+    end
+  end
+
+  context "path sanitization" do
+    let(:config) do
+      {
+        "remote_theme_cache" => {
+          "enabled" => true,
+        },
+      }
+    end
+
+    it "sanitizes path separators in git refs" do
+      sanitized = theme.send(:sanitize_path_component, "feature/test-branch")
+      expect(sanitized).to eq("feature_test-branch")
+      expect(sanitized).not_to include("/")
+    end
+
+    it "sanitizes double dots to prevent directory traversal" do
+      sanitized = theme.send(:sanitize_path_component, "../../../etc/shadow")
+      expect(sanitized).not_to include("..")
+      expect(sanitized).to eq("______etc_shadow")
+    end
+
+    it "sanitizes backslashes" do
+      sanitized = theme.send(:sanitize_path_component, "path\\with\\backslashes")
+      expect(sanitized).to eq("path_with_backslashes")
+      expect(sanitized).not_to include("\\")
+    end
+
+    it "preserves valid version numbers" do
+      sanitized = theme.send(:sanitize_path_component, "v1.2.3")
+      expect(sanitized).to eq("v1.2.3")
+    end
+
+    it "handles nil gracefully" do
+      sanitized = theme.send(:sanitize_path_component, nil)
+      expect(sanitized).to eq("")
     end
   end
 end

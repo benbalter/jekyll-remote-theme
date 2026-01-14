@@ -57,11 +57,17 @@ module Jekyll
         theme_parts[:ref] || "HEAD"
       end
 
-      def cache_enabled?
-        return false unless @site
+      def cache_config
+        return nil unless @site
 
-        cache_config = @site.config[CACHE_CONFIG_KEY]
-        return false unless cache_config.is_a?(Hash)
+        @cache_config ||= begin
+          config = @site.config[CACHE_CONFIG_KEY]
+          config.is_a?(Hash) ? config : nil
+        end
+      end
+
+      def cache_enabled?
+        return false unless cache_config
 
         cache_config["enabled"] == true
       end
@@ -69,7 +75,6 @@ module Jekyll
       def cache_path
         return nil unless cache_enabled?
 
-        cache_config = @site.config[CACHE_CONFIG_KEY]
         custom_path = cache_config["path"]
 
         if custom_path
@@ -81,7 +86,12 @@ module Jekyll
 
       def root
         @root ||= if cache_enabled?
-                    path = File.join(cache_path, owner, name, git_ref)
+                    # Sanitize path components to prevent directory traversal
+                    sanitized_owner = sanitize_path_component(owner)
+                    sanitized_name = sanitize_path_component(name)
+                    sanitized_ref = sanitize_path_component(git_ref)
+
+                    path = File.join(cache_path, sanitized_owner, sanitized_name, sanitized_ref)
                     FileUtils.mkdir_p(path)
                     File.realpath(path)
                   else
@@ -126,6 +136,16 @@ module Jekyll
           ENV["PAGES_GITHUB_HOSTNAME"],
           ENV["GITHUB_HOSTNAME"],
         ].compact.to_set
+      end
+
+      # Sanitize path component to prevent directory traversal attacks
+      # Removes any path separators and parent directory references
+      def sanitize_path_component(component)
+        return "" if component.nil?
+
+        # Replace path separators and backslashes, but preserve dots in version strings
+        # Only replace ".." sequences that could lead to directory traversal
+        component.to_s.gsub(%r{[/\\]}, "_").gsub(/\.\.+/, "_")
       end
     end
   end
