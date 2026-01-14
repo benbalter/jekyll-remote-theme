@@ -70,7 +70,8 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
       it "raises a DownloadError" do
         msg = "The repository 'pages-themes/primer' could not be found. " \
-              "Please check that the repository name is correct, publicly accessible, and contains a valid Jekyll theme. " \
+              "Please check that the repository name is correct, " \
+              "publicly accessible, and contains a valid Jekyll theme. " \
               "URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
