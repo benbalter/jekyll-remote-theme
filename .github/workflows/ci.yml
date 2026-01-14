@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        jekyll_version:
+          - "~> 3.0"
+          - "~> 4.0"
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true # Runs bundle install and caches installed gems
+    
+    - name: Install dependencies
+      run: script/bootstrap
+      env:
+        JEKYLL_VERSION: ${{ matrix.jekyll_version }}
+    
+    - name: Run tests
+      run: script/cibuild
+      env:
+        JEKYLL_VERSION: ${{ matrix.jekyll_version }}
