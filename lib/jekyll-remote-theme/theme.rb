@@ -60,6 +60,8 @@ module Jekyll
       end
 
       def git_ref
+        return "HEAD" if local_theme?
+
         theme_parts[:ref] || "HEAD"
       end
 
@@ -75,7 +77,7 @@ module Jekyll
       end
 
       def local_theme?
-        looks_like_local_path?(@raw_theme)
+        @local_theme ||= looks_like_local_path?(@raw_theme)
       end
 
       private
@@ -83,11 +85,7 @@ module Jekyll
       def looks_like_local_path?(path)
         # Check if it looks like a local path
         # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
-        return true if path.start_with?("/", "./", "../", "~/")
-        # Check for Windows-style absolute paths (e.g., C:\path or C:/path)
-        return true if path.match?(%r{\A[a-z]:[/\\]}i)
-
-        false
+        path.start_with?("/", "./", "../", "~/") || path.match?(%r{\A[a-z]:[/\\]}i)
       end
 
       def expanded_local_path
