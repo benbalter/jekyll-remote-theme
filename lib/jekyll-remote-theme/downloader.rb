@@ -112,7 +112,8 @@ module Jekyll
       end
 
       def find_proxy_env_var
-        if zip_url.scheme == "https"
+        # Check for HTTPS proxy first if the URL uses HTTPS
+        if theme.scheme == "https"
           ENV["https_proxy"] || ENV["HTTPS_PROXY"] || ENV["http_proxy"] || ENV["HTTP_PROXY"]
         else
           ENV["http_proxy"] || ENV["HTTP_PROXY"]
