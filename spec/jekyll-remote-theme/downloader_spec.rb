@@ -104,7 +104,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
 
     after do
-      FileUtils.rm_rf(tmp_theme_dir) if Dir.exist?(tmp_theme_dir)
+      FileUtils.rm_rf(tmp_theme_dir)
     end
 
     it "knows it's already downloaded" do

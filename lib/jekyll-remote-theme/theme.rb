@@ -66,9 +66,7 @@ module Jekyll
       end
 
       def root
-        return @root if defined?(@root) && @root
-
-        @root = local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
+        @root ||= local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
       end
 
       def inspect

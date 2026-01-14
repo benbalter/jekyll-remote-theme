@@ -176,7 +176,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
 
     after do
-      FileUtils.rm_rf(tmp_theme_dir) if Dir.exist?(tmp_theme_dir)
+      FileUtils.rm_rf(tmp_theme_dir)
     end
 
     it "detects as a local theme" do
