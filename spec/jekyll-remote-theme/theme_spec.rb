@@ -238,5 +238,46 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
         expect(subject.git_ref).to eql("HEAD")
       end
     end
+
+    context "when the API returns malformed JSON" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(:status => 200, :body => "not valid json")
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API returns JSON without tag_name" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(
+            :status  => 200,
+            :body    => '{"name": "Release 1"}',
+            :headers => { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
+
+    context "when the API returns empty tag_name" do
+      before do
+        stub_request(:get, api_url)
+          .to_return(
+            :status  => 200,
+            :body    => '{"tag_name": ""}',
+            :headers => { "Content-Type" => "application/json" }
+          )
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+    end
   end
 end

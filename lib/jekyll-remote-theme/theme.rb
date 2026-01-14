@@ -5,7 +5,7 @@ module Jekyll
     class Theme < Jekyll::Theme
       OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
       NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, or commit
+      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, commit, or "latest"
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
@@ -146,11 +146,22 @@ module Jekyll
       end
 
       def parse_tag_from_response(response)
-        require "json"
         data = JSON.parse(response.body)
         tag = data["tag_name"]
+
+        if tag.nil? || tag.empty?
+          Jekyll.logger.warn LOG_KEY,
+                             "No tag_name in API response for #{name_with_owner}, using HEAD"
+          return nil
+        end
+
         Jekyll.logger.debug LOG_KEY, "Resolved @latest to #{tag} for #{name_with_owner}"
         tag
+      rescue JSON::ParserError => e
+        Jekyll.logger.warn LOG_KEY,
+                           "Failed to parse API response for #{name_with_owner}: " \
+                           "#{e.message}, using HEAD"
+        nil
       end
 
       def log_no_releases_warning
