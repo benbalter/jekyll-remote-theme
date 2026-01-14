@@ -20,14 +20,15 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
       # 5. /absolute/path/to/theme - an absolute local file path
       # 6. ../relative/path/to/theme - a relative local file path
+      # 7. ~/path/to/theme - a home directory relative path
       def initialize(raw_theme)
-        @raw_theme = raw_theme.to_s.strip
-        @raw_theme = @raw_theme.downcase unless local_theme?
+        original_theme = raw_theme.to_s.strip
+        @raw_theme = looks_like_local_path?(original_theme) ? original_theme : original_theme.downcase
         super(@raw_theme)
       end
 
       def name
-        return File.basename(@raw_theme) if local_theme?
+        return File.basename(expanded_local_path) if local_theme?
 
         theme_parts[:name]
       end
@@ -65,11 +66,7 @@ module Jekyll
       def root
         return @root if defined?(@root) && @root
 
-        if local_theme?
-          @root = File.expand_path(@raw_theme)
-        else
-          @root = File.realpath Dir.mktmpdir(TEMP_PREFIX)
-        end
+        @root = local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
       end
 
       def inspect
@@ -78,19 +75,27 @@ module Jekyll
       end
 
       def local_theme?
-        @local_theme ||= looks_like_local_path?(@raw_theme)
+        looks_like_local_path?(@raw_theme)
       end
 
       private
 
       def looks_like_local_path?(path)
-        # Check if it looks like a local path (starts with /, ./, or ../)
-        path.start_with?("/", "./", "../")
+        # Check if it looks like a local path
+        # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
+        return true if path.start_with?("/", "./", "../", "~/")
+        # Check for Windows-style absolute paths (e.g., C:\path or C:/path)
+        return true if path.match?(%r{\A[a-z]:[/\\]}i)
+
+        false
+      end
+
+      def expanded_local_path
+        @expanded_local_path ||= File.expand_path(@raw_theme)
       end
 
       def local_path_valid?
-        expanded_path = File.expand_path(@raw_theme)
-        Dir.exist?(expanded_path)
+        Dir.exist?(expanded_local_path)
       end
 
       def uri

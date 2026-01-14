@@ -238,5 +238,17 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
         expect(subject).to_not be_valid
       end
     end
+
+    context "with a tilde path" do
+      let(:raw_theme) { "~/nonexistent-theme" }
+
+      it "detects as a local theme" do
+        expect(subject.local_theme?).to be true
+      end
+
+      it "is invalid when directory doesn't exist" do
+        expect(subject).to_not be_valid
+      end
+    end
   end
 end
