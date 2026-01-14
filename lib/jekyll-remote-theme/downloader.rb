@@ -43,7 +43,7 @@ module Jekyll
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         http_class.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
           http.request(request) do |response|
-            raise_unless_sucess(response)
+            raise_unless_success(response)
             enforce_max_file_size(response.content_length)
             response.read_body do |chunk|
               zip_file.write chunk
@@ -64,7 +64,7 @@ module Jekyll
         @request
       end
 
-      def raise_unless_sucess(response)
+      def raise_unless_success(response)
         return if response.is_a?(Net::HTTPSuccess)
 
         case response.code
