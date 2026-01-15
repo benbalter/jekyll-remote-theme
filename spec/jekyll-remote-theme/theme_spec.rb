@@ -130,6 +130,18 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     expect(subject.send(:gemspec)).to be_a(Jekyll::RemoteTheme::MockGemspec)
   end
 
+  it "defaults submodules to false" do
+    expect(subject.submodules?).to be_falsy
+  end
+
+  context "with submodules enabled" do
+    subject { described_class.new(nwo, :submodules => true) }
+
+    it "stores the submodules setting" do
+      expect(subject.submodules?).to be_truthy
+    end
+  end
+
   context "a full URL" do
     let(:host) { "github.com" }
     let(:scheme) { "https" }

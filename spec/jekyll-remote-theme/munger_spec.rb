@@ -130,6 +130,48 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
   end
 
+  context "with submodules config" do
+    context "as a separate key with string theme" do
+      let(:overrides) { { "remote_theme" => "pages-themes/primer", "submodules" => true } }
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "in hash format" do
+      let(:overrides) do
+        { "remote_theme" => { "url" => "pages-themes/primer", "submodules" => true } }
+      end
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "with symbol keys in hash format" do
+      let(:overrides) do
+        { "remote_theme" => { :url => "pages-themes/primer", :submodules => true } }
+      end
+
+      it "passes submodules to theme" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_truthy
+      end
+    end
+
+    context "without submodules specified" do
+      let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
+
+      it "defaults to false" do
+        theme = subject.send(:theme)
+        expect(theme.submodules?).to be_falsy
+      end
+    end
+  end
+
   context "with local layout override" do
     let(:source) { fixture_path("site-with-local-layouts") }
     let(:overrides) { { "remote_theme" => "pages-themes/primer" } }

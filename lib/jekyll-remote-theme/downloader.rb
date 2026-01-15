@@ -22,8 +22,12 @@ module Jekyll
           return
         end
 
-        download
-        unzip
+        if theme.submodules?
+          clone_with_submodules
+        else
+          download
+          unzip
+        end
       end
 
       def downloaded?
@@ -168,6 +172,47 @@ module Jekyll
       # on a case-sensitive file system, strip the parent folder from all paths.
       def path_without_name_and_ref(path)
         Jekyll.sanitized_path theme.root, path.split("/").drop(1).join("/")
+      end
+
+      def clone_with_submodules
+        Jekyll.logger.debug LOG_KEY, "Cloning #{git_url} to #{theme.root} with submodules"
+
+        # Remove the empty directory created by mktmpdir
+        FileUtils.rm_rf(theme.root) if Dir.exist?(theme.root)
+
+        # Clone with submodules
+        cmd = git_clone_command
+        output, status = Open3.capture2e(*cmd)
+
+        unless status.success?
+          raise DownloadError, "Failed to clone #{git_url} with submodules: #{output}"
+        end
+
+        @downloaded = true
+      rescue StandardError => e
+        raise DownloadError, "Git clone failed: #{e.message}"
+      end
+
+      def git_clone_command
+        cmd = [
+          "git", "clone",
+          "--quiet",
+          "--depth", "1",
+          "--recurse-submodules",
+          "--shallow-submodules",
+        ]
+        # Only specify branch if git_ref is not HEAD (default)
+        cmd.concat(["--branch", theme.git_ref]) unless theme.git_ref == "HEAD"
+        cmd.concat([git_url.to_s, theme.root])
+        cmd
+      end
+
+      def git_url
+        @git_url ||= Addressable::URI.new(
+          :scheme => theme.scheme,
+          :host   => theme.host,
+          :path   => [theme.owner, theme.name].join("/")
+        ).normalize
       end
     end
   end
