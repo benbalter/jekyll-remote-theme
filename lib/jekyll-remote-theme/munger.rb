@@ -68,9 +68,7 @@ module Jekyll
         needs_init = current_munger.nil?
         
         # Check if munger is for a different site (if site tracking is available)
-        if !needs_init && Jekyll::GitHubMetadata.respond_to?(:site)
-          needs_init = Jekyll::GitHubMetadata.site != site
-        end
+        needs_init ||= Jekyll::GitHubMetadata.respond_to?(:site) && Jekyll::GitHubMetadata.site != site
         
         if needs_init
           Jekyll.logger.debug LOG_KEY, "Initializing GitHub metadata munger"
