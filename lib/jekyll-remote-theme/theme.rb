@@ -64,7 +64,7 @@ module Jekyll
       end
 
       def data_path
-        @data_path ||= File.join(@root, "_data")
+        @data_path ||= File.join(root, "_data")
       end
 
       private
