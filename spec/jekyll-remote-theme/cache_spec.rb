@@ -40,7 +40,7 @@ RSpec.describe "Jekyll::RemoteTheme Caching" do
     end
 
     it "uses cache directory" do
-      expect(theme.root).to match(/vendor\/cache\/remote-themes/)
+      expect(theme.root).to match(%r!vendor/cache/remote-themes!)
     end
 
     it "includes owner in cache path" do
@@ -64,7 +64,7 @@ RSpec.describe "Jekyll::RemoteTheme Caching" do
         {
           "remote_theme_cache" => {
             "enabled" => true,
-            "path" => ".cache/themes",
+            "path"    => ".cache/themes",
           },
         }
       end
