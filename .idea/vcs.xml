@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
-  </component>
+<project>
+  <!--
+    Intentionally left without IDE-specific configuration.
+    VCS/IDE settings are user-local and should not be committed to the repository.
+  -->
 </project>
