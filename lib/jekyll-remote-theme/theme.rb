@@ -23,7 +23,8 @@ module Jekyll
       # 7. ~/path/to/theme - a home directory relative path
       def initialize(raw_theme)
         original_theme = raw_theme.to_s.strip
-        @raw_theme = looks_like_local_path?(original_theme) ? original_theme : original_theme.downcase
+        local_path = looks_like_local_path?(original_theme)
+        @raw_theme = local_path ? original_theme : original_theme.downcase
         super(@raw_theme)
       end
 
@@ -54,9 +55,8 @@ module Jekyll
 
       def valid?
         return local_path_valid? if local_theme?
-        return false unless uri && theme_parts && name && owner
 
-        host && valid_hosts.include?(host)
+        remote_theme_valid?
       end
 
       def git_ref
@@ -87,7 +87,7 @@ module Jekyll
       def looks_like_local_path?(path)
         # Check if it looks like a local path
         # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
-        path.start_with?("/", "./", "../", "~/") || path.match?(%r{\A[a-z]:[/\\]}i)
+        path.start_with?("/", "./", "../", "~/") || path.match?(%r!\A[a-z]:[/\\]!i)
       end
 
       def expanded_local_path
@@ -96,6 +96,12 @@ module Jekyll
 
       def local_path_valid?
         Dir.exist?(expanded_local_path)
+      end
+
+      def remote_theme_valid?
+        return false unless uri && theme_parts && name && owner
+
+        host && valid_hosts.include?(host)
       end
 
       def uri
