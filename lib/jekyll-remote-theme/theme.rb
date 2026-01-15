@@ -18,16 +18,25 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
+      # 5. /absolute/path/to/theme - an absolute local file path
+      # 6. ../relative/path/to/theme - a relative local file path
+      # 7. ~/path/to/theme - a home directory relative path
       def initialize(raw_theme)
-        @raw_theme = raw_theme.to_s.downcase.strip
+        original_theme = raw_theme.to_s.strip
+        local_path = looks_like_local_path?(original_theme)
+        @raw_theme = local_path ? original_theme : original_theme.downcase
         super(@raw_theme)
       end
 
       def name
+        return File.basename(expanded_local_path) if local_theme?
+
         theme_parts[:name]
       end
 
       def owner
+        return "local" if local_theme?
+
         theme_parts[:owner]
       end
 
@@ -45,12 +54,14 @@ module Jekyll
       alias_method :nwo, :name_with_owner
 
       def valid?
-        return false unless uri && theme_parts && name && owner
+        return local_path_valid? if local_theme?
 
-        host && valid_hosts.include?(host)
+        remote_theme_valid?
       end
 
       def git_ref
+        return "HEAD" if local_theme?
+
         parsed_ref = theme_parts[:ref]
         return "HEAD" unless parsed_ref
         return resolve_latest_release if parsed_ref == "latest"
@@ -59,7 +70,7 @@ module Jekyll
       end
 
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        @root ||= local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
       end
 
       def inspect
@@ -67,10 +78,35 @@ module Jekyll
         " ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
+      def local_theme?
+        @local_theme ||= looks_like_local_path?(@raw_theme)
+      end
+
       private
+
+      def looks_like_local_path?(path)
+        # Check if it looks like a local path
+        # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
+        path.start_with?("/", "./", "../", "~/") || path.match?(%r!\A[a-z]:[/\\]!i)
+      end
+
+      def expanded_local_path
+        @expanded_local_path ||= File.expand_path(@raw_theme)
+      end
+
+      def local_path_valid?
+        Dir.exist?(expanded_local_path)
+      end
+
+      def remote_theme_valid?
+        return false unless uri && theme_parts && name && owner
+
+        host && valid_hosts.include?(host)
+      end
 
       def uri
         return @uri if defined? @uri
+        return @uri = nil if local_theme?
 
         @uri = if THEME_REGEX.match?(@raw_theme)
                  Addressable::URI.new(
@@ -86,6 +122,8 @@ module Jekyll
       end
 
       def theme_parts
+        return nil if local_theme?
+
         @theme_parts ||= uri.path[1..-1].match(THEME_REGEX) if uri
       end
 
