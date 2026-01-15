@@ -65,7 +65,14 @@ module Jekyll
         
         # Create a new munger if one doesn't exist or if it's for a different site
         current_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger
-        if current_munger.nil? || (defined?(Jekyll::GitHubMetadata) && Jekyll::GitHubMetadata.site != site)
+        needs_init = current_munger.nil?
+        
+        # Check if munger is for a different site (if site tracking is available)
+        if !needs_init && Jekyll::GitHubMetadata.respond_to?(:site)
+          needs_init = Jekyll::GitHubMetadata.site != site
+        end
+        
+        if needs_init
           Jekyll.logger.debug LOG_KEY, "Initializing GitHub metadata munger"
           munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
           munger.munge!
