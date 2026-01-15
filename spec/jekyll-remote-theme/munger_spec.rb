@@ -169,6 +169,9 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
         theme = subject.send(:theme)
         expect(theme.submodules?).to be_falsy
       end
+    end
+  end
+
   context "with local layout override" do
     let(:source) { fixture_path("site-with-local-layouts") }
     let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
