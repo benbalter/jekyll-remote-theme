@@ -59,13 +59,18 @@ module Jekyll
       end
 
       # Initialize GitHub metadata munger if it was loaded after :after_init hook
+      # or if the existing munger needs to be updated for the current site
       def initialize_github_metadata
         return unless defined?(Jekyll::GitHubMetadata::SiteGitHubMunger)
-        return if Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger
-
-        munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
-        munger.munge!
-        Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = munger
+        
+        # Create a new munger if one doesn't exist or if it's for a different site
+        current_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger
+        if current_munger.nil? || (defined?(Jekyll::GitHubMetadata) && Jekyll::GitHubMetadata.site != site)
+          Jekyll.logger.debug LOG_KEY, "Initializing GitHub metadata munger"
+          munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
+          munger.munge!
+          Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = munger
+        end
       end
 
       def enqueue_theme_cleanup
