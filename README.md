@@ -79,3 +79,7 @@ Similarly, if the theme has an `_includes/header.html` file, you can override it
 ## Debugging
 
 Adding `--verbose` to the `build` or `serve` command may provide additional information.
+
+## Directories
+
+In addition to the default directories `assets`, `_includes`, `_layouts`, and `_sass`, data files in the remote theme's `_data` directory are also considered.  
