@@ -59,6 +59,41 @@ To automatically use the latest tagged release, you can specify `@latest` (e.g.,
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
 
+## Caching remote themes
+
+By default, remote themes are downloaded to a temporary directory and cleaned up after each build. To persist themes across builds and reduce bandwidth usage, you can enable caching in your `_config.yml`:
+
+```yml
+remote_theme_cache:
+  enabled: true
+```
+
+This will cache downloaded themes in `vendor/cache/remote-themes` within your project directory. Each theme version (based on owner, repository name, and Git ref) is cached separately, so you can use different versions without conflicts.
+
+### Custom cache location
+
+You can specify a custom cache directory:
+
+```yml
+remote_theme_cache:
+  enabled: true
+  path: .cache/themes  # Relative to your site's source directory
+```
+
+### Benefits of caching
+
+- **Faster builds**: Skip downloads when the theme is already cached
+- **Reduced bandwidth**: Download themes only once per version
+- **Offline development**: Use cached themes without internet access
+- **Multiple projects**: Share cached themes across builds of the same project
+
+### Cache management
+
+- Cached themes are organized by `owner/name/git_ref` structure
+- Different Git refs (tags, branches, commits) are cached separately
+- To clear the cache, simply delete the cache directory
+- The cache directory is automatically created when caching is enabled
+
 ## Customizing your theme
 
 You can override any file from the remote theme by creating a file with the same path in your Jekyll site. This works for:

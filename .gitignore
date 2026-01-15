@@ -3,6 +3,7 @@ spec/examples.txt
 *.gem
 tmp/
 spec/fixtures/site/.jekyll-cache
+spec/fixtures/site/.cache/
 vendor/
 .vendor/
 .bundle/

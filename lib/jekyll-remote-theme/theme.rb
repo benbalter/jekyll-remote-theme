@@ -18,8 +18,11 @@ module Jekyll
       # - An enterprise GitHub instance + a GitHub owner + a theme-name string
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
-      def initialize(raw_theme)
+      #
+      # site is optional and used for cache configuration
+      def initialize(raw_theme, site = nil)
         @raw_theme = raw_theme.to_s.downcase.strip
+        @site = site
         super(@raw_theme)
       end
 
@@ -58,8 +61,46 @@ module Jekyll
         parsed_ref
       end
 
+      def cache_config
+        return nil unless @site
+
+        @cache_config ||= begin
+          config = @site.config[CACHE_CONFIG_KEY]
+          config.is_a?(Hash) ? config : nil
+        end
+      end
+
+      def cache_enabled?
+        return false unless cache_config
+
+        cache_config["enabled"] == true
+      end
+
+      def cache_path
+        return nil unless cache_enabled?
+
+        custom_path = cache_config["path"]
+
+        if custom_path
+          File.expand_path(custom_path, @site.source)
+        else
+          File.expand_path(DEFAULT_CACHE_DIR, @site.source)
+        end
+      end
+
       def root
-        @root ||= File.realpath Dir.mktmpdir(TEMP_PREFIX)
+        @root ||= if cache_enabled?
+                    # Sanitize path components to prevent directory traversal
+                    sanitized_owner = sanitize_path_component(owner)
+                    sanitized_name = sanitize_path_component(name)
+                    sanitized_ref = sanitize_path_component(git_ref)
+
+                    path = File.join(cache_path, sanitized_owner, sanitized_name, sanitized_ref)
+                    FileUtils.mkdir_p(path)
+                    File.realpath(path)
+                  else
+                    File.realpath Dir.mktmpdir(TEMP_PREFIX)
+                  end
       end
 
       def inspect
@@ -99,6 +140,17 @@ module Jekyll
           ENV["PAGES_GITHUB_HOSTNAME"],
           ENV["GITHUB_HOSTNAME"],
         ].compact.to_set
+      end
+
+      # Sanitize path component to prevent directory traversal attacks
+      # Removes any path separators and parent directory references
+      def sanitize_path_component(component)
+        return "" if component.nil?
+
+        # Replace path separators and backslashes, but preserve dots in version strings
+        # The regex %r!\.\.+! matches two or more consecutive dots (e.g., "..", "...")
+        # but NOT single dots (e.g., "v1.2.3" remains unchanged)
+        component.to_s.gsub(%r![/\\]!, "_").gsub(%r!\.\.+!, "_")
       end
 
       def resolve_latest_release

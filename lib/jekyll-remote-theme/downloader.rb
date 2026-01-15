@@ -18,7 +18,11 @@ module Jekyll
 
       def run
         if downloaded?
-          Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
+          if theme.cache_enabled?
+            Jekyll.logger.info LOG_KEY, "Using cached #{theme.name_with_owner}@#{theme.git_ref}"
+          else
+            Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
+          end
           return
         end
 
