@@ -100,6 +100,76 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       @stubbed_logger.rewind
       expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")
     end
+
+    context "when GitHub metadata munger needs reinitialization" do
+      before do
+        # Simulate github-metadata being loaded
+        unless defined?(Jekyll::GitHubMetadata)
+          module Jekyll
+            module GitHubMetadata
+              class SiteGitHubMunger
+                class << self
+                  attr_accessor :global_munger
+                end
+
+                attr_reader :site
+
+                def initialize(site)
+                  @site = site
+                end
+
+                def munge!
+                  # Mock implementation
+                end
+              end
+
+              class << self
+                attr_accessor :site
+              end
+            end
+          end
+        end
+      end
+
+      it "reinitializes munger when global_munger is nil" do
+        # Ensure global_munger is nil
+        Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = nil
+        
+        # Call initialize_github_metadata
+        subject.send(:initialize_github_metadata)
+        
+        # Verify munger was initialized
+        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to_not be_nil
+        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to be_a(Jekyll::GitHubMetadata::SiteGitHubMunger)
+      end
+
+      it "reinitializes munger when site instance differs" do
+        # Create a munger for a different site
+        other_site = make_site({ "source" => source_dir })
+        other_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(other_site)
+        Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = other_munger
+        Jekyll::GitHubMetadata.site = other_site
+        
+        # Call initialize_github_metadata with current site
+        subject.send(:initialize_github_metadata)
+        
+        # Verify munger was reinitialized for current site
+        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to_not eq(other_munger)
+      end
+
+      it "does not reinitialize when munger is for current site" do
+        # Create a munger for the current site
+        current_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
+        Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = current_munger
+        Jekyll::GitHubMetadata.site = site
+        
+        # Call initialize_github_metadata
+        subject.send(:initialize_github_metadata)
+        
+        # Verify munger was not replaced
+        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to eq(current_munger)
+      end
+    end
   end
 
   context "with a malicious theme" do
