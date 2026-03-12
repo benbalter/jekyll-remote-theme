@@ -198,6 +198,93 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
+  context "with a local path" do
+    let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
+    let(:raw_theme) { tmp_theme_dir }
+
+    before do
+      # Create a basic theme structure
+      FileUtils.mkdir_p(File.join(tmp_theme_dir, "_layouts"))
+      File.write(File.join(tmp_theme_dir, "_layouts", "default.html"), "layout content")
+    end
+
+    after do
+      FileUtils.rm_rf(tmp_theme_dir)
+    end
+
+    it "detects as a local theme" do
+      expect(subject.local_theme?).to be true
+    end
+
+    it "is valid when directory exists" do
+      expect(subject).to be_valid
+    end
+
+    it "extracts the name from path" do
+      expect(subject.name).to eql(File.basename(tmp_theme_dir))
+    end
+
+    it "uses 'local' as the owner" do
+      expect(subject.owner).to eql("local")
+    end
+
+    it "uses the expanded path as root" do
+      expect(subject.root).to eql(File.expand_path(tmp_theme_dir))
+    end
+
+    it "returns nil for host" do
+      expect(subject.host).to be_nil
+    end
+
+    it "returns nil for scheme" do
+      expect(subject.scheme).to be_nil
+    end
+
+    context "with a relative path" do
+      let(:raw_theme) { "../relative-theme" }
+
+      it "detects as a local theme" do
+        expect(subject.local_theme?).to be true
+      end
+
+      it "is invalid when directory doesn't exist" do
+        expect(subject).to_not be_valid
+      end
+    end
+
+    context "with ./relative path" do
+      let(:raw_theme) { "./local-theme" }
+
+      it "detects as a local theme" do
+        expect(subject.local_theme?).to be true
+      end
+    end
+
+    context "with an absolute path that doesn't exist" do
+      let(:raw_theme) { "/nonexistent/theme/path" }
+
+      it "detects as a local theme" do
+        expect(subject.local_theme?).to be true
+      end
+
+      it "is invalid when directory doesn't exist" do
+        expect(subject).to_not be_valid
+      end
+    end
+
+    context "with a tilde path" do
+      let(:raw_theme) { "~/nonexistent-theme" }
+
+      it "detects as a local theme" do
+        expect(subject.local_theme?).to be true
+      end
+
+      it "is invalid when directory doesn't exist" do
+        expect(subject).to_not be_valid
+      end
+    end
+  end
+
   context "with @latest ref and real API calls" do
     let(:git_ref) { "latest" }
     let(:api_url) { "https://api.github.com/repos/foo/bar/releases/latest" }

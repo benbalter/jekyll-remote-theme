@@ -69,7 +69,10 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       after { WebMock.allow_net_connect! }
 
       it "raises a DownloadError" do
-        msg = "404 - Not Found - Loading URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
+        msg = "The repository 'pages-themes/primer' could not be found. " \
+              "Please check that the repository name is correct, " \
+              "publicly accessible, and contains a valid Jekyll theme. " \
+              "URL: https://codeload.github.com/benbalter/_invalid_/zip/HEAD"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
@@ -87,6 +90,21 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
 
       it "raises a DownloadError" do
         msg = "Maximum file size of 1073741824 bytes exceeded"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+    end
+
+    context "with a server error" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_server_error_/zip/HEAD" }
+      before do
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:status => [500, "Internal Server Error"])
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError with standard format" do
+        msg = "500 - Internal Server Error - Loading URL: https://codeload.github.com/benbalter/_server_error_/zip/HEAD"
         expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
       end
     end
@@ -171,6 +189,36 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     it "handles invalid proxy URIs gracefully" do
       ENV["http_proxy"] = "://invalid"
       expect(subject.send(:proxy_host)).to be_nil
+    end
+  end
+
+  context "with a local theme" do
+    let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
+    let(:raw_theme) { tmp_theme_dir }
+
+    before do
+      # Create a basic theme structure
+      FileUtils.mkdir_p(File.join(tmp_theme_dir, "_layouts"))
+      File.write(File.join(tmp_theme_dir, "_layouts", "default.html"), "layout content")
+      reset_tmp_dir
+    end
+
+    after do
+      FileUtils.rm_rf(tmp_theme_dir)
+    end
+
+    it "knows it's already downloaded" do
+      expect(subject.downloaded?).to be true
+    end
+
+    it "doesn't download anything" do
+      expect(subject).not_to receive(:download)
+      subject.run
+    end
+
+    it "doesn't unzip anything" do
+      expect(subject).not_to receive(:unzip)
+      subject.run
     end
   end
 end

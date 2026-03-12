@@ -17,6 +17,11 @@ module Jekyll
       end
 
       def run
+        if theme.local_theme?
+          Jekyll.logger.debug LOG_KEY, "Using local theme at #{theme.root}"
+          return
+        end
+
         if downloaded?
           Jekyll.logger.debug LOG_KEY, "Using existing #{theme.name_with_owner}"
           return
@@ -27,6 +32,8 @@ module Jekyll
       end
 
       def downloaded?
+        return true if theme.local_theme?
+
         @downloaded ||= theme_dir_exists? && !theme_dir_empty?
       end
 
@@ -43,7 +50,7 @@ module Jekyll
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
         http_class.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
           http.request(request) do |response|
-            raise_unless_sucess(response)
+            raise_unless_success(response)
             enforce_max_file_size(response.content_length)
             response.read_body do |chunk|
               zip_file.write chunk
@@ -64,10 +71,18 @@ module Jekyll
         @request
       end
 
-      def raise_unless_sucess(response)
+      def raise_unless_success(response)
         return if response.is_a?(Net::HTTPSuccess)
 
-        raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
+        case response.code
+        when "404"
+          raise DownloadError, "The repository '#{theme.name_with_owner}' could not be found. " \
+                             "Please check that the repository name is correct, " \
+                             "publicly accessible, and contains a valid Jekyll theme. " \
+                             "URL: #{zip_url}"
+        else
+          raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
+        end
       end
 
       def enforce_max_file_size(size)

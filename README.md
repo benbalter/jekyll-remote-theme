@@ -45,7 +45,12 @@ or <sup>1</sup>
   ```yml
   remote_theme: http[s]://github.<Enterprise>.com/benbalter/retlab
   ```
+or <sup>2</sup>
+  ```yml
+  remote_theme: ../my-local-theme
+  ```
 <sup>1</sup> The codeload subdomain needs to be available on your github enterprise instance for this to work.
+<sup>2</sup> For local development, you can use local file paths (relative or absolute).
 
 ## Declaring your theme
 
@@ -58,6 +63,22 @@ You may also optionally specify a branch, tag, or commit to use by appending an 
 To automatically use the latest tagged release, you can specify `@latest` (e.g., `benbalter/retlab@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
+
+### Local Development
+
+For local development, you can use local file paths instead of remote repositories. This is useful when you want to separate your theme from your blog repository and test changes locally before pushing to GitHub.
+
+Local paths can be either relative or absolute:
+
+```yml
+# Relative path
+remote_theme: ../my-theme
+
+# Absolute path
+remote_theme: /home/user/projects/my-theme
+```
+
+The local directory should contain a valid Jekyll theme structure with layouts, includes, assets, etc. No download or extraction occurs when using local paths - the plugin uses the theme files directly from the specified location.
 
 ## Customizing your theme
 
