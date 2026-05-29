@@ -18,6 +18,14 @@ jobs:
         jekyll_version:
           - "~> 3.0"
           - "~> 4.0"
+        exclude:
+          # jekyll-github-metadata builds its memoization ivar name from the
+          # caller's label, which Ruby 3.4+ qualifies (e.g. "Foo#bar"),
+          # producing an invalid ivar name and crashing the edit-link tag.
+          # Only hit on Jekyll 3.x, where github-metadata takes the memoizing
+          # code path. See https://github.com/jekyll/github-metadata
+          - ruby_version: "4.0"
+            jekyll_version: "~> 3.0"
 
     steps:
     - uses: actions/checkout@v6
