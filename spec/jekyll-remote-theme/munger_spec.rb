@@ -19,9 +19,9 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
 
   # Remove :after_reset hook to allow themes to be stubbed prior to munging
   before(:each) do
-    hooks = Jekyll::Hooks.instance_variable_get("@registry")
+    hooks = Jekyll::Hooks.instance_variable_get(:@registry)
     hooks[:site][:after_reset] = []
-    Jekyll::Hooks.instance_variable_set("@registry", hooks)
+    Jekyll::Hooks.instance_variable_set(:@registry, hooks)
   end
 
   it "stores the site" do
@@ -62,7 +62,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       Jekyll.logger.log_level = :debug
     end
     before { subject.munge! }
-    after { Jekyll.instance_variable_set("@logger", @old_logger) }
+    after { Jekyll.instance_variable_set(:@logger, @old_logger) }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
@@ -111,7 +111,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       Jekyll.logger.log_level = :debug
     end
     before { subject.munge! }
-    after { Jekyll.instance_variable_set("@logger", @old_logger) }
+    after { Jekyll.instance_variable_set(:@logger, @old_logger) }
 
     it "sets the theme" do
       expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)

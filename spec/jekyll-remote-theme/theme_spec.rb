@@ -17,14 +17,14 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   subject { described_class.new(raw_theme) }
 
   it "stores the theme" do
-    expect(subject.instance_variable_get("@raw_theme")).to eql(nwo)
+    expect(subject.instance_variable_get(:@raw_theme)).to eql(nwo)
   end
 
   context "with an abnormal NWO" do
     let(:nwo) { " FoO/bAr " }
 
     it "normalizes the nwo" do
-      expect(subject.instance_variable_get("@raw_theme")).to eql("foo/bar")
+      expect(subject.instance_variable_get(:@raw_theme)).to eql("foo/bar")
     end
   end
 

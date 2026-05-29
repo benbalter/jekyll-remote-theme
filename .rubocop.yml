@@ -3,6 +3,7 @@ inherit_gem:
   rubocop-jekyll: .rubocop.yml
 
 AllCops:
+  NewCops: enable
   Exclude:
     - vendor/**/*
 
@@ -13,7 +14,7 @@ Metrics/BlockLength:
   Exclude:
     - "*.gemspec"
 
-# Disable Layout/BlockAlignment cop due to crashes with current RuboCop version
-# See: https://github.com/rubocop-hq/rubocop/issues
-Layout/BlockAlignment:
-  Enabled: false
+# Test fixtures are intentionally minimal stand-ins for real gemspecs
+Gemspec/RequiredRubyVersion:
+  Exclude:
+    - "spec/fixtures/**/*"
