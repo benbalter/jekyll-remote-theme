@@ -10,18 +10,22 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
+        ruby_version:
+          - "3.3"
+          - "4.0"
         jekyll_version:
           - "~> 3.0"
           - "~> 4.0"
-    
+
     steps:
     - uses: actions/checkout@v6
-    
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: ${{ matrix.ruby_version }}
         bundler-cache: true # Runs bundle install and caches installed gems
     
     - name: Install dependencies
