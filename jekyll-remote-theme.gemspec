@@ -28,6 +28,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rubocop", "~> 0.71"
   s.add_development_dependency "rubocop-jekyll", "~> 0.10"
+  # No longer default gems as of Ruby 4.0+; required by RuboCop
+  s.add_development_dependency "benchmark"
+  s.add_development_dependency "ostruct"
+  s.add_development_dependency "tsort"
   s.add_development_dependency "webmock", "~> 3.0"
   s.required_ruby_version = ">= 2.3.0"
 end

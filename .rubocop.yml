@@ -6,6 +6,13 @@ AllCops:
   Exclude:
     - vendor/**/*
 
+Metrics/BlockLength:
+  inherit_mode:
+    merge:
+      - Exclude
+  Exclude:
+    - "*.gemspec"
+
 # Disable Layout/BlockAlignment cop due to crashes with current RuboCop version
 # See: https://github.com/rubocop-hq/rubocop/issues
 Layout/BlockAlignment:
