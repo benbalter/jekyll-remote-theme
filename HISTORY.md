@@ -1,5 +1,24 @@
 # History
 
+## 0.5.1
+
+### Fixes
+
+- Fix RuboCop load failure on Ruby 4.0
+- Add base64 dependency for Ruby 3.4+
+
+### Dependencies
+
+- Allow openssl 4.x to fix install on Ruby 4.0 (#133)
+- Bump github/codeql-action from 3 to 4 (#130)
+
+### Infrastructure
+
+- Test CI against Ruby 4.0
+- Exclude Ruby 4.0 + Jekyll 3.x from CI matrix
+- Upgrade RuboCop to 1.57 and resolve violations
+- Pin rubocop-ast below 1.38 to avoid deprecation warning
+
 ## 0.5.0
 
 ### Features
