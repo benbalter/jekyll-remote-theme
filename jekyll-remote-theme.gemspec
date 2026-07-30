@@ -35,5 +35,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "ostruct"
   s.add_development_dependency "tsort"
   s.add_development_dependency "webmock", "~> 3.0"
-  s.required_ruby_version = ">= 2.7.0"
+  s.required_ruby_version = ">= 3.0"
 end
