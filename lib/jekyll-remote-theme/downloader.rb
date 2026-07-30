@@ -77,9 +77,9 @@ module Jekyll
         case response.code
         when "404"
           raise DownloadError, "The repository '#{theme.name_with_owner}' could not be found. " \
-                             "Please check that the repository name is correct, " \
-                             "publicly accessible, and contains a valid Jekyll theme. " \
-                             "URL: #{zip_url}"
+                               "Please check that the repository name is correct, " \
+                               "publicly accessible, and contains a valid Jekyll theme. " \
+                               "URL: #{zip_url}"
         else
           raise DownloadError, "#{response.code} - #{response.message} - Loading URL: #{zip_url}"
         end
@@ -97,12 +97,28 @@ module Jekyll
         # File IO is already open, rewind pointer to start of file to read
         zip_file.rewind
 
+        # Extract each entry by hand rather than calling Zip::Entry#extract,
+        # whose signature changed incompatibly in rubyzip 3.0 (the destination
+        # is now resolved relative to a `destination_directory:` keyword,
+        # mangling the absolute paths we pass). Reading each entry's stream and
+        # writing it ourselves behaves identically across rubyzip 1.x–3.x.
         Zip::File.open(zip_file) do |archive|
-          archive.each { |file| file.extract path_without_name_and_ref(file.name) }
+          archive.each { |entry| extract_entry(entry) }
         end
       ensure
         zip_file.close
         zip_file.unlink
+      end
+
+      # Writes a single zip entry to its destination within theme.root.
+      # path_without_name_and_ref sandboxes the destination, guarding against
+      # Zip Slip.
+      def extract_entry(entry)
+        return if entry.name.end_with?("/") # skip directory entries
+
+        dest = path_without_name_and_ref(entry.name)
+        FileUtils.mkdir_p File.dirname(dest)
+        entry.get_input_stream { |input| File.binwrite(dest, input.read) }
       end
 
       # Full URL to codeload zip download endpoint for the given theme

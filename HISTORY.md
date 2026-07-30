@@ -1,0 +1,58 @@
+# History
+
+## Unreleased
+
+### Dependencies
+
+- Allow rubyzip 3.x (`>= 1.3.0, < 4.0`) and make archive extraction compatible
+  with rubyzip's 3.0 API change (#112)
+
+## 0.5.1
+
+### Fixes
+
+- Fix RuboCop load failure on Ruby 4.0
+- Add base64 dependency for Ruby 3.4+
+
+### Dependencies
+
+- Allow openssl 4.x to fix install on Ruby 4.0 (#133)
+- Bump github/codeql-action from 3 to 4 (#130)
+
+### Infrastructure
+
+- Test CI against Ruby 4.0
+- Exclude Ruby 4.0 + Jekyll 3.x from CI matrix
+- Upgrade RuboCop to 1.57 and resolve violations
+- Pin rubocop-ast below 1.38 to avoid deprecation warning
+
+## 0.5.0
+
+### Features
+
+- Add `@latest` ref to automatically use the latest GitHub release (#126)
+- Add support for local filesystem paths in `remote_theme` configuration (#120)
+- Add corporate proxy support for remote theme downloads (#124)
+
+### Fixes
+
+- Improve 404 error message for non-existent remote themes (#110)
+- Fix Ruby 3.4 SSL/CRL compatibility issue (#118)
+- Fix compatibility with jekyll-github-metadata 2.15.0+ (#122)
+- Add gemspec metadata methods to `MockGemspec` for remote theme compatibility (#125)
+- Add tests and documentation for local file override behavior (#123)
+
+### Dependencies
+
+- Bump jekyll-sass-converter to allow 3.1.0 (#127)
+- Bump actions/checkout from 2 to 6 (#115)
+- Bump github/codeql-action from 1 to 3 (#108)
+- Upgrade to GitHub-native Dependabot (#92)
+
+### Infrastructure
+
+- Move from Travis to GitHub Actions for CI (#106)
+
+## 0.4.3
+
+See [the GitHub release notes](https://github.com/benbalter/jekyll-remote-theme/releases/tag/v0.4.3).

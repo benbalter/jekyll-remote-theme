@@ -18,16 +18,22 @@ Gem::Specification.new do |s|
   s.add_dependency "addressable", "~> 2.0"
   s.add_dependency "jekyll", ">= 3.5", "< 5.0"
   s.add_dependency "jekyll-sass-converter", ">= 1.0", "< 4.0", "!= 2.0.0"
-  s.add_dependency "openssl", "~> 3.0", ">= 3.1.2"
-  s.add_dependency "rubyzip", ">= 1.3.0", "< 3.0"
+  s.add_dependency "openssl", ">= 3.1.2"
+  s.add_dependency "rubyzip", ">= 1.3.0", "< 4.0"
 
-  s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "jekyll_test_plugin_malicious", "~> 0.2"
+  s.add_development_dependency "jekyll-theme-primer", "~> 0.5"
   s.add_development_dependency "kramdown-parser-gfm", "~> 1.0"
   s.add_development_dependency "pry", "~> 0.11"
   s.add_development_dependency "rspec", "~> 3.0"
-  s.add_development_dependency "rubocop", "~> 0.71"
-  s.add_development_dependency "rubocop-jekyll", "~> 0.10"
+  s.add_development_dependency "rubocop", "~> 1.57"
+  s.add_development_dependency "rubocop-jekyll", "~> 0.14"
+  # No longer default gems as of recent Rubies; required by RuboCop and
+  # Jekyll's dependencies (e.g. safe_yaml needs base64 on Ruby 3.4+)
+  s.add_development_dependency "base64"
+  s.add_development_dependency "benchmark"
+  s.add_development_dependency "ostruct"
+  s.add_development_dependency "tsort"
   s.add_development_dependency "webmock", "~> 3.0"
-  s.required_ruby_version = ">= 2.3.0"
+  s.required_ruby_version = ">= 2.7.0"
 end

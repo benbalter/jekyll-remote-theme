@@ -74,8 +74,8 @@ module Jekyll
       end
 
       def inspect
-        "#<Jekyll::RemoteTheme::Theme host=\"#{host}\" owner=\"#{owner}\" name=\"#{name}\"" \
-        " ref=\"#{git_ref}\" root=\"#{root}\">"
+        "#<Jekyll::RemoteTheme::Theme host=\"#{host}\" owner=\"#{owner}\" name=\"#{name}\" " \
+          "ref=\"#{git_ref}\" root=\"#{root}\">"
       end
 
       def local_theme?
@@ -140,11 +140,11 @@ module Jekyll
       end
 
       def resolve_latest_release
-        return @resolved_latest_release if defined? @resolved_latest_release
+        return @resolve_latest_release if defined? @resolve_latest_release
 
         Jekyll.logger.debug LOG_KEY, "Resolving @latest for #{name_with_owner}"
 
-        @resolved_latest_release = fetch_latest_release_tag || "HEAD"
+        @resolve_latest_release = fetch_latest_release_tag || "HEAD"
       end
 
       def fetch_latest_release_tag

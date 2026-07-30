@@ -10,18 +10,30 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
+        ruby_version:
+          - "3.3"
+          - "4.0"
         jekyll_version:
           - "~> 3.0"
           - "~> 4.0"
-    
+        exclude:
+          # jekyll-github-metadata builds its memoization ivar name from the
+          # caller's label, which Ruby 3.4+ qualifies (e.g. "Foo#bar"),
+          # producing an invalid ivar name and crashing the edit-link tag.
+          # Only hit on Jekyll 3.x, where github-metadata takes the memoizing
+          # code path. See https://github.com/jekyll/github-metadata
+          - ruby_version: "4.0"
+            jekyll_version: "~> 3.0"
+
     steps:
-    - uses: actions/checkout@v6
-    
+    - uses: actions/checkout@v7
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: ${{ matrix.ruby_version }}
         bundler-cache: true # Runs bundle install and caches installed gems
     
     - name: Install dependencies

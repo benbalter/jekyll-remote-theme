@@ -34,13 +34,9 @@ module Jekyll
       # Returns an array of authors from the gemspec
       def authors
         @authors ||= begin
-          return [] unless contents
-
-          match = contents.match(AUTHORS_REGEX)
-          return [] unless match
-
+          match = contents&.match(AUTHORS_REGEX)
           # Extract author names from the array string
-          match[1].scan(%r!["']([^"']+)["']!).flatten
+          match ? match[1].scan(%r!["']([^"']+)["']!).flatten : []
         end
       end
 
@@ -49,25 +45,19 @@ module Jekyll
       # It cannot evaluate version constants like MyGem::VERSION.
       def version
         @version ||= begin
-                       return Gem::Version.new(DEFAULT_VERSION) unless contents
-
-                       match = contents.match(VERSION_REGEX)
-                       return Gem::Version.new(DEFAULT_VERSION) unless match
-
-                       # Extract the version string and convert to Gem::Version
-                       Gem::Version.new(match[1])
-                     rescue ArgumentError
-                       # If the version string is invalid, return default
-                       Gem::Version.new(DEFAULT_VERSION)
-                     end
+          match = contents&.match(VERSION_REGEX)
+          # Extract the version string and convert to Gem::Version
+          match ? Gem::Version.new(match[1]) : Gem::Version.new(DEFAULT_VERSION)
+        rescue ArgumentError
+          # If the version string is invalid, return default
+          Gem::Version.new(DEFAULT_VERSION)
+        end
       end
 
       # Returns the summary from the gemspec
       def summary
         @summary ||= begin
-          return "" unless contents
-
-          match = contents.match(SUMMARY_REGEX)
+          match = contents&.match(SUMMARY_REGEX)
           match ? match[1] : ""
         end
       end
@@ -75,9 +65,7 @@ module Jekyll
       # Returns the description from the gemspec
       def description
         @description ||= begin
-          return nil unless contents
-
-          match = contents.match(DESCRIPTION_REGEX)
+          match = contents&.match(DESCRIPTION_REGEX)
           match ? match[1] : nil
         end
       end
