@@ -1,11 +1,16 @@
 # History
 
-## Unreleased
+## 0.5.2
 
 ### Dependencies
 
 - Allow rubyzip 3.x (`>= 1.3.0, < 4.0`) and make archive extraction compatible
-  with rubyzip's 3.0 API change (#112)
+  with rubyzip's 3.0 API change (#139)
+
+### Infrastructure
+
+- Relax the `rubocop-ast` pin (#134, #138)
+- Bump `actions/checkout` to v7 (#137)
 
 ## 0.5.1
 

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+output=$(bundle exec jekyll build)
+
+if [[ $output == *"ALL YOUR COMPUTER ARE BELONG TO US"* ]]; then
+  echo "Malicious plugin executed!"
+else
+  echo "Malicious plugin did not execute"
+  exit 0
+fi
+
+gem build jekyll-test-theme-malicious.gemspec
