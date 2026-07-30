@@ -3,5 +3,9 @@
 set -e
 
 bundle exec rspec
-bundle exec rubocop
+# Scope RuboCop to our own source. A bare `rubocop` walks the whole tree,
+# including the CI-only in-repo `vendor/bundle`, where the jekyll-theme-primer
+# dev dependency ships a `.rubocop.yml` that `inherit_gem`s rubocop-github (not
+# installed) — which crashes config resolution during file discovery.
+bundle exec rubocop lib spec *.gemspec
 gem build jekyll-remote-theme.gemspec
