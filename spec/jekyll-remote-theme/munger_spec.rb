@@ -134,13 +134,14 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       it "reinitializes munger when global_munger is nil" do
         # Ensure global_munger is nil
         Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = nil
-        
+
         # Call initialize_github_metadata
         subject.send(:initialize_github_metadata)
-        
+
         # Verify munger was initialized
-        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to_not be_nil
-        expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to be_a(Jekyll::GitHubMetadata::SiteGitHubMunger)
+        munger_class = Jekyll::GitHubMetadata::SiteGitHubMunger
+        expect(munger_class.global_munger).to_not be_nil
+        expect(munger_class.global_munger).to be_a(munger_class)
       end
 
       it "reinitializes munger when site instance differs" do
@@ -149,10 +150,10 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
         other_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(other_site)
         Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = other_munger
         Jekyll::GitHubMetadata.site = other_site
-        
+
         # Call initialize_github_metadata with current site
         subject.send(:initialize_github_metadata)
-        
+
         # Verify munger was reinitialized for current site
         expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to_not eq(other_munger)
       end
@@ -162,10 +163,10 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
         current_munger = Jekyll::GitHubMetadata::SiteGitHubMunger.new(site)
         Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger = current_munger
         Jekyll::GitHubMetadata.site = site
-        
+
         # Call initialize_github_metadata
         subject.send(:initialize_github_metadata)
-        
+
         # Verify munger was not replaced
         expect(Jekyll::GitHubMetadata::SiteGitHubMunger.global_munger).to eq(current_munger)
       end
