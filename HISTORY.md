@@ -2,6 +2,11 @@
 
 ## 0.5.2
 
+### Fixes
+
+- Fix jekyll-github-metadata 2.15.0+ compatibility when loaded as a theme
+  dependency (#128)
+
 ### Dependencies
 
 - Allow rubyzip 3.x (`>= 1.3.0, < 4.0`) and make archive extraction compatible
