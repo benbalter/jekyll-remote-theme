@@ -1,5 +1,12 @@
 # History
 
+## Unreleased
+
+### Dependencies
+
+- Allow rubyzip 3.x (`>= 1.3.0, < 4.0`) and make archive extraction compatible
+  with rubyzip's 3.0 API change (#112)
+
 ## 0.5.1
 
 ### Fixes
