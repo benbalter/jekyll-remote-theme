@@ -6,3 +6,6 @@ spec/fixtures/site/.jekyll-cache
 vendor/
 .vendor/
 .bundle/
+# Transient theme extractions / test artifacts
+/private/
+/tmp/
