@@ -14,7 +14,10 @@ Metrics/BlockLength:
   Exclude:
     - "*.gemspec"
 
-# Test fixtures are intentionally minimal stand-ins for real gemspecs
+# Test fixtures are intentionally minimal stand-ins for real gemspecs.
+# The main gemspec is excluded too: rubocop-jekyll pins TargetRubyVersion to
+# 2.7, which the cop wants to equal required_ruby_version (>= 3.0).
 Gemspec/RequiredRubyVersion:
   Exclude:
     - "spec/fixtures/**/*"
+    - "jekyll-remote-theme.gemspec"
