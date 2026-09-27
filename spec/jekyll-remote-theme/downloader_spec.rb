@@ -148,6 +148,52 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
   end
 
+  context "extracting" do
+    let(:content) { "a" * 1000 }
+
+    before do
+      zip = subject.send(:zip_file)
+      Zip::OutputStream.write_buffer(zip) do |out|
+        out.put_next_entry("primer-HEAD/_layouts/default.html")
+        out.write(content)
+      end
+      zip.flush
+    end
+
+    after { FileUtils.rm_rf theme.root }
+
+    it "extracts entries within the limits" do
+      subject.send(:unzip)
+      expect(File.read("#{theme.root}/_layouts/default.html")).to eql(content)
+    end
+
+    context "when the theme is larger than the extraction limit" do
+      before { stub_const("#{described_class}::MAX_EXTRACTED_SIZE", 500) }
+
+      it "raises a DownloadError" do
+        msg = "Maximum extracted theme size of 500 bytes exceeded"
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+    end
+
+    context "when an entry inflates to more than its declared size" do
+      before do
+        allow_any_instance_of(Zip::Entry).to receive(:size).and_return(10)
+        stub_const("#{described_class}::EXTRACT_CHUNK_SIZE", 100)
+      end
+
+      it "raises a DownloadError" do
+        msg = "Zip entry primer-HEAD/_layouts/default.html is larger than its declared size"
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+
+      it "doesn't write more than the declared size" do
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError)
+        expect(File.size("#{theme.root}/_layouts/default.html")).to be <= 10
+      end
+    end
+  end
+
   context "with a local theme" do
     let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
     let(:raw_theme) { tmp_theme_dir }

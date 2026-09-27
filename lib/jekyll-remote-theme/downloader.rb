@@ -6,6 +6,9 @@ module Jekyll
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme"
       USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})"
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
+      # Limit on the theme's total size once extracted, to stop zip bombs
+      MAX_EXTRACTED_SIZE = 2 * (1024 * 1024 * 1024) # Size in bytes (2 GB)
+      EXTRACT_CHUNK_SIZE = 64 * 1024
       NET_HTTP_ERRORS = [
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
@@ -109,6 +112,7 @@ module Jekyll
         # is now resolved relative to a `destination_directory:` keyword,
         # mangling the absolute paths we pass). Reading each entry's stream and
         # writing it ourselves behaves identically across rubyzip 1.x–3.x.
+        @extracted_size = 0
         Zip::File.open(zip_file) do |archive|
           archive.each { |entry| extract_entry(entry) }
         end
@@ -123,9 +127,36 @@ module Jekyll
       def extract_entry(entry)
         return if entry.name.end_with?("/") # skip directory entries
 
+        enforce_max_extracted_size(@extracted_size + entry.size)
         dest = path_without_name_and_ref(entry.name)
         FileUtils.mkdir_p File.dirname(dest)
-        entry.get_input_stream { |input| File.binwrite(dest, input.read) }
+        File.open(dest, "wb") do |output|
+          entry.get_input_stream { |input| copy_entry(entry, input, output) }
+        end
+      end
+
+      # Copies an entry in chunks, counting the bytes actually inflated rather
+      # than trusting the sizes in the archive. Zip.validate_entry_sizes only
+      # applies to Zip::Entry#extract, so the same check is made here: an entry
+      # may not inflate to more than its declared size.
+      def copy_entry(entry, input, output)
+        written = 0
+        while (chunk = input.read(EXTRACT_CHUNK_SIZE))
+          written += chunk.bytesize
+          if written > entry.size
+            raise DownloadError, "Zip entry #{entry.name} is larger than its declared size"
+          end
+
+          @extracted_size += chunk.bytesize
+          enforce_max_extracted_size(@extracted_size)
+          output.write(chunk)
+        end
+      end
+
+      def enforce_max_extracted_size(size)
+        return unless size > MAX_EXTRACTED_SIZE
+
+        raise DownloadError, "Maximum extracted theme size of #{MAX_EXTRACTED_SIZE} bytes exceeded"
       end
 
       # Full URL to codeload zip download endpoint for the given theme
