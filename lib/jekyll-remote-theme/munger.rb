@@ -20,11 +20,13 @@ module Jekyll
         end
 
         Jekyll.logger.info LOG_KEY, "Using theme #{theme.name_with_owner}"
+        # after_reset fires on every rebuild (e.g. `jekyll serve`). Only the
+        # first run downloads the theme, so only it registers the cleanup.
         unless munged?
           downloader.run
           configure_theme
+          enqueue_theme_cleanup
         end
-        enqueue_theme_cleanup
 
         theme
       end
@@ -35,8 +37,10 @@ module Jekyll
         site.theme&.is_a?(Jekyll::RemoteTheme::Theme)
       end
 
+      # On a rebuild, reuse the theme configured by the first run rather than
+      # building a new one, which would create another temp directory.
       def theme
-        @theme ||= Theme.new(raw_theme)
+        @theme ||= munged? ? site.theme : Theme.new(raw_theme)
       end
 
       def raw_theme
