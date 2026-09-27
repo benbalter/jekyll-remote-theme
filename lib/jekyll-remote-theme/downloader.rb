@@ -51,14 +51,23 @@ module Jekyll
           http.request(request) do |response|
             raise_unless_success(response)
             enforce_max_file_size(response.content_length)
-            response.read_body do |chunk|
-              zip_file.write chunk
-            end
+            write_body(response)
           end
         end
         @downloaded = true
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
+      end
+
+      # Content-Length is optional (e.g. chunked responses), so also count the
+      # bytes as they arrive and stop once the limit is exceeded.
+      def write_body(response)
+        bytes = 0
+        response.read_body do |chunk|
+          bytes += chunk.bytesize
+          enforce_max_file_size(bytes)
+          zip_file.write chunk
+        end
       end
 
       def request

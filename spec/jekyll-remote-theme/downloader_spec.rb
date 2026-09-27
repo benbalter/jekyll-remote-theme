@@ -94,6 +94,29 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       end
     end
 
+    context "with a large body and no Content-Length" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_chunked_/zip/HEAD" }
+      before do
+        stub_const("#{described_class}::MAX_FILE_SIZE", 10)
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:body => "x" * 100)
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError" do
+        msg = "Maximum file size of 10 bytes exceeded"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+
+      it "doesn't write more than the limit" do
+        zip_file = subject.send(:zip_file)
+        allow(zip_file).to receive(:write).and_call_original
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError)
+        expect(zip_file).not_to have_received(:write)
+      end
+    end
+
     context "with a server error" do
       let(:zip_url) { "https://codeload.github.com/benbalter/_server_error_/zip/HEAD" }
       before do
