@@ -173,7 +173,7 @@ module Jekyll
       end
 
       def theme_dir_empty?
-        Dir["#{theme.root}/*"].empty?
+        Dir.empty?(theme.root)
       end
 
       # Codeload generated zip files contain a top level folder in the form of
