@@ -67,6 +67,40 @@ RSpec.describe Jekyll::RemoteTheme::HTTP do
       end
     end
 
+    context "with NO_PROXY matching the host's domain" do
+      let(:env) do
+        { "HTTPS_PROXY" => "http://proxy.example.com:8080", "NO_PROXY" => "github.com" }
+      end
+
+      it "bypasses the proxy" do
+        expect(proxy).to be_nil
+      end
+    end
+
+    context "with no_proxy listing a leading-dot domain" do
+      let(:env) do
+        {
+          "https_proxy" => "http://secure-proxy.example.com:8443",
+          "http_proxy"  => "http://proxy.example.com:8080",
+          "no_proxy"    => "localhost, .github.com",
+        }
+      end
+
+      it "bypasses both proxies" do
+        expect(proxy).to be_nil
+      end
+    end
+
+    context "with NO_PROXY not matching the host" do
+      let(:env) do
+        { "HTTPS_PROXY" => "http://proxy.example.com:8080", "NO_PROXY" => "example.org" }
+      end
+
+      it "uses the proxy" do
+        expect(proxy.host).to eq("proxy.example.com")
+      end
+    end
+
     context "with an invalid proxy URI" do
       let(:env) { { "http_proxy" => "://invalid" } }
 

@@ -7,9 +7,10 @@ module Jekyll
     module HTTP
       OPEN_TIMEOUT = 10 # seconds
       READ_TIMEOUT = 60 # seconds
-      PROXY_VARIABLES = {
-        "https" => %w(https_proxy HTTPS_PROXY http_proxy HTTP_PROXY).freeze,
-        "http"  => %w(http_proxy HTTP_PROXY).freeze,
+      # Proxy environment variables to try, by request scheme
+      PROXY_SCHEMES = {
+        "https" => %w(https http).freeze,
+        "http"  => %w(http).freeze,
       }.freeze
 
       module_function
@@ -28,13 +29,18 @@ module Jekyll
         )
       end
 
-      # The proxy to use for `uri`, from the environment. HTTPS requests use
-      # https_proxy, falling back to http_proxy.
+      # The proxy to use for `uri`, from the environment, or nil. HTTPS
+      # requests use https_proxy, falling back to http_proxy. Hosts listed in
+      # no_proxy/NO_PROXY, and loopback addresses, bypass the proxy.
       def proxy_uri(uri, env = ENV)
-        names = PROXY_VARIABLES.fetch(uri.scheme, PROXY_VARIABLES["http"])
-        proxy = names.lazy.filter_map { |name| env[name] }.first
-        Addressable::URI.parse(proxy) if proxy
-      rescue Addressable::URI::InvalidURIError
+        PROXY_SCHEMES.fetch(uri.scheme, PROXY_SCHEMES["http"]).each do |scheme|
+          target = URI::Generic.build(:scheme => scheme, :host => uri.host,
+                                      :port   => uri.inferred_port)
+          proxy = target.find_proxy(env)
+          return proxy if proxy
+        end
+        nil
+      rescue URI::Error
         nil
       end
     end
