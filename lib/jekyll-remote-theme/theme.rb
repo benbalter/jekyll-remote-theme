@@ -171,11 +171,7 @@ module Jekyll
       end
 
       def make_api_request(api_url)
-        Net::HTTP.start(
-          api_url.host,
-          api_url.port,
-          :use_ssl => api_url.scheme == "https"
-        ) do |http|
+        HTTP.start(api_url) do |http|
           request = Net::HTTP::Get.new(api_url.request_uri)
           request["Accept"] = "application/vnd.github.v3+json"
           request["User-Agent"] = Downloader::USER_AGENT
