@@ -94,6 +94,29 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       end
     end
 
+    context "with a large body and no Content-Length" do
+      let(:zip_url) { "https://codeload.github.com/benbalter/_chunked_/zip/HEAD" }
+      before do
+        stub_const("#{described_class}::MAX_FILE_SIZE", 10)
+        WebMock.disable_net_connect!
+        stub_request(:get, zip_url).to_return(:body => "x" * 100)
+      end
+
+      after { WebMock.allow_net_connect! }
+
+      it "raises a DownloadError" do
+        msg = "Maximum file size of 10 bytes exceeded"
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
+
+      it "doesn't write more than the limit" do
+        zip_file = subject.send(:zip_file)
+        allow(zip_file).to receive(:write).and_call_original
+        expect { subject.run }.to raise_error(Jekyll::RemoteTheme::DownloadError)
+        expect(zip_file).not_to have_received(:write)
+      end
+    end
+
     context "with a server error" do
       let(:zip_url) { "https://codeload.github.com/benbalter/_server_error_/zip/HEAD" }
       before do
@@ -125,70 +148,49 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
   end
 
-  context "proxy configuration" do
-    after do
-      ENV.delete("http_proxy")
-      ENV.delete("https_proxy")
-      ENV.delete("HTTP_PROXY")
-      ENV.delete("HTTPS_PROXY")
+  context "extracting" do
+    let(:content) { "a" * 1000 }
+
+    before do
+      zip = subject.send(:zip_file)
+      Zip::OutputStream.write_buffer(zip) do |out|
+        out.put_next_entry("primer-HEAD/_layouts/default.html")
+        out.write(content)
+      end
+      zip.flush
     end
 
-    it "returns nil proxy_uri when no proxy is set" do
-      expect(subject.send(:proxy_uri)).to be_nil
+    after { FileUtils.rm_rf theme.root }
+
+    it "extracts entries within the limits" do
+      subject.send(:unzip)
+      expect(File.read("#{theme.root}/_layouts/default.html")).to eql(content)
     end
 
-    it "returns nil proxy_host when no proxy is set" do
-      expect(subject.send(:proxy_host)).to be_nil
+    context "when the theme is larger than the extraction limit" do
+      before { stub_const("#{described_class}::MAX_EXTRACTED_SIZE", 500) }
+
+      it "raises a DownloadError" do
+        msg = "Maximum extracted theme size of 500 bytes exceeded"
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
     end
 
-    it "parses http_proxy environment variable" do
-      ENV["http_proxy"] = "http://proxy.example.com:8080"
-      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
-      expect(subject.send(:proxy_port)).to eq(8080)
-    end
+    context "when an entry inflates to more than its declared size" do
+      before do
+        allow_any_instance_of(Zip::Entry).to receive(:size).and_return(10)
+        stub_const("#{described_class}::EXTRACT_CHUNK_SIZE", 100)
+      end
 
-    it "parses https_proxy environment variable for https URLs" do
-      ENV["https_proxy"] = "http://secure-proxy.example.com:8443"
-      expect(subject.send(:proxy_host)).to eq("secure-proxy.example.com")
-      expect(subject.send(:proxy_port)).to eq(8443)
-    end
+      it "raises a DownloadError" do
+        msg = "Zip entry primer-HEAD/_layouts/default.html is larger than its declared size"
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError, msg)
+      end
 
-    it "prefers https_proxy over http_proxy for https URLs" do
-      ENV["http_proxy"] = "http://proxy.example.com:8080"
-      ENV["https_proxy"] = "http://secure-proxy.example.com:8443"
-      expect(subject.send(:proxy_host)).to eq("secure-proxy.example.com")
-      expect(subject.send(:proxy_port)).to eq(8443)
-    end
-
-    it "parses proxy with authentication" do
-      ENV["http_proxy"] = "http://user:password@proxy.example.com:8080"
-      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
-      expect(subject.send(:proxy_port)).to eq(8080)
-      expect(subject.send(:proxy_user)).to eq("user")
-      expect(subject.send(:proxy_pass)).to eq("password")
-    end
-
-    it "handles uppercase environment variables" do
-      ENV["HTTP_PROXY"] = "http://proxy.example.com:8080"
-      expect(subject.send(:proxy_host)).to eq("proxy.example.com")
-      expect(subject.send(:proxy_port)).to eq(8080)
-    end
-
-    it "returns Net::HTTP class when no proxy is set" do
-      expect(subject.send(:http_class)).to eq(Net::HTTP)
-    end
-
-    it "returns Net::HTTP::Proxy class when proxy is set" do
-      ENV["http_proxy"] = "http://proxy.example.com:8080"
-      http_class = subject.send(:http_class)
-      expect(http_class).not_to eq(Net::HTTP)
-      expect(http_class.proxy_address).to eq("proxy.example.com")
-      expect(http_class.proxy_port).to eq(8080)
-    end
-
-    it "handles invalid proxy URIs gracefully" do
-      ENV["http_proxy"] = "://invalid"
-      expect(subject.send(:proxy_host)).to be_nil
+      it "doesn't write more than the declared size" do
+        expect { subject.send(:unzip) }.to raise_error(Jekyll::RemoteTheme::DownloadError)
+        expect(File.size("#{theme.root}/_layouts/default.html")).to be <= 10
+      end
     end
   end
 

@@ -96,6 +96,26 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(site.layouts["default"].path).to eql(layout_path)
     end
 
+    context "when munging again on a rebuild" do
+      let(:rebuild_munger) { described_class.new(site) }
+
+      it "doesn't register another cleanup handler" do
+        expect(rebuild_munger).not_to receive(:at_exit)
+        rebuild_munger.munge!
+      end
+
+      it "doesn't create another temp directory" do
+        expect(Dir).not_to receive(:mktmpdir)
+        rebuild_munger.munge!
+      end
+
+      it "keeps the configured theme" do
+        theme = site.theme
+        rebuild_munger.munge!
+        expect(site.theme).to equal(theme)
+      end
+    end
+
     it "requires plugins" do
       @stubbed_logger.rewind
       expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")

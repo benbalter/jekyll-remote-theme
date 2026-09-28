@@ -6,6 +6,9 @@ module Jekyll
       PROJECT_URL = "https://github.com/benbalter/jekyll-remote-theme"
       USER_AGENT = "Jekyll Remote Theme/#{VERSION} (+#{PROJECT_URL})"
       MAX_FILE_SIZE = 1 * (1024 * 1024 * 1024) # Size in bytes (1 GB)
+      # Limit on the theme's total size once extracted, to stop zip bombs
+      MAX_EXTRACTED_SIZE = 2 * (1024 * 1024 * 1024) # Size in bytes (2 GB)
+      EXTRACT_CHUNK_SIZE = 64 * 1024
       NET_HTTP_ERRORS = [
         Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError, Net::OpenTimeout,
         Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError,
@@ -45,23 +48,30 @@ module Jekyll
         @zip_file ||= Tempfile.new([TEMP_PREFIX, ".zip"], :binmode => true)
       end
 
-      # rubocop:disable Metrics/AbcSize
       def download
         Jekyll.logger.debug LOG_KEY, "Downloading #{zip_url} to #{zip_file.path}"
-        http_class.start(zip_url.host, zip_url.port, :use_ssl => true) do |http|
+        HTTP.start(zip_url, :use_ssl => true) do |http|
           http.request(request) do |response|
             raise_unless_success(response)
             enforce_max_file_size(response.content_length)
-            response.read_body do |chunk|
-              zip_file.write chunk
-            end
+            write_body(response)
           end
         end
         @downloaded = true
       rescue *NET_HTTP_ERRORS => e
         raise DownloadError, e.message
       end
-      # rubocop:enable Metrics/AbcSize
+
+      # Content-Length is optional (e.g. chunked responses), so also count the
+      # bytes as they arrive and stop once the limit is exceeded.
+      def write_body(response)
+        bytes = 0
+        response.read_body do |chunk|
+          bytes += chunk.bytesize
+          enforce_max_file_size(bytes)
+          zip_file.write chunk
+        end
+      end
 
       def request
         return @request if defined? @request
@@ -102,6 +112,7 @@ module Jekyll
         # is now resolved relative to a `destination_directory:` keyword,
         # mangling the absolute paths we pass). Reading each entry's stream and
         # writing it ourselves behaves identically across rubyzip 1.x–3.x.
+        @extracted_size = 0
         Zip::File.open(zip_file) do |archive|
           archive.each { |entry| extract_entry(entry) }
         end
@@ -116,9 +127,36 @@ module Jekyll
       def extract_entry(entry)
         return if entry.name.end_with?("/") # skip directory entries
 
+        enforce_max_extracted_size(@extracted_size + entry.size)
         dest = path_without_name_and_ref(entry.name)
         FileUtils.mkdir_p File.dirname(dest)
-        entry.get_input_stream { |input| File.binwrite(dest, input.read) }
+        File.open(dest, "wb") do |output|
+          entry.get_input_stream { |input| copy_entry(entry, input, output) }
+        end
+      end
+
+      # Copies an entry in chunks, counting the bytes actually inflated rather
+      # than trusting the sizes in the archive. Zip.validate_entry_sizes only
+      # applies to Zip::Entry#extract, so the same check is made here: an entry
+      # may not inflate to more than its declared size.
+      def copy_entry(entry, input, output)
+        written = 0
+        while (chunk = input.read(EXTRACT_CHUNK_SIZE))
+          written += chunk.bytesize
+          if written > entry.size
+            raise DownloadError, "Zip entry #{entry.name} is larger than its declared size"
+          end
+
+          @extracted_size += chunk.bytesize
+          enforce_max_extracted_size(@extracted_size)
+          output.write(chunk)
+        end
+      end
+
+      def enforce_max_extracted_size(size)
+        return unless size > MAX_EXTRACTED_SIZE
+
+        raise DownloadError, "Maximum extracted theme size of #{MAX_EXTRACTED_SIZE} bytes exceeded"
       end
 
       # Full URL to codeload zip download endpoint for the given theme
@@ -130,58 +168,12 @@ module Jekyll
         ).normalize
       end
 
-      # Returns an HTTP class that respects proxy environment variables
-      def http_class
-        @http_class ||= Net::HTTP::Proxy(proxy_host, proxy_port, proxy_user, proxy_pass)
-      end
-
-      # Extracts proxy settings from environment variables
-      def proxy_uri
-        return @proxy_uri if defined?(@proxy_uri)
-
-        proxy_env = find_proxy_env_var
-        @proxy_uri = parse_proxy_uri(proxy_env)
-      end
-
-      def find_proxy_env_var
-        # Check for HTTPS proxy first if the URL uses HTTPS
-        if theme.scheme == "https"
-          ENV["https_proxy"] || ENV["HTTPS_PROXY"] || ENV["http_proxy"] || ENV["HTTP_PROXY"]
-        else
-          ENV["http_proxy"] || ENV["HTTP_PROXY"]
-        end
-      end
-
-      def parse_proxy_uri(proxy_env)
-        return nil unless proxy_env
-
-        Addressable::URI.parse(proxy_env)
-      rescue Addressable::URI::InvalidURIError
-        nil
-      end
-
-      def proxy_host
-        proxy_uri&.host
-      end
-
-      def proxy_port
-        proxy_uri&.port
-      end
-
-      def proxy_user
-        proxy_uri&.user
-      end
-
-      def proxy_pass
-        proxy_uri&.password
-      end
-
       def theme_dir_exists?
         theme.root && Dir.exist?(theme.root)
       end
 
       def theme_dir_empty?
-        Dir["#{theme.root}/*"].empty?
+        Dir.empty?(theme.root)
       end
 
       # Codeload generated zip files contain a top level folder in the form of

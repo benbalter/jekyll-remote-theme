@@ -16,6 +16,7 @@ module Jekyll
     class DownloadError < StandardError; end
 
     autoload :Downloader,  "jekyll-remote-theme/downloader"
+    autoload :HTTP,        "jekyll-remote-theme/http"
     autoload :MockGemspec, "jekyll-remote-theme/mock_gemspec"
     autoload :Munger,      "jekyll-remote-theme/munger"
     autoload :Theme,       "jekyll-remote-theme/theme"
