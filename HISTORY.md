@@ -1,5 +1,34 @@
 # History
 
+## 0.6.0
+
+### Security
+
+- Cap the download size while streaming, so chunked responses without a
+  `Content-Length` header are limited too (#152)
+- Reject zip entries that inflate past their declared size, and cap the total
+  extracted size at 2 GB (#152)
+
+### Fixes
+
+- Honor `NO_PROXY`/`no_proxy`, and use `HTTPS_PROXY` for the `@latest`
+  release lookup as well as the download (#152)
+- Stop registering a new `at_exit` handler and theme temp directory on every
+  `jekyll serve` rebuild (#152)
+
+### Changes
+
+- Add a 10-second open timeout and a 60-second read timeout to GitHub
+  requests (#152)
+
+### Dependencies
+
+- Declare `required_ruby_version >= 3.0` (#145)
+
+### Infrastructure
+
+- Bump `github/codeql-action` (#146, #147, #149)
+
 ## 0.5.2
 
 ### Fixes
