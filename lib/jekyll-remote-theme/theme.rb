@@ -89,6 +89,15 @@ module Jekyll
 
       private
 
+      # A rejected local theme has no root. Jekyll 3's Theme#initialize resolves
+      # the theme's Sass path straight away, so return no paths rather than
+      # passing a nil root to Jekyll.sanitized_path.
+      def path_for(folder)
+        return if root.nil?
+
+        super
+      end
+
       def looks_like_local_path?(path)
         # Check if it looks like a local path
         # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
