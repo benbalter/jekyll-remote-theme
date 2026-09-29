@@ -50,7 +50,7 @@ or <sup>2</sup>
   remote_theme: ../my-local-theme
   ```
 <sup>1</sup> The codeload subdomain needs to be available on your github enterprise instance for this to work.
-<sup>2</sup> For local development, you can use local file paths (relative or absolute).
+<sup>2</sup> For local development, you can use local file paths (relative or absolute). Local paths are not available in safe mode (including on GitHub Pages).
 
 ## Declaring your theme
 
@@ -77,6 +77,8 @@ remote_theme: ../my-theme
 # Absolute path
 remote_theme: /home/user/projects/my-theme
 ```
+
+Local paths are not supported in [safe mode](https://jekyllrb.com/docs/configuration/options/) (including on GitHub Pages), where the theme will be rejected as invalid.
 
 The local directory should contain a valid Jekyll theme structure with layouts, includes, assets, etc. No download or extraction occurs when using local paths - the plugin uses the theme files directly from the specified location.
 

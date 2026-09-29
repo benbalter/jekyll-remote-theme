@@ -1,5 +1,13 @@
 # History
 
+## 0.6.1
+
+### Security
+
+- Reject local theme paths when the site is built in safe mode, so a site's
+  `_config.yml` can't read files from outside the site on the build host
+  ([GHSA-3343-386p-v26g](https://github.com/benbalter/jekyll-remote-theme/security/advisories/GHSA-3343-386p-v26g))
+
 ## 0.6.0
 
 ### Security

@@ -254,4 +254,101 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(site.includes_load_paths.first).to eql(site.in_source_dir("_includes"))
     end
   end
+
+  context "with a local theme path" do
+    let(:workspace) { File.realpath(Dir.mktmpdir("jekyll-remote-theme-local-")) }
+    let(:source) { File.join(workspace, "site") }
+    let(:in_source_theme) { File.join(source, "_themes", "my-theme") }
+    let(:sibling_theme) { File.join(workspace, "sibling-theme") }
+    let(:safe) { false }
+    let(:remote_theme) { "./_themes/my-theme" }
+    let(:overrides) { { "safe" => safe, "remote_theme" => remote_theme } }
+
+    def build_theme(dir)
+      FileUtils.mkdir_p(File.join(dir, "_layouts"))
+      File.write(File.join(dir, "_layouts", "default.html"), "layout content")
+    end
+
+    def log_output
+      @stubbed_logger.rewind
+      @stubbed_logger.read
+    end
+
+    before do
+      [in_source_theme, sibling_theme].each { |dir| build_theme(dir) }
+      @old_logger = Jekyll.logger
+      @stubbed_logger = StringIO.new
+      Jekyll.logger = Logger.new(@stubbed_logger)
+      Jekyll.logger.log_level = :debug
+      # Builds are typically run from the site directory
+      @old_working_dir = Dir.pwd
+      Dir.chdir(source)
+    end
+
+    after do
+      Dir.chdir(@old_working_dir)
+      Jekyll.instance_variable_set(:@logger, @old_logger)
+      FileUtils.rm_rf(workspace)
+    end
+
+    shared_examples "an accepted local theme" do |theme_dir_method|
+      it "sets the theme" do
+        subject.munge!
+        expected = send(theme_dir_method)
+        expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
+        expect(site.theme.root).to eql(expected)
+        expect(site.theme.layouts_path).to eql(File.join(expected, "_layouts"))
+      end
+    end
+
+    shared_examples "a rejected local theme" do
+      it "doesn't set the theme" do
+        expect(subject.munge!).to be_nil
+        expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+      end
+
+      it "logs an error" do
+        subject.munge!
+        expect(log_output).to include("is not a valid remote theme")
+      end
+    end
+
+    context "outside safe mode" do
+      context "with a path inside the site source" do
+        it_behaves_like "an accepted local theme", :in_source_theme
+      end
+
+      context "with an absolute path outside the site source" do
+        let(:remote_theme) { sibling_theme }
+
+        it_behaves_like "an accepted local theme", :sibling_theme
+      end
+
+      context "with a ../ path to a sibling directory" do
+        let(:remote_theme) { "../sibling-theme" }
+
+        it_behaves_like "an accepted local theme", :sibling_theme
+      end
+    end
+
+    context "in safe mode" do
+      let(:safe) { true }
+
+      context "with a path inside the site source" do
+        it_behaves_like "a rejected local theme"
+      end
+
+      context "with an absolute path outside the site source" do
+        let(:remote_theme) { sibling_theme }
+
+        it_behaves_like "a rejected local theme"
+      end
+
+      context "with a ../ path to a sibling directory" do
+        let(:remote_theme) { "../sibling-theme" }
+
+        it_behaves_like "a rejected local theme"
+      end
+    end
+  end
 end

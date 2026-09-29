@@ -201,6 +201,9 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   context "with a local path" do
     let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
     let(:raw_theme) { tmp_theme_dir }
+    let(:safe) { false }
+    let(:site) { instance_double(Jekyll::Site, :safe => safe) }
+    subject { described_class.new(raw_theme, site) }
 
     before do
       # Create a basic theme structure
@@ -218,6 +221,22 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
 
     it "is valid when directory exists" do
       expect(subject).to be_valid
+    end
+
+    it "is invalid without a site" do
+      expect(described_class.new(raw_theme)).to_not be_valid
+    end
+
+    context "in safe mode" do
+      let(:safe) { true }
+
+      it "is invalid" do
+        expect(subject).to_not be_valid
+      end
+
+      it "has no root" do
+        expect(subject.root).to be_nil
+      end
     end
 
     it "extracts the name from path" do

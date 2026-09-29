@@ -21,7 +21,10 @@ module Jekyll
       # 5. /absolute/path/to/theme - an absolute local file path
       # 6. ../relative/path/to/theme - a relative local file path
       # 7. ~/path/to/theme - a home directory relative path
-      def initialize(raw_theme)
+      #
+      # Local paths are only valid when a site is given and it isn't in safe mode.
+      def initialize(raw_theme, site = nil)
+        @site = site
         original_theme = raw_theme.to_s.strip
         local_path = looks_like_local_path?(original_theme)
         @raw_theme = local_path ? original_theme : original_theme.downcase
@@ -70,7 +73,9 @@ module Jekyll
       end
 
       def root
-        @root ||= local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
+        return (expanded_local_path if local_path_valid?) if local_theme?
+
+        @root ||= File.realpath(Dir.mktmpdir(TEMP_PREFIX))
       end
 
       def inspect
@@ -84,6 +89,15 @@ module Jekyll
 
       private
 
+      # A rejected local theme has no root. Jekyll 3's Theme#initialize resolves
+      # the theme's Sass path straight away, so return no paths rather than
+      # passing a nil root to Jekyll.sanitized_path.
+      def path_for(folder)
+        return if root.nil?
+
+        super
+      end
+
       def looks_like_local_path?(path)
         # Check if it looks like a local path
         # Supports: /, ./, ../, ~/ (Unix-style) and drive letters (Windows-style)
@@ -94,7 +108,11 @@ module Jekyll
         @expanded_local_path ||= File.expand_path(@raw_theme)
       end
 
+      # Local paths can reference any directory on the host, so they're never
+      # allowed in safe mode (or without a site to check).
       def local_path_valid?
+        return false if @site.nil? || @site.safe
+
         Dir.exist?(expanded_local_path)
       end
 
