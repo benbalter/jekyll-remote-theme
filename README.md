@@ -47,10 +47,10 @@ or <sup>1</sup>
   ```
 or <sup>2</sup>
   ```yml
-  remote_theme: ../my-local-theme
+  remote_theme: ./_themes/my-local-theme
   ```
 <sup>1</sup> The codeload subdomain needs to be available on your github enterprise instance for this to work.
-<sup>2</sup> For local development, you can use local file paths (relative or absolute).
+<sup>2</sup> For local development, you can use a local file path within your site's source directory. Local paths are not available in safe mode (e.g., on GitHub Pages).
 
 ## Declaring your theme
 
@@ -66,17 +66,21 @@ For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOS
 
 ### Local Development
 
-For local development, you can use local file paths instead of remote repositories. This is useful when you want to separate your theme from your blog repository and test changes locally before pushing to GitHub.
+For local development, you can use a local file path instead of a remote repository. This is useful when you want to test changes to a theme locally before pushing them to GitHub.
 
-Local paths can be either relative or absolute:
+Local paths must start with `/`, `./`, `../`, `~/`, or a drive letter. Relative paths are resolved against the site's source directory, and the path must resolve (after following any symbolic links) to a directory inside the site's source directory:
 
 ```yml
-# Relative path
-remote_theme: ../my-theme
+# Relative to the site source
+remote_theme: ./_themes/my-theme
 
-# Absolute path
-remote_theme: /home/user/projects/my-theme
+# Absolute path (must be inside the site source)
+remote_theme: /home/user/projects/my-site/_themes/my-theme
 ```
+
+Paths that resolve outside the site's source directory are rejected as invalid themes. To work on a theme that lives in its own repository, clone it (e.g., as a Git submodule) into a directory inside your site whose name starts with an underscore (e.g., `_themes/`), which Jekyll won't publish as site content. A symbolic link to a directory outside the site source won't work, since symbolic links are resolved before the check.
+
+Local paths are not supported in [safe mode](https://jekyllrb.com/docs/configuration/options/) (including on GitHub Pages), where the theme will be rejected as invalid.
 
 The local directory should contain a valid Jekyll theme structure with layouts, includes, assets, etc. No download or extraction occurs when using local paths - the plugin uses the theme files directly from the specified location.
 

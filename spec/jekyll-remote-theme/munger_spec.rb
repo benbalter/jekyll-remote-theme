@@ -254,4 +254,111 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(site.includes_load_paths.first).to eql(site.in_source_dir("_includes"))
     end
   end
+
+  context "with a local theme path" do
+    let(:workspace) { File.realpath(Dir.mktmpdir("jekyll-remote-theme-local-")) }
+    let(:source) { File.join(workspace, "site") }
+    let(:in_source_theme) { File.join(source, "_themes", "my-theme") }
+    let(:outside_theme) { File.join(workspace, "outside-theme") }
+    let(:prefix_sibling_theme) { File.join(workspace, "site-other") }
+    let(:safe) { false }
+    let(:remote_theme) { "./_themes/my-theme" }
+    let(:overrides) { { "safe" => safe, "remote_theme" => remote_theme } }
+    # Builds are typically run from the site directory
+    let(:working_dir) { source }
+
+    def build_theme(dir)
+      FileUtils.mkdir_p(File.join(dir, "_layouts"))
+      File.write(File.join(dir, "_layouts", "default.html"), "layout content")
+    end
+
+    def log_output
+      @stubbed_logger.rewind
+      @stubbed_logger.read
+    end
+
+    before do
+      [in_source_theme, outside_theme, prefix_sibling_theme].each { |dir| build_theme(dir) }
+      @old_logger = Jekyll.logger
+      @stubbed_logger = StringIO.new
+      Jekyll.logger = Logger.new(@stubbed_logger)
+      Jekyll.logger.log_level = :debug
+      @old_working_dir = Dir.pwd
+      Dir.chdir(working_dir)
+    end
+
+    after do
+      Dir.chdir(@old_working_dir)
+      Jekyll.instance_variable_set(:@logger, @old_logger)
+      FileUtils.rm_rf(workspace)
+    end
+
+    shared_examples "a rejected local theme" do
+      it "doesn't set the theme" do
+        expect(subject.munge!).to be_nil
+        expect(site.theme).to_not be_a(Jekyll::RemoteTheme::Theme)
+      end
+
+      it "logs an error" do
+        subject.munge!
+        expect(log_output).to include("is not a valid remote theme")
+      end
+    end
+
+    context "inside the site source" do
+      it "sets the theme" do
+        subject.munge!
+        expect(site.theme).to be_a(Jekyll::RemoteTheme::Theme)
+        expect(site.theme.root).to eql(in_source_theme)
+        expect(site.theme.layouts_path).to eql(File.join(in_source_theme, "_layouts"))
+      end
+    end
+
+    context "with an absolute path outside the site source" do
+      let(:remote_theme) { outside_theme }
+
+      it_behaves_like "a rejected local theme"
+    end
+
+    context "with a relative path that only exists relative to the working directory" do
+      let(:working_dir) { workspace }
+      let(:remote_theme) { "./outside-theme" }
+
+      it_behaves_like "a rejected local theme"
+    end
+
+    context "with a ../ path that escapes the site source" do
+      let(:remote_theme) { "../outside-theme" }
+
+      it_behaves_like "a rejected local theme"
+    end
+
+    context "with a sibling directory sharing the site source's prefix" do
+      let(:remote_theme) { "../site-other" }
+
+      it_behaves_like "a rejected local theme"
+    end
+
+    context "with a symlink inside the site source that points outside it" do
+      let(:remote_theme) { "./_themes/linked" }
+
+      before { File.symlink(outside_theme, File.join(source, "_themes", "linked")) }
+
+      it_behaves_like "a rejected local theme"
+    end
+
+    context "in safe mode" do
+      let(:safe) { true }
+
+      context "with a path inside the site source" do
+        it_behaves_like "a rejected local theme"
+      end
+
+      context "with an absolute path outside the site source" do
+        let(:remote_theme) { outside_theme }
+
+        it_behaves_like "a rejected local theme"
+      end
+    end
+  end
 end

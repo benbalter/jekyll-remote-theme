@@ -40,7 +40,7 @@ module Jekyll
       # On a rebuild, reuse the theme configured by the first run rather than
       # building a new one, which would create another temp directory.
       def theme
-        @theme ||= munged? ? site.theme : Theme.new(raw_theme)
+        @theme ||= munged? ? site.theme : Theme.new(raw_theme, site)
       end
 
       def raw_theme

@@ -19,9 +19,14 @@ module Jekyll
       # 4. http[s]://github.<yourEnterprise>.com/owner/theme-name@git_ref
       # - An enterprise GitHub instance + a GitHub owner + a theme-name + Git ref string
       # 5. /absolute/path/to/theme - an absolute local file path
-      # 6. ../relative/path/to/theme - a relative local file path
+      # 6. ./relative/path/to/theme - a local file path relative to the site source
       # 7. ~/path/to/theme - a home directory relative path
-      def initialize(raw_theme)
+      #
+      # Local paths must resolve (after following symlinks) to a directory within
+      # the site source, and are rejected entirely when the site is in safe mode.
+      # A local theme without a site to confine it to is never valid.
+      def initialize(raw_theme, site = nil)
+        @site = site
         original_theme = raw_theme.to_s.strip
         local_path = looks_like_local_path?(original_theme)
         @raw_theme = local_path ? original_theme : original_theme.downcase
@@ -70,7 +75,9 @@ module Jekyll
       end
 
       def root
-        @root ||= local_theme? ? expanded_local_path : File.realpath(Dir.mktmpdir(TEMP_PREFIX))
+        return confined_local_path if local_theme?
+
+        @root ||= File.realpath(Dir.mktmpdir(TEMP_PREFIX))
       end
 
       def inspect
@@ -90,12 +97,42 @@ module Jekyll
         path.start_with?("/", "./", "../", "~/") || path.match?(%r!\A[a-z]:[/\\]!i)
       end
 
+      def site_source
+        return @site_source if defined? @site_source
+
+        @site_source = begin
+          File.realpath(@site.source) if @site
+        rescue SystemCallError
+          nil
+        end
+      end
+
       def expanded_local_path
-        @expanded_local_path ||= File.expand_path(@raw_theme)
+        @expanded_local_path ||= File.expand_path(@raw_theme, site_source || Dir.pwd)
+      end
+
+      # The real path of the local theme directory, or nil if the site is in safe
+      # mode or the directory doesn't exist or resolves outside the site source.
+      def confined_local_path
+        return @confined_local_path if defined? @confined_local_path
+
+        @confined_local_path = resolve_confined_local_path
+      end
+
+      def resolve_confined_local_path
+        return nil if @site.nil? || @site.safe || site_source.nil?
+
+        path = File.realpath(expanded_local_path)
+        return nil unless File.directory?(path)
+        return nil unless path == site_source || path.start_with?(site_source + File::SEPARATOR)
+
+        path
+      rescue SystemCallError
+        nil
       end
 
       def local_path_valid?
-        Dir.exist?(expanded_local_path)
+        !confined_local_path.nil?
       end
 
       def remote_theme_valid?
