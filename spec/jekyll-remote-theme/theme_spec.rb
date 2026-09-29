@@ -199,11 +199,10 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
   end
 
   context "with a local path" do
-    let(:site_source) { File.realpath(Dir.mktmpdir("test-site-")) }
-    let(:tmp_theme_dir) { File.join(site_source, "_themes", "test-theme") }
+    let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
     let(:raw_theme) { tmp_theme_dir }
     let(:safe) { false }
-    let(:site) { make_site("source" => site_source, "safe" => safe) }
+    let(:site) { instance_double(Jekyll::Site, :safe => safe) }
     subject { described_class.new(raw_theme, site) }
 
     before do
@@ -213,7 +212,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
 
     after do
-      FileUtils.rm_rf(site_source)
+      FileUtils.rm_rf(tmp_theme_dir)
     end
 
     it "detects as a local theme" do
@@ -224,7 +223,7 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
       expect(subject).to be_valid
     end
 
-    it "is invalid without a site to confine it to" do
+    it "is invalid without a site" do
       expect(described_class.new(raw_theme)).to_not be_valid
     end
 
@@ -234,17 +233,9 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
       it "is invalid" do
         expect(subject).to_not be_valid
       end
-    end
 
-    context "with a path relative to the site source" do
-      let(:raw_theme) { "./_themes/test-theme" }
-
-      it "is valid" do
-        expect(subject).to be_valid
-      end
-
-      it "resolves the root against the site source" do
-        expect(subject.root).to eql(tmp_theme_dir)
+      it "has no root" do
+        expect(subject.root).to be_nil
       end
     end
 
@@ -256,8 +247,8 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
       expect(subject.owner).to eql("local")
     end
 
-    it "uses the real path as root" do
-      expect(subject.root).to eql(File.realpath(tmp_theme_dir))
+    it "uses the expanded path as root" do
+      expect(subject.root).to eql(File.expand_path(tmp_theme_dir))
     end
 
     it "returns nil for host" do

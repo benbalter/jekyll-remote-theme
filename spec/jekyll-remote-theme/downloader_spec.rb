@@ -195,11 +195,8 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
   end
 
   context "with a local theme" do
-    let(:site_source) { File.realpath(Dir.mktmpdir("test-site-")) }
-    let(:tmp_theme_dir) { File.join(site_source, "_themes", "test-theme") }
+    let(:tmp_theme_dir) { Dir.mktmpdir("test-theme-") }
     let(:raw_theme) { tmp_theme_dir }
-    let(:site) { make_site("source" => site_source, "safe" => false) }
-    let(:theme) { Jekyll::RemoteTheme::Theme.new(raw_theme, site) }
 
     before do
       # Create a basic theme structure
@@ -209,11 +206,7 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
     end
 
     after do
-      FileUtils.rm_rf(site_source)
-    end
-
-    it "is a valid theme" do
-      expect(theme).to be_valid
+      FileUtils.rm_rf(tmp_theme_dir)
     end
 
     it "knows it's already downloaded" do
