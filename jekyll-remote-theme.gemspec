@@ -10,6 +10,14 @@ Gem::Specification.new do |s|
   s.email         = ["ben.balter@github.com"]
   s.homepage      = "https://github.com/benbalter/jekyll-remote-theme"
   s.summary       = "Jekyll plugin for building Jekyll sites with any GitHub-hosted theme"
+  s.description   = "Jekyll plugin to build a site with any public GitHub-hosted theme, set " \
+                    "via the remote_theme config key. Supported on GitHub Pages."
+  s.metadata      = {
+    "homepage_uri"    => "https://github.com/benbalter/jekyll-remote-theme",
+    "source_code_uri" => "https://github.com/benbalter/jekyll-remote-theme",
+    "bug_tracker_uri" => "https://github.com/benbalter/jekyll-remote-theme/issues",
+    "changelog_uri"   => "https://github.com/benbalter/jekyll-remote-theme/releases",
+  }
 
   s.files         = `git ls-files app lib`.split("\n")
   s.require_paths = ["lib"]
