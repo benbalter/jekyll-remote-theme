@@ -1,8 +1,8 @@
 # Jekyll Remote Theme
 
-Jekyll plugin for building Jekyll sites with any public GitHub-hosted theme
+Jekyll plugin to build a site with any public GitHub-hosted theme, set via the remote_theme config key. Supported on GitHub Pages.
 
-[![Gem Version](https://badge.fury.io/rb/jekyll-remote-theme.svg)](https://badge.fury.io/rb/jekyll-remote-theme) [![CI](https://github.com/benbalter/jekyll-remote-theme/workflows/CI/badge.svg)](https://github.com/benbalter/jekyll-remote-theme/actions?query=workflow%3ACI) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![Gem Version](https://badge.fury.io/rb/jekyll-remote-theme.svg)](https://badge.fury.io/rb/jekyll-remote-theme) [![CI](https://github.com/benbalter/jekyll-remote-theme/actions/workflows/ci.yml/badge.svg)](https://github.com/benbalter/jekyll-remote-theme/actions/workflows/ci.yml) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](docs/CONTRIBUTING.md)
 
 
 ## Usage
