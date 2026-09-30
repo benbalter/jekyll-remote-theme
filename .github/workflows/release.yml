@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: rubygems
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # RubyGems trusted publishing (OIDC)
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+      with:
+        ruby-version: "4.0"
+        bundler-cache: true # Runs bundle install and caches installed gems
+
+    - name: Verify tag matches gem version
+      run: |
+        version="$(ruby -e 'spec = Gem::Specification.load(ARGV[0]) or abort("could not load #{ARGV[0]}"); print spec.version' jekyll-remote-theme.gemspec)"
+        if [ -z "$version" ]; then
+          echo "::error::Could not read the gem version from jekyll-remote-theme.gemspec"
+          exit 1
+        fi
+        if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
+          echo "::error::Tag $GITHUB_REF_NAME does not match gem version $version"
+          exit 1
+        fi
+
+    - name: Publish to RubyGems
+      uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+      with:
+        await-release: true
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+          echo "Release $GITHUB_REF_NAME already exists; skipping"
+          exit 0
+        fi
+        awk -v heading="## ${GITHUB_REF_NAME#v}" '
+          $0 == heading { found = 1; next }
+          found && /^## / { exit }
+          found { print }
+        ' HISTORY.md > "$RUNNER_TEMP/notes.md"
+        if [ -n "$(tr -d '[:space:]' < "$RUNNER_TEMP/notes.md")" ]; then
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md"
+        else
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --generate-notes
+        fi

@@ -9,3 +9,4 @@ vendor/
 # Transient theme extractions / test artifacts
 /private/
 /tmp/
+/pkg/
