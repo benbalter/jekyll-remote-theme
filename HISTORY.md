@@ -1,5 +1,15 @@
 # History
 
+## 0.6.2
+
+Maintenance release: no runtime behavior changes.
+
+### Documentation
+
+- Add a gemspec description and RubyGems metadata (homepage, source code,
+  bug tracker, and changelog links), and lead the README with the same
+  one-line description (#155)
+
 ## 0.6.1
 
 ### Security
