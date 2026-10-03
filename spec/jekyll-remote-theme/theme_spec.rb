@@ -196,13 +196,13 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
         expect(subject.scheme).to eql(scheme)
       end
 
-      it "is valid if a whitelisted host name" do
+      it "is valid if an allowlisted host name" do
         with_env "GITHUB_HOSTNAME", "example.com" do
           expect(subject).to be_valid
         end
       end
 
-      it "is invalid if not a whitelisted host name" do
+      it "is invalid if not an allowlisted host name" do
         with_env "GITHUB_HOSTNAME", "enterprise.github.com" do
           expect(subject).to_not be_valid
         end
