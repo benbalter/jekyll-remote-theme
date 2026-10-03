@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.name    = "rundev"
   spec.version = RunDev::VERSION
   spec.authors = ["John Doe"]
-  spec.summary = "Dummy gemspec"
+  spec.summary = "Placeholder gemspec"
 
   spec.add_runtime_dependency "jekyll", "~> 3.5"
   spec.add_runtime_dependency "jekyll-feed", "~> 0.6" # some "random" comment

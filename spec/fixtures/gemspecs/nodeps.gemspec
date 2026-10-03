@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name    = "nodeps"
   s.version = Lorem::VERSION
   s.authors = ["John Doe"]
-  s.summary = "Dummy gemspec"
+  s.summary = "Placeholder gemspec"
 
   s.add_development_dependency("bundler", "~> 1.12")
   s.add_development_dependency("rake",    "~> 10.0")

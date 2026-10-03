@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name    = "braces"
   s.version = Braces::VERSION
   s.authors = ["John Doe"]
-  s.summary = "Dummy gemspec"
+  s.summary = "Placeholder gemspec"
 
   # rubocop:disable Style/StringLiterals
   # runtime dependencies
