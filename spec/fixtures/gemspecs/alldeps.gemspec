@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name    = "alldeps"
   s.version = AllDeps::VERSION
   s.authors = ["John Doe"]
-  s.summary = "Dummy gemspec"
+  s.summary = "Placeholder gemspec"
 
   # runtime dependencies
   s.add_dependency "jekyll", "~> 3.5"

@@ -42,7 +42,7 @@ RSpec.describe Jekyll::RemoteTheme::MockGemspec do
 
   it "returns summary" do
     expect(subject.summary).to be_a(String)
-    expect(subject.summary).to eq("Dummy gemspec")
+    expect(subject.summary).to eq("Placeholder gemspec")
   end
 
   it "returns description" do
