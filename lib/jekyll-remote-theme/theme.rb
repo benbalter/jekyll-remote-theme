@@ -7,6 +7,7 @@ module Jekyll
       NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
       REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, commit, or "latest"
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
+      REF_SUFFIX_REGEX = %r!\A#{REF_REGEX}\z!.freeze
 
       # Initializes a new Jekyll::RemoteTheme::Theme
       #
@@ -27,7 +28,7 @@ module Jekyll
         @site = site
         original_theme = raw_theme.to_s.strip
         local_path = looks_like_local_path?(original_theme)
-        @raw_theme = local_path ? original_theme : original_theme.downcase
+        @raw_theme = local_path ? original_theme : normalize_remote_theme(original_theme)
         super(@raw_theme)
       end
 
@@ -67,7 +68,7 @@ module Jekyll
 
         parsed_ref = theme_parts[:ref]
         return "HEAD" unless parsed_ref
-        return resolve_latest_release if parsed_ref == "latest"
+        return resolve_latest_release if parsed_ref.casecmp?("latest")
 
         parsed_ref
       end
@@ -96,6 +97,16 @@ module Jekyll
         return if root.nil?
 
         super
+      end
+
+      # Owners and repo names are case-insensitive on GitHub, so normalize them,
+      # but leave the git ref alone: branch and tag names are case-sensitive, and
+      # downcasing them points codeload at a ref that doesn't exist.
+      def normalize_remote_theme(theme)
+        theme_without_ref, separator, ref = theme.rpartition("@")
+        return theme.downcase if separator.empty? || !"@#{ref}".match?(REF_SUFFIX_REGEX)
+
+        "#{theme_without_ref.downcase}@#{ref}"
       end
 
       def looks_like_local_path?(path)
