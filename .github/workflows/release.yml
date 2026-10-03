@@ -15,12 +15,12 @@ jobs:
       id-token: write # RubyGems trusted publishing (OIDC)
 
     steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+    - uses: actions/checkout@v7
       with:
         persist-credentials: false
 
     - name: Set up Ruby
-      uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
+      uses: ruby/setup-ruby@v1
       with:
         ruby-version: "4.0"
         bundler-cache: true # Runs bundle install and caches installed gems
@@ -38,7 +38,7 @@ jobs:
         fi
 
     - name: Publish to RubyGems
-      uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1
+      uses: rubygems/release-gem@v1
       with:
         await-release: true
 
