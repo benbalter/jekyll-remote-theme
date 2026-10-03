@@ -89,6 +89,26 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
+  context "with a mixed-case git_ref" do
+    let(:nwo) { "FoO/bAr" }
+    let(:git_ref) { "Feature-Branch" }
+
+    it "normalizes the nwo but preserves the ref's case" do
+      expect(subject.instance_variable_get(:@raw_theme)).to eql("foo/bar@Feature-Branch")
+      expect(subject.git_ref).to eql("Feature-Branch")
+    end
+  end
+
+  context "with a mixed-case git_ref on a full URL" do
+    let(:raw_theme) { "https://GitHub.Example.com/FoO/bAr@Feature-Branch" }
+
+    it "normalizes the host and nwo but preserves the ref's case" do
+      expect(subject.host).to eql("github.example.com")
+      expect(subject.name_with_owner).to eql("foo/bar")
+      expect(subject.git_ref).to eql("Feature-Branch")
+    end
+  end
+
   context "with @latest ref" do
     let(:git_ref) { "latest" }
     let(:api_response_body) { '{"tag_name": "v1.2.3"}' }
