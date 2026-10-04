@@ -210,7 +210,7 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
       expect(site.config["theme"]).to eql("jekyll-test-theme-malicious")
     end
 
-    it "requires whitelisted plugins" do
+    it "requires allowlisted plugins" do
       @stubbed_logger.rewind
       expect(@stubbed_logger.read).to include("Requiring: jekyll-seo-tag")
     end

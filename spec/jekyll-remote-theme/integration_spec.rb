@@ -102,7 +102,7 @@ RSpec.describe "Jekyll::RemoteTheme Integration" do
       expect(index_contents).to include("Begin Jekyll SEO tag")
     end
 
-    it "requires whitelisted dependencies" do
+    it "requires allowlisted dependencies" do
       expect(output).to include("Requiring: jekyll-seo-tag")
     end
 
