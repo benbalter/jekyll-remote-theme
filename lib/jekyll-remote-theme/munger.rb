@@ -15,7 +15,7 @@ module Jekyll
         return unless raw_theme
 
         unless theme.valid?
-          Jekyll.logger.error LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
+          Jekyll.logger.error LOG_KEY, invalid_theme_message
           return
         end
 
@@ -32,6 +32,14 @@ module Jekyll
       end
 
       private
+
+      def invalid_theme_message
+        message = "#{raw_theme.inspect} is not a valid remote theme"
+        return message unless theme.disallowed_host?
+
+        "#{message}; host #{theme.host.inspect} is not allowed. " \
+          "Set PAGES_GITHUB_HOSTNAME or GITHUB_HOSTNAME to #{theme.host.inspect}"
+      end
 
       def munged?
         site.theme&.is_a?(Jekyll::RemoteTheme::Theme)

@@ -73,6 +73,12 @@ module Jekyll
         parsed_ref
       end
 
+      def disallowed_host?
+        return false unless uri && theme_parts && name && owner
+
+        host && !valid_hosts.include?(host)
+      end
+
       def root
         return (expanded_local_path if local_path_valid?) if local_theme?
 

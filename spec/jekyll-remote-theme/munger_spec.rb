@@ -53,6 +53,48 @@ RSpec.describe Jekyll::RemoteTheme::Munger do
     end
   end
 
+  context "with an unallowed remote host" do
+    let(:raw_theme) { "https://ghe.example.com/o/r" }
+    let(:overrides) { { "remote_theme" => raw_theme } }
+
+    before do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("PAGES_GITHUB_HOSTNAME").and_return(nil)
+      allow(ENV).to receive(:[]).with("GITHUB_HOSTNAME").and_return(nil)
+    end
+
+    it "names the host and the variables that allow it without downloading" do
+      expect(Jekyll.logger).to receive(:error).with(
+        Jekyll::RemoteTheme::LOG_KEY,
+        "#{raw_theme.inspect} is not a valid remote theme; " \
+        'host "ghe.example.com" is not allowed. ' \
+        'Set PAGES_GITHUB_HOSTNAME or GITHUB_HOSTNAME to "ghe.example.com"'
+      )
+      expect(Jekyll::RemoteTheme::Downloader).not_to receive(:new)
+      expect(subject.munge!).to be_nil
+      expect(site.theme).not_to be_a(Jekyll::RemoteTheme::Theme)
+    end
+
+    context "with an invalid repository path" do
+      let(:raw_theme) { "https://ghe.example.com/not-a-repository" }
+
+      it "keeps the generic invalid-theme error" do
+        expect(Jekyll.logger).to receive(:error).with(
+          Jekyll::RemoteTheme::LOG_KEY, "#{raw_theme.inspect} is not a valid remote theme"
+        )
+        expect(subject.munge!).to be_nil
+      end
+    end
+
+    %w(PAGES_GITHUB_HOSTNAME GITHUB_HOSTNAME).each do |variable|
+      it "accepts the host when #{variable} is set" do
+        allow(ENV).to receive(:[]).with(variable).and_return("ghe.example.com")
+        expect(theme).to be_valid
+        expect(theme).not_to be_disallowed_host
+      end
+    end
+  end
+
   context "with a remote theme" do
     let(:overrides) { { "remote_theme" => "pages-themes/primer" } }
     before do
