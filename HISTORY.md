@@ -1,5 +1,12 @@
 # History
 
+## Unreleased
+
+### Fixes
+
+- Document the Enterprise hostname allowlist and explain how to allow a rejected
+  host in the invalid-theme error (#168)
+
 ## 0.6.2
 
 Maintenance release: no runtime behavior changes.

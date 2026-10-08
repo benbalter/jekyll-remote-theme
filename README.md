@@ -62,7 +62,17 @@ You may also optionally specify a branch, tag, or commit to use by appending an 
 
 To automatically use the latest tagged release, you can specify `@latest` (e.g., `benbalter/retlab@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
 
-For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. Other than requiring the fully qualified domain name of the enterprise GitHub instance, this works exactly the same as the public usage.
+For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. The enterprise hostname must also be allowed: set either `PAGES_GITHUB_HOSTNAME` or `GITHUB_HOSTNAME` in the build environment to that hostname, without a scheme or path. Both variables add an allowed host; `github.com` is always allowed.
+
+For example, with `remote_theme: https://ghe.example.com/OWNER/REPOSITORY`:
+
+```sh
+PAGES_GITHUB_HOSTNAME=ghe.example.com bundle exec jekyll build
+# Alternatively:
+GITHUB_HOSTNAME=ghe.example.com bundle exec jekyll build
+```
+
+The `codeload.ghe.example.com` subdomain must also be available for downloading the theme. Set the variable to the enterprise hostname (`ghe.example.com`), not the codeload subdomain.
 
 ### Local Development
 
