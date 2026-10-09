@@ -189,7 +189,7 @@ module Jekyll
         if response.is_a?(Net::HTTPSuccess)
           parse_tag_from_response(response)
         else
-          log_no_releases_warning
+          log_failed_response_warning(response)
           nil
         end
       rescue StandardError => e
@@ -236,6 +236,19 @@ module Jekyll
       def log_no_releases_warning
         Jekyll.logger.warn LOG_KEY,
                            "No releases found for #{name_with_owner}, using HEAD"
+      end
+
+      def log_failed_response_warning(response)
+        if response.code == "404"
+          log_no_releases_warning
+        else
+          message = "Unexpected HTTP #{response.code} response " \
+                    "for #{name_with_owner}, using HEAD"
+          if %w(403 429).include?(response.code)
+            message += "; this is likely caused by GitHub API rate limiting"
+          end
+          Jekyll.logger.warn LOG_KEY, message
+        end
       end
 
       def log_api_error(error)
