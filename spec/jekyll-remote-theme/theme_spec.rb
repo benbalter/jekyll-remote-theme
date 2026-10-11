@@ -353,6 +353,32 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
       it "falls back to HEAD" do
         expect(subject.git_ref).to eql("HEAD")
       end
+
+      it "keeps the no-releases message" do
+        expect(Jekyll.logger).to receive(:warn).with(
+          Jekyll::RemoteTheme::LOG_KEY,
+          "No releases found for foo/bar, using HEAD"
+        )
+        subject.git_ref
+      end
+    end
+
+    context "when the API returns 403" do
+      before do
+        stub_request(:get, api_url).to_return(:status => 403)
+      end
+
+      it "falls back to HEAD" do
+        expect(subject.git_ref).to eql("HEAD")
+      end
+
+      it "warns that rate limiting is the likely cause" do
+        expect(Jekyll.logger).to receive(:warn).with(
+          Jekyll::RemoteTheme::LOG_KEY,
+          %r!HTTP 403.*rate limiting!
+        )
+        subject.git_ref
+      end
     end
 
     context "when the API call raises an error" do
