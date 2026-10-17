@@ -5,7 +5,12 @@ module Jekyll
     class Theme < Jekyll::Theme
       OWNER_REGEX = %r!(?<owner>[a-z0-9\-]+)!i.freeze
       NAME_REGEX  = %r!(?<name>[a-z0-9\._\-]+)!i.freeze
-      REF_REGEX   = %r!@(?<ref>[a-z0-9\._\-]+)!i.freeze # May be a branch, tag, commit, or "latest"
+      # A ref segment can't be "." or "..": the ref goes into a normalized download
+      # URL, where those segments would point at a different path.
+      REF_SEGMENT_REGEX = %r!(?\!\.\.?(?:/|\z))[a-z0-9\._\-]+!i.freeze
+      # May be a branch, tag, commit, or "latest". Branches may contain "/", as in
+      # "feature/new-layout", but not at the start or end, or twice in a row.
+      REF_REGEX   = %r!@(?<ref>#{REF_SEGMENT_REGEX}(?:/#{REF_SEGMENT_REGEX})*)!i.freeze
       THEME_REGEX = %r!\A#{OWNER_REGEX}/#{NAME_REGEX}(?:#{REF_REGEX})?\z!i.freeze
       REF_SUFFIX_REGEX = %r!\A#{REF_REGEX}\z!.freeze
 

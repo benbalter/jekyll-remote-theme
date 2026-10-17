@@ -4,6 +4,8 @@
 
 ### Fixes
 
+- Allow `/` in Git refs, so branches such as `@feature/new-layout` work, while
+  still rejecting `.` and `..` segments and leading, trailing or doubled slashes (#73)
 - Document the Enterprise hostname allowlist and explain how to allow a rejected
   host in the invalid-theme error (#168)
 

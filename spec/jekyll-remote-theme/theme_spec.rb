@@ -109,6 +109,44 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
     end
   end
 
+  context "with a git_ref containing slashes" do
+    let(:nwo) { "FoO/bAr" }
+    let(:git_ref) { "Feature/New-Layout" }
+
+    it "is valid" do
+      expect(subject).to be_valid
+    end
+
+    it "normalizes the nwo but preserves the ref" do
+      expect(subject.instance_variable_get(:@raw_theme)).to eql("foo/bar@Feature/New-Layout")
+      expect(subject.name_with_owner).to eql("foo/bar")
+      expect(subject.git_ref).to eql("Feature/New-Layout")
+    end
+  end
+
+  context "with a git_ref containing slashes on a full URL" do
+    let(:raw_theme) { "https://GitHub.Example.com/FoO/bAr@user/feature/v2" }
+
+    it "parses the host, nwo and ref" do
+      expect(subject.host).to eql("github.example.com")
+      expect(subject.name_with_owner).to eql("foo/bar")
+      expect(subject.git_ref).to eql("user/feature/v2")
+    end
+  end
+
+  [
+    "/feature", "feature/", "feature//branch", "..", ".", "../../other/repo",
+    "feature/../../other/repo", "feature/./branch", "feature/..",
+  ].each do |ref|
+    context "with the git_ref #{ref.inspect}" do
+      let(:git_ref) { ref }
+
+      it "is invalid" do
+        expect(subject).to_not be_valid
+      end
+    end
+  end
+
   context "with @latest ref" do
     let(:git_ref) { "latest" }
     let(:api_response_body) { '{"tag_name": "v1.2.3"}' }
