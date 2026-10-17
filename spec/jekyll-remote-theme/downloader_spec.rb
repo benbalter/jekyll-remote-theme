@@ -46,6 +46,15 @@ RSpec.describe Jekyll::RemoteTheme::Downloader do
       expect(subject.send(:zip_url).to_s).to eql(expected)
     end
 
+    context "a git ref containing slashes" do
+      let(:raw_theme) { "pages-themes/primer@feature/new-layout" }
+
+      it "builds the zip url" do
+        expected = "https://codeload.github.com/pages-themes/primer/zip/feature/new-layout"
+        expect(subject.send(:zip_url).to_s).to eql(expected)
+      end
+    end
+
     context "a custom host" do
       let(:raw_theme) { "http://example.com/pages-themes/primer" }
 
