@@ -26,24 +26,24 @@ Jekyll plugin to build a site with any public GitHub-hosted theme, set via the r
 3. Add the following to your site's `_config.yml` to choose your theme
 
   ```yml
-  remote_theme: benbalter/retlab
+  remote_theme: pages-themes/cayman
   ```
 
   To use a specific release or branch:
 
   ```yml
-  remote_theme: benbalter/retlab@v1.0.0
+  remote_theme: pages-themes/cayman@v0.2.0
   ```
 
   To automatically use the latest tagged release:
 
   ```yml
-  remote_theme: benbalter/retlab@latest
+  remote_theme: pages-themes/cayman@latest
   ```
 
 or <sup>1</sup>
   ```yml
-  remote_theme: http[s]://github.<Enterprise>.com/benbalter/retlab
+  remote_theme: http[s]://github.<Enterprise>.com/OWNER/REPOSITORY
   ```
 or <sup>2</sup>
   ```yml
@@ -58,9 +58,9 @@ Remote themes are specified by the `remote_theme` key in the site's config.
 
 For public GitHub, remote themes must be in the form of `OWNER/REPOSITORY`, and must represent a public GitHub-hosted Jekyll theme. See [the Jekyll documentation](https://jekyllrb.com/docs/themes/) for more information on authoring a theme. Note that you do not need to upload the gem to RubyGems or include a `.gemspec` file.
 
-You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `benbalter/retlab@v1.0.0` or `benbalter/retlab@develop`). Branch names containing slashes, such as `benbalter/retlab@feature/new-layout`, work too. If you don't specify a Git ref, the `HEAD` ref will be used.
+You may also optionally specify a branch, tag, or commit to use by appending an `@` and the Git ref (e.g., `pages-themes/cayman@v0.2.0` or `pages-themes/cayman@master`). Branch names containing slashes, such as `OWNER/REPOSITORY@feature/new-layout`, work too. If you don't specify a Git ref, the `HEAD` ref will be used.
 
-To automatically use the latest tagged release, you can specify `@latest` (e.g., `benbalter/retlab@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
+To automatically use the latest tagged release, you can specify `@latest` (e.g., `pages-themes/cayman@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
 
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. The enterprise hostname must also be allowed: set either `PAGES_GITHUB_HOSTNAME` or `GITHUB_HOSTNAME` in the build environment to that hostname, without a scheme or path. Both variables add an allowed host; `github.com` is always allowed.
 

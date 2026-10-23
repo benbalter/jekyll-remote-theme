@@ -9,6 +9,9 @@
   Thanks to [@sefrockygarcia](https://github.com/sefrockygarcia).
 - Document the Enterprise hostname allowlist and explain how to allow a rejected
   host in the invalid-theme error (#168)
+- Point the README examples at `pages-themes/cayman`, whose refs exist, instead of
+  the archived `benbalter/retlab` and its missing `v1.0.0` tag (#109).
+  Thanks to [@anyingiit](https://github.com/anyingiit).
 
 ## 0.6.2
 
