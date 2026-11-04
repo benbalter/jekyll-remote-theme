@@ -1,14 +1,20 @@
 # History
 
-## Unreleased
+## 0.6.3
 
 ### Fixes
 
 - Allow `/` in Git refs, so branches such as `@feature/new-layout` work, while
   still rejecting `.` and `..` segments and leading, trailing or doubled slashes (#173).
   Thanks to [@sefrockygarcia](https://github.com/sefrockygarcia).
+- Keep the case of the Git ref, so mixed-case branch and tag names no longer
+  404. Only the owner and repository name are lowercased (#97, #161)
+- When resolving `@latest` fails with a 403 or 429, warn that GitHub API rate
+  limiting is the likely cause instead of claiming the theme has no releases (#167, #172).
+  Thanks to [@azmi2409](https://github.com/azmi2409).
 - Document the Enterprise hostname allowlist and explain how to allow a rejected
-  host in the invalid-theme error (#168)
+  host in the invalid-theme error (#168, #171).
+  Thanks to [@w3lld1](https://github.com/w3lld1).
 - Point the README examples at `pages-themes/cayman`, whose refs exist, instead of
   the archived `benbalter/retlab` and its missing `v1.0.0` tag (#109).
   Thanks to [@anyingiit](https://github.com/anyingiit).
