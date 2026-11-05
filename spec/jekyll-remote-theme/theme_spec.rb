@@ -383,6 +383,56 @@ RSpec.describe Jekyll::RemoteTheme::Theme do
       expect(subject.git_ref).to eql("v2.5.0")
     end
 
+    context "with a token in the environment" do
+      around do |example|
+        saved = ENV.to_h.slice("JEKYLL_GITHUB_TOKEN", "GITHUB_TOKEN", "GITHUB_API_URL")
+        %w(JEKYLL_GITHUB_TOKEN GITHUB_TOKEN GITHUB_API_URL).each { |k| ENV.delete(k) }
+        example.run
+      ensure
+        %w(JEKYLL_GITHUB_TOKEN GITHUB_TOKEN GITHUB_API_URL).each { |k| ENV.delete(k) }
+        ENV.update(saved)
+      end
+
+      it "sends GITHUB_TOKEN to api.github.com" do
+        ENV["GITHUB_TOKEN"] = "gh-token"
+        stub = stub_request(:get, api_url)
+          .with(:headers => { "Authorization" => "Bearer gh-token" })
+          .to_return(:status => 200, :body => api_response_body)
+        expect(subject.git_ref).to eql("v2.5.0")
+        expect(stub).to have_been_requested
+      end
+
+      it "prefers JEKYLL_GITHUB_TOKEN over GITHUB_TOKEN" do
+        ENV["GITHUB_TOKEN"] = "gh-token"
+        ENV["JEKYLL_GITHUB_TOKEN"] = "jekyll-token"
+        stub = stub_request(:get, api_url)
+          .with(:headers => { "Authorization" => "Bearer jekyll-token" })
+          .to_return(:status => 200, :body => api_response_body)
+        subject.git_ref
+        expect(stub).to have_been_requested
+      end
+
+      it "sends no Authorization header without a token" do
+        subject.git_ref
+        expect(
+          a_request(:get, api_url).with { |req| !req.headers.key?("Authorization") }
+        ).to have_been_made
+      end
+
+      it "does not send the token to another host" do
+        ENV["GITHUB_TOKEN"] = "gh-token"
+        ghe_url = Addressable::URI.parse("https://ghe.example.com/api/v3/x")
+        expect(subject.send(:api_token_for, ghe_url)).to be_nil
+      end
+
+      it "sends the token to the host in GITHUB_API_URL" do
+        ENV["GITHUB_TOKEN"] = "gh-token"
+        ENV["GITHUB_API_URL"] = "https://ghe.example.com/api/v3"
+        ghe_url = Addressable::URI.parse("https://ghe.example.com/api/v3/x")
+        expect(subject.send(:api_token_for, ghe_url)).to eql("gh-token")
+      end
+    end
+
     context "when the API returns 404" do
       before do
         stub_request(:get, api_url).to_return(:status => 404)
