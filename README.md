@@ -62,6 +62,8 @@ You may also optionally specify a branch, tag, or commit to use by appending an 
 
 To automatically use the latest tagged release, you can specify `@latest` (e.g., `pages-themes/cayman@latest`). This will fetch the most recent release from the GitHub Releases API. If no releases exist, it will fall back to using `HEAD`.
 
+Unauthenticated GitHub API requests are limited to 60 an hour per IP address, which shared CI runners use up quickly. When that happens, `@latest` falls back to `HEAD` with a warning. To avoid it, set `JEKYLL_GITHUB_TOKEN` or `GITHUB_TOKEN` in the build environment; in GitHub Actions, add `env: GITHUB_TOKEN: ${{ github.token }}` to the build step. The token is only sent to `api.github.com`, or to the host in `GITHUB_API_URL` on GitHub Enterprise.
+
 For Enterprise GitHub, remote themes must be in the form of `http[s]://GITHUBHOST.com/OWNER/REPOSITORY`, and must represent a public (non-private repository) GitHub-hosted Jekyll theme. The enterprise hostname must also be allowed: set either `PAGES_GITHUB_HOSTNAME` or `GITHUB_HOSTNAME` in the build environment to that hostname, without a scheme or path. Both variables add an allowed host; `github.com` is always allowed.
 
 For example, with `remote_theme: https://ghe.example.com/OWNER/REPOSITORY`:

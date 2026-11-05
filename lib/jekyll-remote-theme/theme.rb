@@ -215,8 +215,31 @@ module Jekyll
           request = Net::HTTP::Get.new(api_url.request_uri)
           request["Accept"] = "application/vnd.github.v3+json"
           request["User-Agent"] = Downloader::USER_AGENT
+          token = api_token_for(api_url)
+          request["Authorization"] = "Bearer #{token}" if token
           http.request(request)
         end
+      end
+
+      # Unauthenticated requests share a 60/hour limit per IP, which CI
+      # runners exhaust quickly. Use a token from the environment when one is
+      # set, but only send it to the API host it belongs to: api.github.com,
+      # or the host in GITHUB_API_URL (set by GitHub Actions, including on
+      # GitHub Enterprise). A theme on any other host never sees the token.
+      def api_token_for(api_url)
+        token = ENV["JEKYLL_GITHUB_TOKEN"] || ENV["GITHUB_TOKEN"]
+        return if token.nil? || token.strip.empty?
+
+        token.strip if token_hosts.include?(api_url.host.to_s.downcase)
+      end
+
+      def token_hosts
+        hosts = ["api.github.com"]
+        configured = ENV["GITHUB_API_URL"].to_s
+        hosts << Addressable::URI.parse(configured).host.to_s.downcase unless configured.empty?
+        hosts
+      rescue Addressable::URI::InvalidURIError
+        hosts
       end
 
       def parse_tag_from_response(response)
@@ -251,6 +274,9 @@ module Jekyll
                     "for #{name_with_owner}, using HEAD"
           if %w(403 429).include?(response.code)
             message += "; this is likely caused by GitHub API rate limiting"
+            unless api_token_for(build_api_url)
+              message += ". Set JEKYLL_GITHUB_TOKEN or GITHUB_TOKEN to raise the limit"
+            end
           end
           Jekyll.logger.warn LOG_KEY, message
         end
