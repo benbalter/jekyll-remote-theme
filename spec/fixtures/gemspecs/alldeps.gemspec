@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.summary = "Placeholder gemspec"
 
   # runtime dependencies
-  s.add_dependency "jekyll", "~> 3.5"
+  s.add_dependency "jekyll", "~> 4.0"
   s.add_dependency "jekyll-feed", "~> 0.6"
   s.add_dependency "jekyll-sitemap", "~> 1.5"
 

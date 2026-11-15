@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["John Doe"]
   spec.summary = "Placeholder gemspec"
 
-  spec.add_runtime_dependency "jekyll", "~> 3.5"
+  spec.add_runtime_dependency "jekyll", "~> 4.0"
   spec.add_runtime_dependency "jekyll-feed", "~> 0.6" # some "random" comment
   spec.add_runtime_dependency "jekyll-sitemap", "~> 1.5"
 
