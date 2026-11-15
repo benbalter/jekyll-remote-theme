@@ -11,5 +11,5 @@ Gem::Specification.new do |s|
   s.summary = "Placeholder gemspec"
 
   s.add_development_dependency("bundler", "~> 1.12")
-  s.add_development_dependency("rake",    "~> 10.0")
+  s.add_development_dependency("rake",    "~> 13.0")
 end
