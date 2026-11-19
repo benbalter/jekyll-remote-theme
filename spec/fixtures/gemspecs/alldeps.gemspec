@@ -16,6 +16,6 @@ Gem::Specification.new do |s|
   s.add_dependency "jekyll-sitemap", "~> 1.5"
 
   # development dependencies
-  s.add_dependency "bundler", "~> 1.12"
+  s.add_dependency "bundler", "~> 4.0"
   s.add_dependency "rake", "~> 13.0"
 end
