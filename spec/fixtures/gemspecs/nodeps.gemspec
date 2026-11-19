@@ -10,6 +10,6 @@ Gem::Specification.new do |s|
   s.authors = ["John Doe"]
   s.summary = "Placeholder gemspec"
 
-  s.add_development_dependency("bundler", "~> 1.12")
+  s.add_development_dependency("bundler", "~> 4.0")
   s.add_development_dependency("rake",    "~> 13.0")
 end
